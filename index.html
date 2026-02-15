@@ -386,7 +386,10 @@ textarea { resize: vertical; min-height: 100px; }
 .auth-logo h1 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text);
+  background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -1px;
   margin-bottom: 8px;
   text-transform: uppercase;
@@ -410,6 +413,20 @@ textarea { resize: vertical; min-height: 100px; }
   border: none; background: none;
 }
 .auth-tab.active { background: var(--bg2); color: var(--text); }
+.auth-submit {
+  background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  color: #000000;
+  border: 1px solid #d8d8d8;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(77,77,77,0.3);
+  transition: all 0.2s;
+}
+.auth-submit:hover {
+  background: linear-gradient(90deg, #3d3d3d 0%, #c8c8c8 32.8%, #f0f0f0 52.4%, #c8c8c8 72.98%, #3d3d3d 100%);
+  border-color: #c8c8c8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(77,77,77,0.4);
+}
 .auth-error {
   background: rgba(231,76,60,.08);
   border: 1px solid rgba(231,76,60,.3);
@@ -606,7 +623,7 @@ textarea { resize: vertical; min-height: 100px; }
         <label>Password</label>
         <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
       </div>
-      <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Sign In</button>
+      <button class="btn auth-submit" style="width:100%;" onclick="doLogin()">Sign In</button>
     </div>
 
     <!-- Register -->
@@ -623,7 +640,7 @@ textarea { resize: vertical; min-height: 100px; }
         <label>Password <small style="color:var(--text-dim)">(min 8 characters)</small></label>
         <input type="password" id="regPass" placeholder="••••••••" autocomplete="new-password">
       </div>
-      <button class="btn btn-primary" style="width:100%;" onclick="doRegister()">Create Account</button>
+      <button class="btn auth-submit" style="width:100%;" onclick="doRegister()">Create Account</button>
     </div>
   </div>
 </div>
