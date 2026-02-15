@@ -1072,6 +1072,9 @@ textarea { resize: vertical; min-height: 100px; }
     font-size: 0.55rem;
     padding: 1px 6px;
   }
+  .col-days {
+    display: none;
+  }
 
   /* Badge refinements */
   .badge {
@@ -1548,7 +1551,7 @@ textarea { resize: vertical; min-height: 100px; }
                   <th>Agency</th>
                   <th>Subject</th>
                   <th>Deadline</th>
-                  <th>Days</th>
+                  <th class="col-days">Days</th>
                   <th>Turn</th>
                   <th>Last Action</th>
                 </tr>
@@ -2097,7 +2100,7 @@ async function loadActiveRequests() {
       <td class="td-agency">${esc(r.agency_name||'—')}</td>
       <td class="td-subject">${esc(r.subject||'—')}</td>
       <td>${fmtDate(r.deadline_date)}</td>
-      <td>${daysTxt}</td>
+      <td class="col-days">${daysTxt}</td>
       <td>${turnDropdown}</td>
       <td style="font-size:.5rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
     </tr>`;
