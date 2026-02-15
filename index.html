@@ -1040,53 +1040,56 @@ textarea { resize: vertical; min-height: 100px; }
     margin-top: 6px;
   }
 
-  /* Table mobile layout */
+  /* Table mobile layout - NO HORIZONTAL SCROLL */
   .table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
   }
   table {
-    font-size: 0.7rem;
-    min-width: 100%;
-    table-layout: auto;
+    font-size: 0.6rem;
+    width: 100%;
+    table-layout: fixed;
   }
   thead th {
-    padding: 8px 6px;
-    font-size: 0.6rem;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
+    padding: 6px 3px;
+    font-size: 0.55rem;
+    letter-spacing: 0.2px;
+    white-space: normal;
+    word-wrap: break-word;
   }
   tbody tr {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
   tbody tr:hover {
     transform: none;
   }
   td {
-    padding: 8px 6px;
-    font-size: 0.7rem;
-    white-space: nowrap;
+    padding: 6px 3px;
+    font-size: 0.6rem;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow: hidden;
   }
   .td-number {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
+    width: 15%;
   }
   .td-subject {
-    font-size: 0.7rem;
-    max-width: 150px;
-    white-space: nowrap;
+    font-size: 0.6rem;
+    width: 30%;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .td-agency {
-    font-size: 0.65rem;
-    max-width: 100px;
-    white-space: nowrap;
+    font-size: 0.55rem;
+    width: 20%;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .badge {
-    font-size: 0.6rem;
-    padding: 2px 6px;
+    font-size: 0.55rem;
+    padding: 1px 4px;
   }
   /* Hide Days column on mobile */
   th.col-days,
