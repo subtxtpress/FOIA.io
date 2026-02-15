@@ -1944,6 +1944,9 @@ def download_docx(req_id):
 def serve_frontend(path=""):
     return send_file(os.path.join(os.path.dirname(__file__), "index.html"))
 
+# Initialize database on startup
+with app.app_context():
+    init_db()
 
 if __name__ == "__main__":
     init_db()
