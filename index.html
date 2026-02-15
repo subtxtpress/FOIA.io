@@ -12,11 +12,9 @@
   padding: 0;
 }
 html {
-  overflow-x: hidden;
   width: 100%;
 }
 body {
-  overflow-x: hidden;
   width: 100%;
   position: relative;
 }
@@ -71,6 +69,8 @@ body {
   color: var(--text);
   font-family: var(--font);
   min-height: 100vh;
+  min-width: 300px;
+  max-width: 100vw;
   line-height: 1.6;
   transition: background .25s, color .25s;
 }
@@ -81,17 +81,19 @@ body {
   min-height: 100vh;
   align-items: stretch;
   max-width: 100vw;
-  overflow-x: hidden;
 }
 
 /* Sidebar */
 #sidebar {
-  width: 240px; min-width: 240px;
+  width: 240px;
+  min-width: 240px;
   background: var(--bg2);
   border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
   transition: transform .3s;
   z-index: 100;
 }
@@ -100,7 +102,8 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .sidebar-logo h1 {
-  font-size: 1.4rem; font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 700;
   background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -115,21 +118,37 @@ body {
   letter-spacing: 0.3px;
   font-weight: 500;
 }
-
-.sidebar-nav { padding: 16px 12px; flex: 1; }
+.sidebar-nav {
+  padding: 16px 12px; flex: 1;
+}
 .nav-label {
-  font-size: .65rem; font-weight: 700;
-  color: var(--text-dim); letter-spacing: 1.2px;
-  text-transform: uppercase; padding: 8px 8px 4px;
+  font-size: .65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 8px 8px 4px;
 }
 .nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border-radius: 8px;
-  cursor: pointer; font-size: .9rem; color: var(--text-dim);
-  transition: all .15s; margin-bottom: 2px;
-  border: none; background: none; width: 100%; text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .9rem;
+  color: var(--text-dim);
+  transition: all .15s;
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
 }
-.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
 .nav-item.active {
   background: rgba(212,165,116,.12);
   color: var(--accent);
@@ -137,39 +156,82 @@ body {
   border-left: 3px solid var(--accent);
   padding-left: 9px;
 }
-.nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; opacity: 0.7; }
-.nav-item.active .icon { opacity: 1; }
-.nav-item:hover .icon { opacity: 1; }
-.nav-badge {
-  margin-left: auto; background: var(--cyan);
-  color: var(--bg); font-size: .65rem; font-weight: 700;
-  padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center;
+.nav-item .icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+  opacity: 0.7;
 }
-.nav-badge.red { background: var(--red); color: var(--bg); }
+.nav-item.active .icon {
+  opacity: 1;
+}
+.nav-item:hover .icon {
+  opacity: 1;
+}
+.nav-badge {
+  margin-left: auto;
+  background:var(--bg3);
+  color:var(--text-dim);
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  min-width: 20px;
+  text-align: center;
+}
+.nav-badge.red {
+  background: var(--red);
+  color: var(--bg);}
 
 .sidebar-footer {
   padding: 16px; border-top: 1px solid var(--border);
 }
 .user-pill {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--bg3); border-radius: 8px; padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 10px 12px;
 }
 .user-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   background: var(--avatar-bg);
   color: var(--avatar-text);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: .85rem; flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .85rem;
+  flex-shrink: 0;
 }
-.user-name { font-size: .85rem; font-weight: 600; }
-.user-status { font-size: .7rem; color: var(--green); }
+.user-name {
+  font-size: .85rem;
+  font-weight: 600;
+}
+.user-status {
+  font-size: .7rem;
+  color: var(--green);
+}
 #btnLogout {
-  display: block; width: 100%; margin-top: 8px;
-  background: none; border: 1px solid var(--border); color: var(--text-dim);
-  padding: 7px; border-radius: 8px; cursor: pointer; font-size: .8rem;
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 7px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .8rem;
   transition: all .15s;
 }
-#btnLogout:hover { border-color: var(--red); color: var(--red); }
+#btnLogout:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
 
 /* Main content */
 #main {
@@ -291,16 +353,20 @@ body {
 }
 
 /* ── Tables ────────────────────────────────────────────────── */
-.table-wrap { overflow-x: auto; border-radius: var(--radius); }
+.table-wrap {
+  border-radius: var(--radius);
+}
 table {
-  width: 100%; border-collapse: collapse;
-  background: var(--bg2); font-size: .875rem;
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg2);
+  font-size: .5rem;
 }
 thead th {
   background: var(--bg3);
   padding: 14px 16px;
   text-align: left;
-  font-size: .7rem;
+  font-size: .5rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -312,30 +378,70 @@ tbody tr {
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: all .15s;
+  font-size: .5rem;
 }
 tbody tr:hover {
   background: var(--bg3);
   transform: translateX(2px);
 }
-tbody tr:last-child { border-bottom: none; }
-td { padding: 13px 16px; }
-.td-number { font-family: monospace; color: var(--cyan); font-size: .8rem; font-weight: 700; }
-.td-subject { font-weight: 600; }
-.td-agency { color: var(--text-dim); font-size: .85rem; }
+tbody tr:last-child {
+  border-bottom: none;
+}
+td {
+  padding: 13px 16px;
+}
+.td-number {
+  font-family: monospace;
+  color: var(--cyan);
+  font-size: .5rem;
+  font-weight: 700;
+}
+.td-subject {
+  font-weight: 600;
+}
+.td-agency {
+  color: var(--text-dim);
+  font-size: .5rem;
+}
 
 /* ── Badges ────────────────────────────────────────────────── */
 .badge {
-  display: inline-block; padding: 3px 10px;
-  border-radius: 20px; font-size: .72rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .5px;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
 }
-.badge-new     { background: rgba(3,218,198,.12); color: var(--secondary); }
-.badge-active  { background: rgba(3,218,198,.15); color: var(--secondary); }
-.badge-overdue { background: rgba(207,102,121,.15); color: var(--error); }
-.badge-closed  { background: rgba(3,218,198,.15); color: var(--secondary); }
-.badge-appealed { background: rgba(187,134,252,.15); color: var(--primary); }
-.badge-myturn  { background: rgba(3,218,198,.15); color: var(--secondary); }
-.badge-theirturn { background: rgba(187,134,252,.15); color: var(--primary); }
+.badge-new     {
+  background: rgba(3,218,198,.12);
+  color: var(--secondary);
+}
+.badge-active  {
+  background: rgba(3,218,198,.15);
+  color: var(--secondary);
+}
+.badge-overdue {
+  background: rgba(207,102,121,.15);
+  color: var(--error);
+}
+.badge-closed  {
+  background: rgba(3,218,198,.15);
+  color: var(--secondary);
+}
+.badge-appealed {
+  background: rgba(187,134,252,.15);
+  color: var(--primary);
+}
+.badge-myturn  {
+  background: rgba(3,218,198,.15);
+  color: var(--secondary);
+}
+.badge-theirturn {
+  background: rgba(187,134,252,.15);
+  color: var(--primary);
+}
 
 /* ── Buttons ───────────────────────────────────────────────── */
 .btn {
@@ -457,7 +563,10 @@ textarea { resize: vertical; min-height: 100px; }
   font-weight: 600; color: var(--text-dim); transition: all .15s;
   border: none; background: none;
 }
-.auth-tab.active { background: var(--bg2); color: var(--text); }
+.auth-tab.active {
+  background: var(--bg2);
+  color: var(--text);
+}
 .auth-submit {
   background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
   color: #000000;
@@ -857,6 +966,7 @@ textarea { resize: vertical; min-height: 100px; }
   }
   .sidebar-nav {
     padding: 12px 8px;
+    
   }
   .nav-label {
     padding: 6px 6px 3px;
@@ -874,6 +984,9 @@ textarea { resize: vertical; min-height: 100px; }
   .nav-item .icon {
     width: 18px;
     font-size: 1rem;
+  }
+  .nav-item .mobile-dashboard {
+    font-size: 0.8rem;
   }
   .nav-badge {
     padding: 2px 6px;
@@ -928,22 +1041,32 @@ textarea { resize: vertical; min-height: 100px; }
   }
 
   /* Table spacing */
+  table {
+    font-size: 0.7rem;
+  }
   thead th {
-    padding: 10px 12px;
-    font-size: 0.65rem;
+    padding: 8px 6px;
+    font-size: 0.55rem;
+    letter-spacing: 0.3px;
+  }
+  tbody tr {
+    font-size: 0.7rem;
   }
   tbody tr:hover {
     transform: none;
   }
   td {
-    padding: 10px 12px;
-    font-size: 0.825rem;
+    padding: 8px 6px;
+    font-size: 0.7rem;
   }
   .td-number {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
+  }
+  .td-subject {
+    font-size: 0.7rem;
   }
   .td-agency {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 
   /* Badge refinements */
@@ -1165,7 +1288,7 @@ textarea { resize: vertical; min-height: 100px; }
     <div class="sidebar-nav">
       <div class="nav-label">Overview</div>
       <button class="nav-item active" data-page="dashboard" onclick="nav('dashboard')">
-        <span class="icon">△</span> Dashboard
+        <span class="icon">△</span> <span class="mobile-dashboard">Dashboard</span>
       </button>
 
       <div class="nav-label" style="margin-top:12px;">Requests</div>
@@ -1940,7 +2063,7 @@ async function loadAllRequests(filter = 'all') {
       <td class="td-subject">${esc(r.subject||'—')}</td>
       <td>${fmtDate(r.created_date)}</td>
       <td>${statusBadge(r)}</td>
-      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
+      <td style="font-size:.5rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
     </tr>`).join('');
   document.getElementById('allEmpty').style.display = rows.length ? 'none' : '';
 }
@@ -1961,7 +2084,7 @@ async function loadActiveRequests() {
       <select class="turn-select" onclick="event.stopPropagation()"
               onchange="quickSetTurn(${r.id}, this.value)"
               style="background:var(--bg3);border:1px solid var(--border);color:${r.turn==='Their Turn'?'var(--cyan)':'var(--amber)'};
-                     padding:4px 8px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;outline:none;">
+                     padding:4px 8px;border-radius:6px;font-size:.5rem;font-weight:700;cursor:pointer;outline:none;">
         <option value="My Turn"   ${r.turn!=='Their Turn'?'selected':''}>My Turn</option>
         <option value="Their Turn" ${r.turn==='Their Turn'?'selected':''}>Their Turn</option>
       </select>`;
@@ -1972,7 +2095,7 @@ async function loadActiveRequests() {
       <td>${fmtDate(r.deadline_date)}</td>
       <td>${daysTxt}</td>
       <td>${turnDropdown}</td>
-      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
+      <td style="font-size:.5rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
     </tr>`;
   }).join('');
   document.getElementById('activeEmpty').style.display = rows.length ? 'none' : '';
@@ -1989,7 +2112,7 @@ async function loadClosedRequests() {
       <td class="td-subject">${esc(r.subject||'—')}</td>
       <td>${fmtDate(r.created_date)}</td>
       <td>${fmtDate(r.closed_date)}</td>
-      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
+      <td style="font-size:.5rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
     </tr>`).join('');
   document.getElementById('closedEmpty').style.display = rows.length ? 'none' : '';
 }
@@ -2094,7 +2217,7 @@ async function loadStateLaws() {
       <td style="font-size:.78rem;color:var(--cyan);font-family:monospace;">${esc(s.citation)}</td>
       <td style="text-align:center;">${s.response_days || '<span style="color:var(--text-dim)">Reasonable</span>'}</td>
       <td style="text-align:center;">${s.appeal_days || '<span style="color:var(--text-dim)">—</span>'}</td>
-      <td style="font-size:.78rem;color:var(--text-dim);max-width:300px;">${esc(s.notes||'')}</td>
+      <td style="font-size:.5rem;color:var(--text-dim);max-width:300px;">${esc(s.notes||'')}</td>
     </tr>`).join('');
 }
 
@@ -2216,7 +2339,7 @@ async function openDetail(id) {
   document.getElementById('detailContent').innerHTML = `
     <div class="detail-header">
       <div>
-        <h2 style="font-size:1.4rem;font-weight:800;color:var(--cyan);">${esc(r.foia_number)}</h2>
+        <h2 style="font-size:1rem;font-weight:800;color:var(--cyan);">${esc(r.foia_number)}</h2>
         <div style="font-size:1rem;font-weight:600;margin-top:4px;">${esc(r.subject||'—')}</div>
         <div class="detail-meta">
           <div class="meta-chip"><strong>Agency:</strong> ${esc(r.agency_name||'—')}</div>
