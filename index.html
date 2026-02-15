@@ -6,7 +6,20 @@
 <title>FOIA.io — FOIA Request Manager</title>
 <style>
 /* ── Reset & Variables ─────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
 
 /* ── Dark mode (default) ───────────────────────────────────── */
 :root {
@@ -52,6 +65,7 @@
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
 }
 
+/* Additional body styles (overflow-x and width set in reset above) */
 body {
   background: var(--bg);
   color: var(--text);
@@ -62,7 +76,13 @@ body {
 }
 
 /* ── Layout ────────────────────────────────────────────────── */
-#app { display: flex; min-height: 100vh; align-items: stretch; }
+#app {
+  display: flex;
+  min-height: 100vh;
+  align-items: stretch;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
 
 /* Sidebar */
 #sidebar {
@@ -154,11 +174,15 @@ body {
 /* Main content */
 #main {
   flex: 1; display: flex; flex-direction: column;
-  min-width: 0; overflow-y: auto;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-left: 40px;
+  padding-right: 40px;
 }
 .topbar {
   border-bottom: 1px solid var(--border);
-  padding: 18px 32px;
+  padding: 18px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -180,11 +204,29 @@ body {
   color: var(--text); font-size: 1.4rem; cursor: pointer; padding: 4px;
 }
 
-.content { padding: 28px; max-width: 1200px; width: 100%; }
+.content {
+  padding: 20px 0;
+  max-width: 1200px;
+  width: 100%;
+  box-sizing: border-box;
+}
 
 /* ── Pages ─────────────────────────────────────────────────── */
-.page { display: none; }
-.page.active { display: block; animation: fadeIn .15s ease; }
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+  animation: fadeIn .15s ease;
+}
+.page > .card:first-child {
+  margin-left: 0 !important;
+}
+#page-all-requests > .card,
+#page-active-requests > .card,
+#page-closed-requests > .card {
+  margin-top: -12px;
+}
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* ── Cards / Panels ────────────────────────────────────────── */
@@ -194,6 +236,8 @@ body {
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow);
+  max-width: 100%;
+  overflow-x: auto;
 }
 .card + .card { margin-top: 16px; }
 .card-title {
@@ -577,14 +621,79 @@ textarea { resize: vertical; min-height: 100px; }
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100vw;
+    max-width: 100vw;
+  }
+  #app {
+    width: 100vw;
+    max-width: 100vw;
+  }
   #sidebar {
     position: fixed; left: 0; top: 0; bottom: 0;
     transform: translateX(-100%);
+    max-width: 240px;
   }
   #sidebar.open { transform: translateX(0); }
   .hamburger { display: block; }
-  .content { padding: 20px 16px; }
-  .topbar { padding: 14px 16px; }
+  #main {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100vw;
+    max-width: 100vw;
+  }
+  .content {
+    padding: 20px 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .topbar {
+    padding: 12px 16px;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+  }
+  .topbar-title {
+    font-size: 1rem;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .topbar .btn-sm {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    flex-shrink: 0;
+  }
+  .page {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .card {
+    padding: 12px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  table {
+    max-width: 100%;
+    width: 100%;
+  }
   .form-row { grid-template-columns: 1fr; }
   .modal { max-width: 100%; border-radius: 12px 12px 0 0; }
   .modal-overlay { align-items: flex-end; padding: 0; }
@@ -864,99 +973,105 @@ textarea { resize: vertical; min-height: 100px; }
           </div>
 
           <div class="form-actions">
-            <button class="btn btn-danger" onclick="clearNewRequestForm()">🗑 Discard</button>
-            <button class="btn btn-primary" onclick="saveNewRequest()">💾 Save Request</button>
+            <button class="btn btn-danger" onclick="clearNewRequestForm()">Discard</button>
+            <button class="btn btn-primary" onclick="saveNewRequest()">Save Request</button>
           </div>
         </div>
       </div>
 
       <!-- ── All Requests ───────────────────────────────────── -->
       <div id="page-all-requests" class="page">
-        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-ghost btn-sm active-filter" data-f="all" onclick="filterAll('all',this)">All</button>
-            <button class="btn btn-ghost btn-sm" data-f="new" onclick="filterAll('new',this)">New</button>
-            <button class="btn btn-ghost btn-sm" data-f="active" onclick="filterAll('active',this)">Active</button>
-            <button class="btn btn-ghost btn-sm" data-f="closed" onclick="filterAll('closed',this)">Closed</button>
+        <div class="card">
+          <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-sm active-filter" data-f="all" onclick="filterAll('all',this)">All</button>
+              <button class="btn btn-ghost btn-sm" data-f="new" onclick="filterAll('new',this)">New</button>
+              <button class="btn btn-ghost btn-sm" data-f="active" onclick="filterAll('active',this)">Active</button>
+              <button class="btn btn-ghost btn-sm" data-f="closed" onclick="filterAll('closed',this)">Closed</button>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="nav('new-request')">+ New Request</button>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="nav('new-request')">+ New Request</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>FOIA #</th>
-                <th>Agency</th>
-                <th>Subject</th>
-                <th>Created</th>
-                <th>Status</th>
-                <th>Last Action</th>
-              </tr>
-            </thead>
-            <tbody id="allRequestsBody"></tbody>
-          </table>
-        </div>
-        <div id="allEmpty" class="empty-state" style="display:none;">
-          <div class="e-icon">—</div>
-          <h3>No requests yet</h3>
-          <p>Create your first FOIA request to get started.</p>
-          <button class="btn btn-primary" onclick="nav('new-request')">+ New Request</button>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>FOIA #</th>
+                  <th>Agency</th>
+                  <th>Subject</th>
+                  <th>Created</th>
+                  <th>Status</th>
+                  <th>Last Action</th>
+                </tr>
+              </thead>
+              <tbody id="allRequestsBody"></tbody>
+            </table>
+          </div>
+          <div id="allEmpty" class="empty-state" style="display:none;">
+            <div class="e-icon">—</div>
+            <h3>No requests yet</h3>
+            <p>Create your first FOIA request to get started.</p>
+            <button class="btn btn-primary" onclick="nav('new-request')">+ New Request</button>
+          </div>
         </div>
       </div>
 
       <!-- ── Active Requests ────────────────────────────────── -->
       <div id="page-active-requests" class="page">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>FOIA #</th>
-                <th>Agency</th>
-                <th>Subject</th>
-                <th>Deadline</th>
-                <th>Days</th>
-                <th>Turn</th>
-                <th>Last Action</th>
-              </tr>
-            </thead>
-            <tbody id="activeRequestsBody"></tbody>
-          </table>
-        </div>
-        <div id="activeEmpty" class="empty-state" style="display:none;">
-          <div class="e-icon">—</div>
-          <h3>No active requests</h3>
-          <p>Save a request letter to move a request into Active status.</p>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>FOIA #</th>
+                  <th>Agency</th>
+                  <th>Subject</th>
+                  <th>Deadline</th>
+                  <th>Days</th>
+                  <th>Turn</th>
+                  <th>Last Action</th>
+                </tr>
+              </thead>
+              <tbody id="activeRequestsBody"></tbody>
+            </table>
+          </div>
+          <div id="activeEmpty" class="empty-state" style="display:none;">
+            <div class="e-icon">—</div>
+            <h3>No active requests</h3>
+            <p>Save a request letter to move a request into Active status.</p>
+          </div>
         </div>
       </div>
 
       <!-- ── Closed Requests ────────────────────────────────── -->
       <div id="page-closed-requests" class="page">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>FOIA #</th>
-                <th>Agency</th>
-                <th>Subject</th>
-                <th>Created</th>
-                <th>Closed</th>
-                <th>Last Action</th>
-              </tr>
-            </thead>
-            <tbody id="closedRequestsBody"></tbody>
-          </table>
-        </div>
-        <div id="closedEmpty" class="empty-state" style="display:none;">
-          <div class="e-icon">—</div>
-          <h3>No closed requests</h3>
-          <p>Requests you close will appear here.</p>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>FOIA #</th>
+                  <th>Agency</th>
+                  <th>Subject</th>
+                  <th>Created</th>
+                  <th>Closed</th>
+                  <th>Last Action</th>
+                </tr>
+              </thead>
+              <tbody id="closedRequestsBody"></tbody>
+            </table>
+          </div>
+          <div id="closedEmpty" class="empty-state" style="display:none;">
+            <div class="e-icon">—</div>
+            <h3>No closed requests</h3>
+            <p>Requests you close will appear here.</p>
+          </div>
         </div>
       </div>
 
       <!-- ── Agency Directory ───────────────────────────────── -->
       <div id="page-agency-dir" class="page">
         <div class="card">
-          <div class="card-title">🏛️ Federal FOIA Agency Directory</div>
+          <div class="card-title">⚖︎ Federal FOIA Agency Directory</div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -977,7 +1092,7 @@ textarea { resize: vertical; min-height: 100px; }
       <!-- ── State Laws ─────────────────────────────────────── -->
       <div id="page-state-laws" class="page">
         <div class="card">
-          <div class="card-title">🗺️ State Public Records Laws — All 50 States</div>
+          <div class="card-title">⚖︎ State Public Records Laws — All 50 States</div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -1043,7 +1158,7 @@ textarea { resize: vertical; min-height: 100px; }
 <div class="modal-overlay" id="updateModal">
   <div class="modal">
     <div class="modal-header">
-      <h2>✏️ Update Request</h2>
+      <h2>Update Request</h2>
       <button class="modal-close" onclick="closeUpdateModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -1087,7 +1202,7 @@ textarea { resize: vertical; min-height: 100px; }
   <div class="modal">
     <div class="modal-header">
       <div>
-        <h2>⚖️ Administrative Appeal</h2>
+        <h2>⚖︎ Administrative Appeal</h2>
         <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;" id="appealModalSub">Federal — Office of Information Policy</div>
       </div>
       <button class="modal-close" onclick="closeAppealModal()">✕</button>
@@ -1134,7 +1249,7 @@ textarea { resize: vertical; min-height: 100px; }
 <!-- ── Subscribe Page (shown over app when needed) ─────────── -->
 <div id="subscribePage" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;overflow-y:auto;">
   <div class="subscribe-card">
-    <div style="font-size:2.5rem;margin-bottom:12px;">🗂️</div>
+    <div style="font-size:2.5rem;margin-bottom:12px;">📁</div>
     <h2>Unlock FOIA.io</h2>
     <p>Manage unlimited FOIA requests, auto-generate letters, and track every deadline.</p>
     <div class="price-tag">$19 <span>/ month</span></div>
@@ -1769,9 +1884,9 @@ async function openDetail(id) {
 
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>📎 Attachments</span>
+        <span>📁 Attachments</span>
         <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0;">
-          ⬆️ Upload File
+          ⬆ Upload File
           <input type="file" style="display:none;" onchange="uploadAttachment(${r.id}, this)">
         </label>
       </div>
@@ -1781,7 +1896,7 @@ async function openDetail(id) {
     </div>
 
     <div class="card">
-      <div class="card-title">🕐 Action Log</div>
+      <div class="card-title">Action Log</div>
       ${logHtml}
     </div>`;
 
