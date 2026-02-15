@@ -928,7 +928,7 @@ def next_foia_number():
     row = db.execute("SELECT last_seq FROM foia_sequence WHERE year=?", (year,)).fetchone()
     db.commit()
     db.close()
-    return f"FOIA-{year}-{row['last_seq']:03d}"
+    return f"{year}-{row['last_seq']:03d}"
 
 
 # ─────────────────────────────────────────────
@@ -1291,7 +1291,7 @@ def preview_number():
     ).fetchone()
     db.close()
     seq = (row["last_seq"] if row else 0) + 1
-    return jsonify({"foia_number": f"FOIA-{year}-{seq:03d}", "date": date.today().isoformat()})
+    return jsonify({"foia_number": f"{year}-{seq:03d}", "date": date.today().isoformat()})
 
 
 @app.route("/api/requests", methods=["POST"])
