@@ -5,22 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FOIA.io — FOIA Request Manager</title>
 <style>
-/* ── Reset & Variables ─────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-html {
-  overflow-x: hidden;
-  width: 100%;
-}
-body {
-  overflow-x: hidden;
-  width: 100%;
-  position: relative;
-}
-
 /* ── Dark mode (default) ───────────────────────────────────── */
 :root {
   --bg:        #121212;
@@ -43,7 +27,6 @@ body {
   --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
   --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
 }
-
 /* ── Light mode ────────────────────────────────────────────── */
 [data-theme="light"] {
   --bg:        #FFFFFF;
@@ -64,33 +47,51 @@ body {
   --shadow:    0 1px 4px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
 }
-
+/* ── Reset & Variables ─────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
 /* Additional body styles (overflow-x and width set in reset above) */
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  min-height: 100vh;
+  height: 100vh;
   line-height: 1.6;
   transition: background .25s, color .25s;
 }
-
 /* ── Layout ────────────────────────────────────────────────── */
 #app {
   display: flex;
   min-height: 100vh;
   align-items: stretch;
-  max-width: 100vw;
+  width: 100vw;
   overflow-x: hidden;
 }
-
 /* Sidebar */
 #sidebar {
-  width: 240px; min-width: 240px;
+  width: 240px;
+  min-width: 240px;
   background: var(--bg2);
   border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
   overflow-y: auto;
   transition: transform .3s;
   z-index: 100;
@@ -115,21 +116,38 @@ body {
   letter-spacing: 0.3px;
   font-weight: 500;
 }
-
-.sidebar-nav { padding: 16px 12px; flex: 1; }
+.sidebar-nav {
+    padding: 16px 12px;
+    flex: 1;
+}
 .nav-label {
-  font-size: .65rem; font-weight: 700;
-  color: var(--text-dim); letter-spacing: 1.2px;
-  text-transform: uppercase; padding: 8px 8px 4px;
+  font-size: .65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 8px 8px 4px;
 }
 .nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border-radius: 8px;
-  cursor: pointer; font-size: .9rem; color: var(--text-dim);
-  transition: all .15s; margin-bottom: 2px;
-  border: none; background: none; width: 100%; text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .9rem;
+  color: var(--text-dim);
+  transition: all .15s;
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
 }
-.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item:hover {
+    background: var(--bg3);
+    color: var(--text);
+}
 .nav-item.active {
   background: rgba(212,165,116,.12);
   color: var(--accent);
@@ -137,48 +155,109 @@ body {
   border-left: 3px solid var(--accent);
   padding-left: 9px;
 }
-.nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; opacity: 0.7; }
-.nav-item.active .icon { opacity: 1; }
-.nav-item:hover .icon { opacity: 1; }
-.nav-badge {
-  margin-left: auto; background: var(--cyan);
-  color: var(--bg); font-size: .65rem; font-weight: 700;
-  padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center;
+.nav-item .icon {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    opacity: 0.7;
 }
-.nav-badge.red { background: var(--red); color: var(--bg); }
-
+.nav-item.active .icon {
+    opacity: 1;
+}
+.nav-item:hover .icon {
+    opacity: 1;
+}
+.nav-badge {
+  margin-left: auto;
+  background: var(--cyan);
+  color: var(--bg);
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  min-width: 20px;
+  text-align: center;
+}
+.nav-badge.red {
+    background: var(--red);
+    color: var(--bg);
+}
 .sidebar-footer {
-  padding: 16px; border-top: 1px solid var(--border);
+  padding: 16px;
+  border-top: 1px solid var(--border);
 }
 .user-pill {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--bg3); border-radius: 8px; padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 10px 12px;
 }
 .user-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   background: var(--avatar-bg);
   color: var(--avatar-text);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: .85rem; flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .85rem;
+  flex-shrink: 1;
 }
-.user-name { font-size: .85rem; font-weight: 600; }
-.user-status { font-size: .7rem; color: var(--green); }
+.user-name {
+    font-size: .85rem;
+    font-weight: 600;
+}
+.user-status {
+    font-size: .7rem;
+    color: var(--green);
+}
 #btnLogout {
-  display: block; width: 100%; margin-top: 8px;
-  background: none; border: 1px solid var(--border); color: var(--text-dim);
-  padding: 7px; border-radius: 8px; cursor: pointer; font-size: .8rem;
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 7px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .8rem;
   transition: all .15s;
 }
-#btnLogout:hover { border-color: var(--red); color: var(--red); }
-
+#btnLogout:hover {
+    border-color: var(--red);
+    color: var(--red);
+}
+/* Sidebar footer */
+#btnTheme {
+  width:100%;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:.82rem;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+  transition: background .2s;
+}
 /* Main content */
 #main {
-  flex: 1; display: flex; flex-direction: column;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-left: 40px;
-  padding-right: 40px;
+  padding-left: 0;
+  padding-right: 0;
 }
 .topbar {
   border-bottom: 1px solid var(--border);
@@ -200,17 +279,20 @@ body {
   color: var(--text);
 }
 .hamburger {
-  display: none; background: none; border: none;
-  color: var(--text); font-size: 1.4rem; cursor: pointer; padding: 4px;
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 4px;
 }
-
 .content {
-  padding: 20px 0;
+  padding: 20px 40px;
   max-width: 1200px;
   width: 100%;
   box-sizing: border-box;
 }
-
 /* ── Pages ─────────────────────────────────────────────────── */
 .page {
   display: none;
@@ -227,8 +309,22 @@ body {
 #page-closed-requests > .card {
   margin-top: -12px;
 }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
+.all-requests-card {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 /* ── Cards / Panels ────────────────────────────────────────── */
 .card {
   background: var(--bg2);
@@ -239,11 +335,13 @@ body {
   max-width: 100%;
   overflow-x: hidden;
 }
-.card + .card { margin-top: 16px; }
+.card + .card {
+  margin-top: 16px;
+}
 .card-title {
-  font-size: .95rem;
+  font-size: .88rem;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   color: var(--text);
   display: flex;
   align-items: center;
@@ -251,12 +349,12 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 /* ── Stats row ─────────────────────────────────────────────── */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px; margin-bottom: 28px;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 .stat-card {
   background: var(--bg2);
@@ -278,9 +376,15 @@ body {
   letter-spacing: -1px;
   line-height: 1;
 }
-.stat-num.amber { color: var(--amber); }
-.stat-num.red { color: var(--red); }
-.stat-num.green { color: var(--green); }
+.stat-num.amber {
+  color: var(--amber);
+}
+.stat-num.red {
+  color: var(--red);
+}
+.stat-num.green {
+  color: var(--green);
+}
 .stat-label {
   font-size: .75rem;
   color: var(--text-dim);
@@ -289,12 +393,16 @@ body {
   letter-spacing: 0.5px;
   font-weight: 600;
 }
-
 /* ── Tables ────────────────────────────────────────────────── */
-.table-wrap { overflow-x: auto; border-radius: var(--radius); }
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+}
 table {
-  width: 100%; border-collapse: collapse;
-  background: var(--bg2); font-size: .875rem;
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg2);
+  font-size: .875rem;
 }
 thead th {
   background: var(--bg3);
@@ -317,32 +425,76 @@ tbody tr:hover {
   background: var(--bg3);
   transform: translateX(2px);
 }
-tbody tr:last-child { border-bottom: none; }
-td { padding: 13px 16px; }
-.td-number { font-family: monospace; color: var(--cyan); font-size: .8rem; font-weight: 700; }
-.td-subject { font-weight: 600; }
-.td-agency { color: var(--text-dim); font-size: .85rem; }
-
+tbody tr:last-child {
+  border-bottom: none;
+}
+td {
+  padding: 13px 16px;
+}
+.td-number {
+  font-family: monospace;
+  color: var(--cyan);
+  font-size: .8rem;
+  font-weight: 700;
+}
+.td-subject {
+  font-weight: 600;
+}
+.td-agency {
+  color: var(--text-dim);
+  font-size: .85rem;
+}
 /* ── Badges ────────────────────────────────────────────────── */
 .badge {
-  display: inline-block; padding: 3px 10px;
-  border-radius: 20px; font-size: .72rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .5px;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
 }
-.badge-new     { background: rgba(3,218,198,.12); color: var(--secondary); }
-.badge-active  { background: rgba(3,218,198,.15); color: var(--secondary); }
-.badge-overdue { background: rgba(207,102,121,.15); color: var(--error); }
-.badge-closed  { background: rgba(3,218,198,.15); color: var(--secondary); }
-.badge-appealed { background: rgba(187,134,252,.15); color: var(--primary); }
-.badge-myturn  { background: rgba(3,218,198,.15); color: var(--secondary); }
-.badge-theirturn { background: rgba(187,134,252,.15); color: var(--primary); }
-
+.badge-new {
+  background: rgba(3,218,198,.12);
+  color: var(--secondary);
+}
+.badge-active {
+  background: rgba(3,218,198,.15);
+  color: var(--secondary);
+}
+.badge-overdue {
+  background: rgba(207,102,121,.15);
+  color: var(--error);
+}
+.badge-closed {
+  background: rgba(3,218,198,.15);
+  color: var(--secondary);
+}
+.badge-appealed {
+  background: rgba(187,134,252,.15);
+  color: var(--primary);
+}
+.badge-myturn {
+  background: rgba(3,218,198,.15);
+  color: var(--secondary);
+}
+.badge-theirturn {
+  background: rgba(187,134,252,.15);
+  color: var(--primary);
+}
 /* ── Buttons ───────────────────────────────────────────────── */
 .btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 10px 20px; border-radius: 8px;
-  font-size: .875rem; font-weight: 600; cursor: pointer;
-  border: none; transition: all .15s; white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: .875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+  white-space: nowrap;
 }
 .btn-primary {
   background: var(--primary);
@@ -360,22 +512,51 @@ td { padding: 13px 16px; }
   box-shadow: 0 4px 12px rgba(98,0,238,0.3);
 }
 .btn-ghost {
-  background: none; border: 1px solid var(--border);
+  background: none;
+  border: 1px solid var(--border);
   color: var(--text-dim);
 }
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .btn-danger {
-  background: none; border: 1px solid var(--border);
+  background: none;
+  border: 1px solid var(--border);
   color: var(--red);
 }
-.btn-danger:hover { background: rgba(231,76,60,.1); border-color: var(--red); }
-.btn-sm { padding: 7px 14px; font-size: .8rem; }
-.btn-icon { padding: 8px; border-radius: 6px; }
-
+.btn-danger:hover {
+  background: rgba(231,76,60,.1);
+  border-color: var(--red);
+}
+.btn-sm {
+  padding: 5px 10px;
+  font-size: .75rem;
+}
+.btn-icon {
+  padding: 8px;
+  border-radius: 6px;
+}
+#btnDownloadDocx {
+  display: none;
+}
+.regenerate-btn {
+  margin-left: 8px;
+}
 /* ── Forms ─────────────────────────────────────────────────── */
-.form-group { margin-bottom: 18px; }
-label { display: block; font-size: .8rem; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
-input, select, textarea {
+.form-group {
+  margin-bottom: 18px;
+}
+label {
+  display: block;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+input,
+select,
+textarea {
   width: 100%;
   background: var(--bg3);
   border: 1px solid var(--border);
@@ -387,34 +568,60 @@ input, select, textarea {
   transition: all .2s;
   outline: none;
 }
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   border-color: var(--text-dim);
   background: var(--bg2);
   box-shadow: 0 0 0 3px rgba(255,255,255,.05);
 }
-select option { background: var(--bg3); }
-textarea { resize: vertical; min-height: 100px; }
-
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+select option {
+  background: var(--bg3);
+}
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
 .form-info {
-  background: var(--bg3); border-radius: 8px; padding: 14px 16px;
-  font-size: .85rem; line-height: 1.8;
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: .85rem;
+  line-height: 1.8;
 }
-.form-info .info-label { color: var(--text-dim); font-size: .75rem; }
-.form-info .info-val { color: var(--text); font-weight: 500; }
+.form-info .info-label {
+  color: var(--text-dim);
+  font-size: .75rem;
+}
+.form-info .info-val {
+  color: var(--text);
+  font-weight: 500;
+}
 .form-actions {
-  display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
-  padding-top: 20px; border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
 }
-
 /* ── Auth pages ────────────────────────────────────────────── */
 #authWrap {
-  min-height: 100vh; display: flex; align-items: center;
-  justify-content: center; background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
   padding: 20px;
 }
 .auth-box {
-  width: 100%; max-width: 420px;
+  width: 100%;
+  max-width: 420px;
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -448,16 +655,30 @@ textarea { resize: vertical; min-height: 100px; }
   font-weight: 500;
 }
 .auth-tabs {
-  display: flex; background: var(--bg3); border-radius: 8px;
-  padding: 4px; margin-bottom: 28px; gap: 4px;
+  display: flex;
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 4px;
 }
 .auth-tab {
-  flex: 1; text-align: center; padding: 8px;
-  border-radius: 6px; cursor: pointer; font-size: .875rem;
-  font-weight: 600; color: var(--text-dim); transition: all .15s;
-  border: none; background: none;
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: all .15s;
+  border: none;
+  background: none;
 }
-.auth-tab.active { background: var(--bg2); color: var(--text); }
+.auth-tab.active {
+  background: var(--bg2);
+  color: var(--text);
+}
 .auth-submit {
   background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
   color: #000000;
@@ -483,143 +704,420 @@ textarea { resize: vertical; min-height: 100px; }
   display: none;
   font-weight: 500;
 }
-
 /* ── Modal ─────────────────────────────────────────────────── */
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.85);
-  z-index: 500; display: flex; align-items: center;
-  justify-content: center; padding: 20px;
-  opacity: 0; pointer-events: none; transition: opacity .2s;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
 }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
 .modal {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 14px; width: 100%; max-width: 720px;
-  max-height: 90vh; overflow-y: auto;
-  transform: translateY(20px); transition: transform .2s;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(20px);
+  transition: transform .2s;
   box-shadow: var(--shadow);
 }
-.modal-overlay.open .modal { transform: translateY(0); }
+.modal-overlay.open .modal {
+  transform: translateY(0);
+}
 .modal-header {
   padding: 24px 28px 16px;
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: flex-start; justify-content: space-between;
-  position: sticky; top: 0; background: var(--bg2); z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg2);
+  z-index: 1;
 }
-.modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+.modal-header h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
 .modal-close {
-  background: none; border: none; color: var(--text-dim);
-  font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
 }
-.modal-close:hover { color: var(--text); }
-.modal-body { padding: 24px 28px; }
-
+.modal-close:hover {
+  color: var(--text);
+}
+.modal-body {
+  padding: 24px 28px;
+}
 /* Letter modal specifics */
-.letter-pre {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 8px; padding: 20px;
-  white-space: pre-wrap; font-family: 'Georgia', serif;
-  font-size: .88rem; line-height: 1.9; color: var(--text);
-  min-height: 300px; outline: none;
+.request-letter-modal {
+  font-size: .8rem;
+  color: var(--text-dim);
+  margin-top: 4px;
 }
-.letter-pre:focus { border-color: var(--cyan); }
+.letter-pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  white-space: pre-wrap;
+  font-family: 'Georgia', serif;
+  font-size: .88rem;
+  line-height: 1.9;
+  color: var(--text);
+  min-height: 300px;
+  outline: none;
+}
+.letter-pre:focus {
+  border-color: var(--cyan);
+}
 .copy-row {
-  display: flex; gap: 10px; align-items: center;
-  margin-top: 12px; flex-wrap: wrap;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 .copy-success {
-  color: var(--green); font-size: .8rem; display: none;
+  color: var(--green);
+  font-size: .8rem;
+  display: none;
 }
-
+#foiaGovLink {
+  margin-left: auto;
+}
+.discard-save {
+  margin-top: 20px;
+}
 /* ── Agency auto-fill panel ────────────────────────────────── */
 .agency-info-panel {
-  display: none; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 8px; padding: 16px; margin-top: 12px;
-  grid-template-columns: 1fr 1fr; gap: 10px;
+  display: none;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
-.agency-info-panel.visible { display: grid; }
-.ai-field { }
-.ai-field .ai-label { font-size: .7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .6px; }
-.ai-field .ai-val { font-size: .85rem; color: var(--text); margin-top: 2px; font-weight: 500; }
-.ai-field.full { grid-column: 1 / -1; }
+.agency-info-panel .visible {
+  display: grid;
+}
+.ai-field { 
 
+}
+#aipPortalLink {
+  color: var(--cyan);
+  font-size: .85rem;
+}
+.ai-field .ai-label {
+  font-size: .7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+.ai-field .ai-val {
+  font-size: .85rem;
+  color: var(--text);
+  margin-top: 2px;
+  font-weight: 500;
+}
+.ai-field. full {
+  grid-column: 1 / -1;
+}
 /* ── Detail panel ──────────────────────────────────────────── */
+#backButton {
+  margin-left: 5%;
+}
+#detailContent {
+  padding: 5%;
+  margin: 0;
+}
 .detail-header {
-  display: flex; flex-wrap: wrap; gap: 12px;
-  align-items: flex-start; justify-content: space-between;
-  margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
-.detail-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
 .meta-chip {
-  background: var(--bg3); border-radius: 6px; padding: 5px 12px;
-  font-size: .78rem; color: var(--text-dim);
+  background: var(--bg3);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: .72rem;
+  color: var(--text-dim);
 }
-.meta-chip strong { color: var(--text); }
-
+.meta-chip strong {
+  color: var(--text); 
+}
 .deadline-banner {
-  border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;
-  display: flex; align-items: center; gap: 12px;
-  font-weight: 600; font-size: .9rem;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: .82rem;
 }
-.deadline-banner.ok { background: rgba(39,174,96,.08); border: 1px solid rgba(39,174,96,.3); color: var(--green); }
-.deadline-banner.warn { background: rgba(243,156,18,.08); border: 1px solid rgba(243,156,18,.3); color: var(--amber); }
-.deadline-banner.over { background: rgba(231,76,60,.08); border: 1px solid rgba(231,76,60,.3); color: var(--red); }
-
-.action-log-list { list-style: none; }
+.deadline-banner.ok {
+  background: rgba(39,174,96,.08);
+  border: 1px solid rgba(39,174,96,.3);
+  color: var(--green);
+}
+.deadline-banner.warn {
+  background: rgba(243,156,18,.08);
+  border: 1px solid rgba(243,156,18,.3);
+  color: var(--amber);
+}
+.deadline-banner.over {
+  background: rgba(231,76,60,.08);
+  border: 1px solid rgba(231,76,60,.3);
+  color: var(--red);
+}
+.action-log-list {
+  list-style: none;
+}
 .action-log-list li {
-  display: flex; gap: 12px; padding: 10px 0;
-  border-bottom: 1px solid var(--border); font-size: .85rem;
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .85rem;
 }
-.action-log-list li:last-child { border-bottom: none; }
-.al-date { color: var(--text-dim); font-size: .78rem; white-space: nowrap; }
-.al-action { color: var(--text); font-weight: 500; }
-.al-note { color: var(--text-dim); font-size: .8rem; }
-
+.action-log-list li:last-child {
+  border-bottom: none;
+}
+.al-date {
+  color: var(--text-dim);
+  font-size: .78rem;
+  white-space: nowrap;
+}
+.al-action {
+  color: var(--text);
+  font-weight: 500;
+}
+.al-note {
+  color: var(--text-dim);
+  font-size: .8rem;
+}
+/* –– Administrative Appeals –––––––––––––––––––––––––––––––––– */
+#appealModalSub {
+  font-size: .8rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.appeal-type {
+  margin-bottom: 16px;
+}
+.copy-to-clipboard {
+  margin-top: 12px;
+}
 /* ── Alert / Toast ─────────────────────────────────────────── */
 #toast {
-  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text); padding: 12px 20px; border-radius: 10px;
-  font-size: .88rem; font-weight: 500; box-shadow: var(--shadow);
-  transform: translateY(80px); opacity: 0; transition: all .25s;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: .88rem;
+  font-weight: 500;
+  box-shadow: var(--shadow);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all .25s;
   max-width: 340px;
 }
-#toast.show { transform: translateY(0); opacity: 1; }
-#toast.success { border-color: var(--green); color: var(--green); }
-#toast.error { border-color: var(--red); color: var(--red); }
-
+#toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+#toast.success {
+  border-color: var(--green);
+  color: var(--green);
+}
+#toast.error {
+  border-color: var(--red);
+  color: var(--red);
+}
 /* ── Subscribe page ────────────────────────────────────────── */
 .subscribe-card {
-  max-width: 480px; margin: 60px auto;
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 16px; padding: 40px; text-align: center;
+  max-width: 480px;
+  margin: 60px auto;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
 }
-.subscribe-card h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 12px; }
-.subscribe-card p { color: var(--text-dim); margin-bottom: 24px; }
+.subscribe-card h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.subscribe-card p {
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}
 .price-tag {
-  font-size: 2.5rem; font-weight: 800; color: var(--cyan);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--cyan);
   margin: 24px 0 8px;
 }
-.price-tag span { font-size: 1rem; font-weight: 400; color: var(--text-dim); }
+.price-tag span {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
 .feature-list {
-  list-style: none; text-align: left; margin: 24px 0;
-  padding: 20px; background: var(--bg3); border-radius: 10px;
+  list-style: none;
+  text-align: left;
+  margin: 24px 0;
+  padding: 20px;
+  background: var(--bg3);
+  border-radius: 10px;
 }
 .feature-list li {
-  padding: 6px 0; color: var(--text-dim); font-size: .9rem;
-  display: flex; gap: 8px;
+  padding: 6px 0;
+  color: var(--text-dim);
+  font-size: .9rem;
+  display: flex;
+  gap: 8px;
 }
-.feature-list li::before { content: "✓"; color: var(--green); font-weight: 700; }
-
+.feature-list li::before {
+  content: "✓";
+  color: var(--green);
+  font-weight: 700;
+}
 /* ── Empty states ──────────────────────────────────────────── */
-.empty-state {
-  text-align: center; padding: 60px 20px; color: var(--text-dim);
+#stateSection {
+  display: none;
 }
-.empty-state .e-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; font-weight: 300; }
-.empty-state h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-.empty-state p { font-size: .9rem; max-width: 360px; margin: 0 auto 20px; }
-
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+}
+.empty-state .e-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.3; font-weight: 300;
+}
+.empty-state h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.empty-state p {
+  font-size: .9rem;
+  max-width: 360px;
+  margin: 0 auto 20px;
+}
+#stateLawPanel {
+  display: none;
+  background:var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.stateLawPanel-1 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:12px;
+}
+.stateLawPanel-2 {
+  font-size: .7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+#slLawName {
+  font-size: .85rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.stateLawPanel-3 {
+  font-size: .7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+#slCitation {
+  font-size: .85rem;
+  font-weight: 600;
+  margin-top: 2px;
+  color: var(--cyan);
+}
+.stateLawPanel-4 {
+  font-size: .7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+#slDays {
+  font-size: .85rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.stateLawPanel-5 {
+  margin-top:10px;
+}
+.stateLawPanel-6 {
+  font-size: .7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+#slNotes {
+  font-size: .82rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
 /* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  #sidebarOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 90;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 @media (max-width: 768px) {
   html, body {
     overflow-x: hidden;
@@ -631,12 +1129,19 @@ textarea { resize: vertical; min-height: 100px; }
     max-width: 100vw;
   }
   #sidebar {
-    position: fixed; left: 0; top: 0; bottom: 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
     transform: translateX(-100%);
     max-width: 240px;
   }
-  #sidebar.open { transform: translateX(0); }
-  .hamburger { display: block; }
+  #sidebar.open {
+    transform: translateX(0);
+  }
+  .hamburger {
+    display: block;
+  }
   #main {
     padding-left: 0;
     padding-right: 0;
@@ -669,9 +1174,9 @@ textarea { resize: vertical; min-height: 100px; }
     font-size: 0.75rem;
     padding: 6px 12px;
     flex-shrink: 0;
+    width: auto;
   }
   .page {
-    width: 100%;
     max-width: 100%;
     box-sizing: border-box;
   }
@@ -707,7 +1212,10 @@ textarea { resize: vertical; min-height: 100px; }
     width: 100vw;
     box-sizing: border-box;
   }
-  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
   .modal-header {
     padding: 16px 16px 12px;
     box-sizing: border-box;
@@ -746,11 +1254,9 @@ textarea { resize: vertical; min-height: 100px; }
     box-sizing: border-box;
   }
   .btn {
-    max-width: 100%;
     box-sizing: border-box;
   }
   .copy-row {
-    width: 100%;
     max-width: 100%;
     box-sizing: border-box;
   }
@@ -770,15 +1276,29 @@ textarea { resize: vertical; min-height: 100px; }
     width: 100%;
     max-width: 100%;
   }
+  .detail-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  .detail-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+  }
   .form-actions {
     flex-direction: column;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
   }
-  .form-actions .btn { width: 100%; justify-content: center; }
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -787,6 +1307,10 @@ textarea { resize: vertical; min-height: 100px; }
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    padding: 16px 12px;
+  }
+  .stat-num {
+    font-size: 1.8rem;
   }
   .badge {
     max-width: 100%;
@@ -844,7 +1368,6 @@ textarea { resize: vertical; min-height: 100px; }
     max-width: 100%;
     box-sizing: border-box;
   }
-
   /* Sidebar spacing reductions */
   .sidebar-logo {
     padding: 16px 16px 12px;
@@ -861,6 +1384,7 @@ textarea { resize: vertical; min-height: 100px; }
   .nav-label {
     padding: 6px 6px 3px;
     font-size: 0.6rem;
+    margin-top: 2px;
   }
   .nav-item {
     padding: 8px 10px;
@@ -900,7 +1424,6 @@ textarea { resize: vertical; min-height: 100px; }
     padding: 6px;
     font-size: 0.75rem;
   }
-
   /* Card spacing */
   .card + .card {
     margin-top: 12px;
@@ -910,7 +1433,6 @@ textarea { resize: vertical; min-height: 100px; }
     gap: 6px;
     font-size: 0.85rem;
   }
-
   /* Stats refinements */
   .stats-grid {
     gap: 12px;
@@ -926,7 +1448,6 @@ textarea { resize: vertical; min-height: 100px; }
     font-size: 0.7rem;
     margin-top: 6px;
   }
-
   /* Table spacing */
   thead th {
     padding: 10px 12px;
@@ -945,13 +1466,11 @@ textarea { resize: vertical; min-height: 100px; }
   .td-agency {
     font-size: 0.8rem;
   }
-
   /* Badge refinements */
   .badge {
     padding: 2px 8px;
     font-size: 0.68rem;
   }
-
   /* Button refinements */
   .btn {
     padding: 8px 16px;
@@ -961,7 +1480,6 @@ textarea { resize: vertical; min-height: 100px; }
   .btn-icon {
     padding: 6px;
   }
-
   /* Auth page spacing */
   #authWrap {
     padding: 16px;
@@ -992,7 +1510,6 @@ textarea { resize: vertical; min-height: 100px; }
     margin-bottom: 14px;
     font-size: 0.8rem;
   }
-
   /* Modal refinements */
   .modal-header h2 {
     font-size: 1rem;
@@ -1001,7 +1518,6 @@ textarea { resize: vertical; min-height: 100px; }
     padding: 8px;
     font-size: 1.5rem;
   }
-
   /* Form element refinements */
   .copy-row {
     gap: 8px;
@@ -1018,24 +1534,24 @@ textarea { resize: vertical; min-height: 100px; }
   .ai-field .ai-val {
     font-size: 0.8rem;
   }
-
   /* Detail refinements */
   .detail-header {
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: 8px;
+    margin-bottom: 16px;
   }
   .detail-meta {
-    gap: 8px;
-    margin-top: 6px;
+    gap: 6px;
+    margin-top: 8px;
   }
   .meta-chip {
-    padding: 4px 10px;
-    font-size: 0.75rem;
+    padding: 3px 8px;
+    font-size: 0.7rem;
   }
   .deadline-banner {
-    gap: 10px;
-    margin-bottom: 16px;
-    font-size: 0.85rem;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 0.8rem;
+    padding: 8px 12px;
   }
   .action-log-list li {
     gap: 10px;
@@ -1050,7 +1566,6 @@ textarea { resize: vertical; min-height: 100px; }
   .al-note {
     font-size: 0.75rem;
   }
-
   /* Subscribe page refinements */
   .subscribe-card {
     margin: 40px auto 20px;
@@ -1079,10 +1594,10 @@ textarea { resize: vertical; min-height: 100px; }
     gap: 6px;
     font-size: 0.85rem;
   }
-
   /* Empty state refinements */
   .empty-state {
     padding: 40px 16px;
+    display: none;
   }
   .empty-state .e-icon {
     font-size: 2.5rem;
@@ -1098,8 +1613,30 @@ textarea { resize: vertical; min-height: 100px; }
     margin: 0 auto 16px;
   }
 }
-@media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr 1fr; }
+/* –– Subscribe Page ────────────────────────────────────────────── */
+#subscribePage {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  overflow-y: auto;
+}
+.stripe-btn {
+  width: 100%;
+  justify-content: center;
+  font-size: 1rem;
+  padding: 14px;
+}
+.activate-free-trial {
+  margin-top: 12px;
+  font-size: .8rem;
+  color: var(--text-dim);
+}
+.dev-access {
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
 }
 </style>
 </head>
@@ -1128,7 +1665,7 @@ textarea { resize: vertical; min-height: 100px; }
         <label>Password</label>
         <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
       </div>
-      <button class="btn auth-submit" style="width:100%;" onclick="doLogin()">Sign In</button>
+      <button class="btn auth-submit" onclick="doLogin()">Sign In</button>
     </div>
 
     <!-- Register -->
@@ -1145,7 +1682,7 @@ textarea { resize: vertical; min-height: 100px; }
         <label>Password <small style="color:var(--text-dim)">(min 8 characters)</small></label>
         <input type="password" id="regPass" placeholder="••••••••" autocomplete="new-password">
       </div>
-      <button class="btn auth-submit" style="width:100%;" onclick="doRegister()">Create Account</button>
+      <button class="btn auth-submit" onclick="doRegister()">Create Account</button>
     </div>
   </div>
 </div>
@@ -1154,7 +1691,7 @@ textarea { resize: vertical; min-height: 100px; }
 <div id="app" style="display:none;">
 
   <!-- Sidebar overlay (mobile) -->
-  <div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;" onclick="closeSidebar()"></div>
+  <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
   <!-- Sidebar -->
   <nav id="sidebar">
@@ -1168,7 +1705,7 @@ textarea { resize: vertical; min-height: 100px; }
         <span class="icon">△</span> Dashboard
       </button>
 
-      <div class="nav-label" style="margin-top:12px;">Requests</div>
+      <div class="nav-label">Requests</div>
       <button class="nav-item" data-page="new-request" onclick="nav('new-request')">
         <span class="icon">﹢</span> New Request
       </button>
@@ -1185,7 +1722,7 @@ textarea { resize: vertical; min-height: 100px; }
         <span class="nav-badge" id="badgeClosed" style="background:var(--bg3);color:var(--text-dim);">0</span>
       </button>
 
-      <div class="nav-label" style="margin-top:12px;">Reference</div>
+      <div class="nav-label">Reference</div>
       <button class="nav-item" data-page="agency-dir" onclick="nav('agency-dir')">
         <span class="icon">⚖︎</span> Federal Agencies
       </button>
@@ -1194,11 +1731,7 @@ textarea { resize: vertical; min-height: 100px; }
       </button>
     </div>
     <div class="sidebar-footer">
-      <button id="btnTheme" onclick="toggleTheme()" style="
-        width:100%; background:var(--bg3); border:1px solid var(--border);
-        color:var(--text); padding:8px 14px; border-radius:8px; cursor:pointer;
-        font-size:.82rem; display:flex; align-items:center; gap:8px;
-        margin-bottom:8px; transition: background .2s;">
+      <button id="btnTheme" onclick="toggleTheme()">
         <span id="themeIcon">☼</span>
         <span id="themeLabel">Light Mode</span>
       </button>
@@ -1218,7 +1751,7 @@ textarea { resize: vertical; min-height: 100px; }
     <div class="topbar">
       <button class="hamburger" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <button class="btn btn-primary btn-sm" onclick="nav('new-request')">+ New Request</button>
+      <button class="btn btn-primary btn-sm" id="topbar-btn" onclick="nav('new-request')">+ New Request</button>
     </div>
 
     <div class="content">
@@ -1313,15 +1846,14 @@ textarea { resize: vertical; min-height: 100px; }
               <div class="ai-field full" id="aipPortalRow" style="display:none;">
                 <div class="ai-label">Online Portal</div>
                 <div class="ai-val">
-                  <a id="aipPortalLink" href="#" target="_blank" rel="noopener"
-                     style="color:var(--cyan);font-size:.85rem;">🌐 Open Agency FOIA Portal →</a>
+                  <a id="aipPortalLink" href="#" target="_blank" rel="noopener">🌐 Open Agency FOIA Portal →</a>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- State section -->
-          <div id="stateSection" style="display:none;">
+          <div id="stateSection">
             <div class="form-row">
               <div class="form-group">
                 <label>State</label>
@@ -1334,24 +1866,24 @@ textarea { resize: vertical; min-height: 100px; }
                 <input type="text" id="nrStateOfficer" placeholder="e.g. Custodian of Records, FOIA Officer…">
               </div>
             </div>
-            <div id="stateLawPanel" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;">
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div id="stateLawPanel">
+              <div class="stateLawPanel-1">
                 <div>
-                  <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;">Law Name</div>
-                  <div style="font-size:.85rem;font-weight:600;margin-top:2px;" id="slLawName">—</div>
+                  <div class="stateLawPanel-2">Law Name</div>
+                  <div id="slLawName">—</div>
                 </div>
                 <div>
-                  <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;">Citation</div>
-                  <div style="font-size:.85rem;font-weight:600;margin-top:2px;color:var(--cyan);" id="slCitation">—</div>
+                  <div class="stateLawPanel-3">Citation</div>
+                  <div id="slCitation">—</div>
                 </div>
                 <div>
-                  <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;">Response Days</div>
-                  <div style="font-size:.85rem;font-weight:600;margin-top:2px;" id="slDays">—</div>
+                  <div class="stateLawPanel-4">Response Days</div>
+                  <div id="slDays">—</div>
                 </div>
               </div>
-              <div style="margin-top:10px;">
-                <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;">Notes</div>
-                <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;" id="slNotes">—</div>
+              <div class="stateLawPanel-5">
+                <div class="stateLawPanel-6">Notes</div>
+                <div id="slNotes">—</div>
               </div>
             </div>
             <div class="form-group">
@@ -1377,14 +1909,11 @@ textarea { resize: vertical; min-height: 100px; }
       <!-- ── All Requests ───────────────────────────────────── -->
       <div id="page-all-requests" class="page">
         <div class="card">
-          <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-ghost btn-sm active-filter" data-f="all" onclick="filterAll('all',this)">All</button>
-              <button class="btn btn-ghost btn-sm" data-f="new" onclick="filterAll('new',this)">New</button>
-              <button class="btn btn-ghost btn-sm" data-f="active" onclick="filterAll('active',this)">Active</button>
-              <button class="btn btn-ghost btn-sm" data-f="closed" onclick="filterAll('closed',this)">Closed</button>
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="nav('new-request')">+ New Request</button>
+          <div class="all-requests-card">
+            <button class="btn btn-ghost btn-sm active-filter" data-f="all" onclick="filterAll('all',this)">All</button>
+            <button class="btn btn-ghost btn-sm" data-f="new" onclick="filterAll('new',this)">New</button>
+            <button class="btn btn-ghost btn-sm" data-f="active" onclick="filterAll('active',this)">Active</button>
+            <button class="btn btn-ghost btn-sm" data-f="closed" onclick="filterAll('closed',this)">Closed</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -1393,15 +1922,13 @@ textarea { resize: vertical; min-height: 100px; }
                   <th>FOIA #</th>
                   <th>Agency</th>
                   <th>Subject</th>
-                  <th>Created</th>
                   <th>Status</th>
-                  <th>Last Action</th>
                 </tr>
               </thead>
               <tbody id="allRequestsBody"></tbody>
             </table>
           </div>
-          <div id="allEmpty" class="empty-state" style="display:none;">
+          <div id="allEmpty" class="empty-state">
             <div class="e-icon">—</div>
             <h3>No requests yet</h3>
             <p>Create your first FOIA request to get started.</p>
@@ -1419,17 +1946,14 @@ textarea { resize: vertical; min-height: 100px; }
                 <tr>
                   <th>FOIA #</th>
                   <th>Agency</th>
-                  <th>Subject</th>
                   <th>Deadline</th>
-                  <th>Days</th>
                   <th>Turn</th>
-                  <th>Last Action</th>
                 </tr>
               </thead>
               <tbody id="activeRequestsBody"></tbody>
             </table>
           </div>
-          <div id="activeEmpty" class="empty-state" style="display:none;">
+          <div id="activeEmpty" class="empty-state">
             <div class="e-icon">—</div>
             <h3>No active requests</h3>
             <p>Save a request letter to move a request into Active status.</p>
@@ -1447,15 +1971,13 @@ textarea { resize: vertical; min-height: 100px; }
                   <th>FOIA #</th>
                   <th>Agency</th>
                   <th>Subject</th>
-                  <th>Created</th>
                   <th>Closed</th>
-                  <th>Last Action</th>
                 </tr>
               </thead>
               <tbody id="closedRequestsBody"></tbody>
             </table>
           </div>
-          <div id="closedEmpty" class="empty-state" style="display:none;">
+          <div id="closedEmpty" class="empty-state">
             <div class="e-icon">—</div>
             <h3>No closed requests</h3>
             <p>Requests you close will appear here.</p>
@@ -1509,7 +2031,7 @@ textarea { resize: vertical; min-height: 100px; }
 
       <!-- ── Request Detail ─────────────────────────────────── -->
       <div id="page-detail" class="page">
-        <button class="btn btn-ghost btn-sm" onclick="goBack()" style="margin-bottom:20px;">← Back</button>
+        <button id="backButton" class="btn btn-ghost btn-sm" onclick="goBack()">← Back</button>
         <div id="detailContent"></div>
       </div>
 
@@ -1523,7 +2045,7 @@ textarea { resize: vertical; min-height: 100px; }
     <div class="modal-header">
       <div>
         <h2>📄 FOIA Request Letter</h2>
-        <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;" id="letterModalSub">Edit the letter below before sending.</div>
+        <div class="request-letter-modal" id="letterModalSub">Edit the letter below before sending.</div>
       </div>
       <button class="modal-close" onclick="closeLetter()">✕</button>
     </div>
@@ -1536,12 +2058,12 @@ textarea { resize: vertical; min-height: 100px; }
       ></div>
       <div class="copy-row">
         <button class="btn btn-ghost btn-sm" onclick="copyLetter()">Copy to Clipboard</button>
-        <button class="btn btn-ghost btn-sm" id="btnDownloadDocx" onclick="downloadDocx()" style="display:none;">Download .docx</button>
+        <button class="btn btn-ghost btn-sm" id="btnDownloadDocx" onclick="downloadDocx()">Download .docx</button>
         <span class="copy-success" id="copySuccess">✓ Copied</span>
         <a id="foiaGovLink" href="https://www.foia.gov/create-a-request" target="_blank" rel="noopener"
-           class="btn btn-ghost btn-sm" style="margin-left:auto;">🌐 Open FOIA.gov Portal</a>
+           class="btn btn-ghost btn-sm">🌐 Open FOIA.gov Portal</a>
       </div>
-      <div class="form-actions" style="margin-top:20px;">
+      <div class="form-actions discard-save">
         <button class="btn btn-danger" onclick="discardLetter()">Discard Letter</button>
         <button class="btn btn-primary" onclick="saveLetter()">Save Letter → Move to Active</button>
       </div>
@@ -1598,12 +2120,12 @@ textarea { resize: vertical; min-height: 100px; }
     <div class="modal-header">
       <div>
         <h2>⚖︎ Administrative Appeal</h2>
-        <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;" id="appealModalSub">Federal — Office of Information Policy</div>
+        <div id="appealModalSub">Federal — Office of Information Policy</div>
       </div>
       <button class="modal-close" onclick="closeAppealModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-row" style="margin-bottom:16px;">
+      <div class="form-row appeal-type">
         <div class="form-group">
           <label>Appeal Type</label>
           <select id="appealType" onchange="onAppealTypeChange()">
@@ -1625,12 +2147,12 @@ textarea { resize: vertical; min-height: 100px; }
         spellcheck="true"
         style="min-height:360px;"
       ></div>
-      <div class="copy-row" style="margin-top:12px;">
+      <div class="copy-row copy-to-clipboard">
         <button class="btn btn-ghost btn-sm" onclick="copyAppeal()">Copy to Clipboard</button>
         <span class="copy-success" id="appealCopySuccess">✓ Copied</span>
-        <button class="btn btn-ghost btn-sm" onclick="regenerateAppeal()" style="margin-left:8px;">Regenerate</button>
+        <button class="btn btn-ghost btn-sm regenerate-btn" onclick="regenerateAppeal()">Regenerate</button>
       </div>
-      <div class="form-actions" style="margin-top:20px;">
+      <div class="form-actions discard-save">
         <button class="btn btn-danger" onclick="closeAppealModal()">Discard</button>
         <button class="btn btn-primary" onclick="saveAppeal()">Save Appeal → Mark as Appealed</button>
       </div>
@@ -1642,7 +2164,7 @@ textarea { resize: vertical; min-height: 100px; }
 <div id="toast"></div>
 
 <!-- ── Subscribe Page (shown over app when needed) ─────────── -->
-<div id="subscribePage" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;overflow-y:auto;">
+<div id="subscribePage">
   <div class="subscribe-card">
     <div style="font-size:2.5rem;margin-bottom:12px;">📁</div>
     <h2>Unlock FOIA.io</h2>
@@ -1657,13 +2179,13 @@ textarea { resize: vertical; min-height: 100px; }
       <li>Word doc letter export</li>
       <li>Fee waiver boilerplate included</li>
     </ul>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;font-size:1rem;padding:14px;" onclick="goToCheckout()">
+    <button class="btn btn-primary stripe-btn" onclick="goToCheckout()">
       Subscribe with Stripe →
     </button>
-    <p style="margin-top:12px;font-size:.8rem;color:var(--text-dim);">
+    <p class="activate-free-trial">
       During development, use the button below to activate a free trial.
     </p>
-    <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="devActivate()">
+    <button class="btn btn-ghost dev-access" onclick="devActivate()">
       🛠 Dev: Activate Free Access
     </button>
   </div>
@@ -1916,12 +2438,11 @@ async function loadDashboard() {
 
 function renderMiniTable(rows) {
   return `<div class="table-wrap"><table>
-    <thead><tr><th>FOIA #</th><th>Agency</th><th>Subject</th><th>Status</th></tr></thead>
+    <thead><tr><th>FOIA #</th><th>Agency</th><th>Status</th></tr></thead>
     <tbody>${rows.map(r => `
       <tr onclick="openDetail(${r.id})">
         <td class="td-number">${esc(r.foia_number)}</td>
         <td class="td-agency">${esc(r.agency_name||'—')}</td>
-        <td class="td-subject">${esc(r.subject||'—')}</td>
         <td>${statusBadge(r)}</td>
       </tr>`).join('')}
     </tbody>
@@ -1938,9 +2459,7 @@ async function loadAllRequests(filter = 'all') {
       <td class="td-number">${esc(r.foia_number)}</td>
       <td class="td-agency">${esc(r.agency_name||'—')}</td>
       <td class="td-subject">${esc(r.subject||'—')}</td>
-      <td>${fmtDate(r.created_date)}</td>
       <td>${statusBadge(r)}</td>
-      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
     </tr>`).join('');
   document.getElementById('allEmpty').style.display = rows.length ? 'none' : '';
 }
@@ -1968,11 +2487,8 @@ async function loadActiveRequests() {
     return `<tr onclick="openDetail(${r.id})">
       <td class="td-number">${esc(r.foia_number)}</td>
       <td class="td-agency">${esc(r.agency_name||'—')}</td>
-      <td class="td-subject">${esc(r.subject||'—')}</td>
       <td>${fmtDate(r.deadline_date)}</td>
-      <td>${daysTxt}</td>
       <td>${turnDropdown}</td>
-      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
     </tr>`;
   }).join('');
   document.getElementById('activeEmpty').style.display = rows.length ? 'none' : '';
@@ -1987,9 +2503,7 @@ async function loadClosedRequests() {
       <td class="td-number">${esc(r.foia_number)}</td>
       <td class="td-agency">${esc(r.agency_name||'—')}</td>
       <td class="td-subject">${esc(r.subject||'—')}</td>
-      <td>${fmtDate(r.created_date)}</td>
       <td>${fmtDate(r.closed_date)}</td>
-      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
     </tr>`).join('');
   document.getElementById('closedEmpty').style.display = rows.length ? 'none' : '';
 }
@@ -2216,8 +2730,8 @@ async function openDetail(id) {
   document.getElementById('detailContent').innerHTML = `
     <div class="detail-header">
       <div>
-        <h2 style="font-size:1.4rem;font-weight:800;color:var(--cyan);">${esc(r.foia_number)}</h2>
-        <div style="font-size:1rem;font-weight:600;margin-top:4px;">${esc(r.subject||'—')}</div>
+        <h2 style="font-size:1.2rem;font-weight:800;color:var(--cyan);">${esc(r.foia_number)}</h2>
+        <div style="font-size:0.9rem;font-weight:600;margin-top:6px;">${esc(r.subject||'—')}</div>
         <div class="detail-meta">
           <div class="meta-chip"><strong>Agency:</strong> ${esc(r.agency_name||'—')}</div>
           <div class="meta-chip"><strong>Created:</strong> ${fmtDate(r.created_date)}</div>
@@ -2227,7 +2741,7 @@ async function openDetail(id) {
           ${r.last_action_date ? `<div class="meta-chip"><strong>Last Action:</strong> ${fmtDateTime(r.last_action_date)}</div>` : ''}
         </div>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <div class="detail-actions" style="display:flex;flex-wrap:wrap;gap:6px;">
         ${isNew ? `<button class="btn btn-primary btn-sm" onclick="openLetter(${r.id})">📄 View/Send Letter</button>` : ''}
         ${isActive ? `
           <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
@@ -2244,7 +2758,7 @@ async function openDetail(id) {
 
     ${deadlineBanner}
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
       <div class="card">
         <div class="card-title">Notes</div>
         <p style="font-size:.9rem;color:var(--text-dim);white-space:pre-wrap;">${esc(r.notes)||'No notes.'}</p>
@@ -2271,7 +2785,7 @@ async function openDetail(id) {
         <div class="meta-chip"><strong>Filed:</strong> ${fmtDateTime(r.appeal_saved_at)}</div>
         ${r.appeal_exemption ? `<div class="meta-chip"><strong>Exemption:</strong> ${esc(r.appeal_exemption)}</div>` : ''}
       </div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:6px;">
         <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View / Edit Appeal</button>
         <button class="btn btn-ghost btn-sm" onclick="copyAppealText(${JSON.stringify(r.appeal_text).replace(/'/g,'&#39;')})">Copy Appeal</button>
       </div>
@@ -2279,9 +2793,9 @@ async function openDetail(id) {
 
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>📁 Attachments</span>
-        <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0;">
-          ⬆ Upload File
+        <span style="font-size:.75rem;width:120px;">📁 Attachments</span>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0;padding:4px 8px;font-size:.7rem;width:80px;">
+          ⬆ Upload
           <input type="file" style="display:none;" onchange="uploadAttachment(${r.id}, this)">
         </label>
       </div>
