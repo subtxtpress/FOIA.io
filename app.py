@@ -8,7 +8,7 @@ from flask import (
     Flask, render_template, request, jsonify,
     session, redirect, url_for, send_file, abort
 )
-import sqlite3
+from db import get_db
 import hashlib
 import hmac
 import os
@@ -22,7 +22,6 @@ from functools import wraps
 # ─────────────────────────────────────────────
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-production")
-DATABASE = os.path.join(os.path.dirname(__file__), "foia_io.db")
 STRIPE_SECRET = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_PRICE_ID = os.environ.get("STRIPE_PRICE_ID", "")  # your monthly price ID
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
@@ -31,23 +30,20 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 # ─────────────────────────────────────────────
-# Database helpers
+# Database helpers (get_db imported from db.py)
 # ─────────────────────────────────────────────
-def get_db():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    return conn
 
 
 def init_db():
-    conn = get_db()
-    c = conn.cursor()
+    db = get_db()
+
+    # Determine primary key syntax based on database type
+    pk = "SERIAL PRIMARY KEY" if db.is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"
 
     # ── Users ──────────────────────────────────────────────────────────────
-    c.execute("""
+    db.execute(f"""
         CREATE TABLE IF NOT EXISTS users (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            id          {pk},
             username    TEXT    NOT NULL UNIQUE,
             email       TEXT    NOT NULL UNIQUE,
             password    TEXT    NOT NULL,
@@ -59,7 +55,7 @@ def init_db():
     """)
 
     # ── FOIA sequence (one row per year) ───────────────────────────────────
-    c.execute("""
+    db.execute("""
         CREATE TABLE IF NOT EXISTS foia_sequence (
             year    INTEGER PRIMARY KEY,
             last_seq INTEGER DEFAULT 0
@@ -67,9 +63,9 @@ def init_db():
     """)
 
     # ── Federal agencies ───────────────────────────────────────────────────
-    c.execute("""
+    db.execute(f"""
         CREATE TABLE IF NOT EXISTS federal_agencies (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            id              {pk},
             name            TEXT NOT NULL,
             abbreviation    TEXT,
             foia_officer_title  TEXT,
@@ -83,9 +79,9 @@ def init_db():
     """)
 
     # ── Requests ───────────────────────────────────────────────────────────
-    c.execute("""
+    db.execute(f"""
         CREATE TABLE IF NOT EXISTS requests (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            id              {pk},
             user_id         INTEGER NOT NULL,
             foia_number     TEXT    NOT NULL UNIQUE,
             created_date    TEXT    NOT NULL,
@@ -125,9 +121,9 @@ def init_db():
     """)
 
     # ── Action log ─────────────────────────────────────────────────────────
-    c.execute("""
+    db.execute(f"""
         CREATE TABLE IF NOT EXISTS action_log (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            id          {pk},
             request_id  INTEGER NOT NULL,
             user_id     INTEGER NOT NULL,
             action      TEXT    NOT NULL,
@@ -138,9 +134,9 @@ def init_db():
     """)
 
     # ── State laws reference ───────────────────────────────────────────────
-    c.execute("""
+    db.execute(f"""
         CREATE TABLE IF NOT EXISTS state_laws (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            id              {pk},
             state_name      TEXT NOT NULL,
             state_code      TEXT NOT NULL UNIQUE,
             law_name        TEXT NOT NULL,
@@ -152,9 +148,9 @@ def init_db():
     """)
 
     # ── Attachments ────────────────────────────────────────────────────────
-    c.execute("""
+    db.execute(f"""
         CREATE TABLE IF NOT EXISTS request_attachments (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            id              {pk},
             request_id      INTEGER NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
             user_id         INTEGER NOT NULL REFERENCES users(id),
             filename        TEXT NOT NULL,
@@ -166,8 +162,8 @@ def init_db():
         )
     """)
 
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
     _seed_agencies()
     _seed_states()
 
@@ -791,12 +787,11 @@ AGENCIES = [
 
 
 def _seed_agencies():
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM federal_agencies")
-    if c.fetchone()[0] == 0:
+    db = get_db()
+    count = db.execute("SELECT COUNT(*) as cnt FROM federal_agencies").fetchone()
+    if count['cnt'] == 0:
         for a in AGENCIES:
-            c.execute("""
+            db.execute("""
                 INSERT INTO federal_agencies
                 (name, abbreviation, foia_officer_title, foia_email,
                  foia_address, foia_phone, foia_fax, response_days, portal_url)
@@ -806,8 +801,8 @@ def _seed_agencies():
                 a["foia_email"], a["foia_address"], a["foia_phone"],
                 a["foia_fax"], a["response_days"], a["portal_url"]
             ))
-        conn.commit()
-    conn.close()
+        db.commit()
+    db.close()
 
 
 # ─────────────────────────────────────────────
@@ -868,18 +863,17 @@ STATE_LAWS = [
 
 
 def _seed_states():
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM state_laws")
-    if c.fetchone()[0] == 0:
+    db = get_db()
+    count = db.execute("SELECT COUNT(*) as cnt FROM state_laws").fetchone()
+    if count['cnt'] == 0:
         for s in STATE_LAWS:
-            c.execute("""
+            db.execute("""
                 INSERT INTO state_laws
                 (state_name, state_code, law_name, citation, response_days, appeal_days, notes)
                 VALUES (?,?,?,?,?,?,?)
             """, s)
-        conn.commit()
-    conn.close()
+        db.commit()
+    db.close()
 
 
 # ─────────────────────────────────────────────
@@ -928,13 +922,12 @@ def subscription_required(f):
 # ─────────────────────────────────────────────
 def next_foia_number():
     year = datetime.now().year
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("INSERT OR IGNORE INTO foia_sequence (year, last_seq) VALUES (?,0)", (year,))
-    c.execute("UPDATE foia_sequence SET last_seq = last_seq + 1 WHERE year=?", (year,))
-    row = c.execute("SELECT last_seq FROM foia_sequence WHERE year=?", (year,)).fetchone()
-    conn.commit()
-    conn.close()
+    db = get_db()
+    db.insert_or_ignore("foia_sequence", ["year", "last_seq"], (year, 0))
+    db.execute("UPDATE foia_sequence SET last_seq = last_seq + 1 WHERE year=?", (year,))
+    row = db.execute("SELECT last_seq FROM foia_sequence WHERE year=?", (year,)).fetchone()
+    db.commit()
+    db.close()
     return f"FOIA-{year}-{row['last_seq']:03d}"
 
 
@@ -980,17 +973,17 @@ def days_since(target_date):
 # ─────────────────────────────────────────────
 def log_action(request_id, user_id, action, note=None):
     now = datetime.now().isoformat(sep=" ", timespec="seconds")
-    conn = get_db()
-    conn.execute(
+    db = get_db()
+    db.execute(
         "INSERT INTO action_log (request_id, user_id, action, note, logged_at) VALUES (?,?,?,?,?)",
         (request_id, user_id, action, note, now)
     )
-    conn.execute(
+    db.execute(
         "UPDATE requests SET last_action_date=?, last_action_note=?, updated_at=? WHERE id=?",
         (now, action, now, request_id)
     )
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
 
 
 # ─────────────────────────────────────────────
@@ -1081,21 +1074,21 @@ def register():
     if len(password) < 8:
         return jsonify({"error": "Password must be at least 8 characters"}), 400
 
-    conn = get_db()
-    existing = conn.execute(
+    db = get_db()
+    existing = db.execute(
         "SELECT id FROM users WHERE username=? OR email=?", (username, email)
     ).fetchone()
     if existing:
-        conn.close()
+        db.close()
         return jsonify({"error": "Username or email already taken"}), 409
 
-    conn.execute(
+    db.execute(
         "INSERT INTO users (username, email, password, subscription_status) VALUES (?,?,?,?)",
         (username, email, hash_password(password), "active")
     )
-    conn.commit()
-    user = conn.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
-    conn.close()
+    db.commit()
+    user = db.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
+    db.close()
     session["user_id"] = user["id"]
     session["username"] = username
     return jsonify({"ok": True, "username": username, "subscription_status": "active"})
@@ -1107,11 +1100,11 @@ def login():
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
 
-    conn = get_db()
-    user = conn.execute(
+    db = get_db()
+    user = db.execute(
         "SELECT * FROM users WHERE username=? OR email=?", (username, username)
     ).fetchone()
-    conn.close()
+    db.close()
 
     if not user or not verify_password(user["password"], password):
         return jsonify({"error": "Invalid credentials"}), 401
@@ -1135,12 +1128,12 @@ def logout():
 def me():
     if "user_id" not in session:
         return jsonify({"authenticated": False})
-    conn = get_db()
-    user = conn.execute(
+    db = get_db()
+    user = db.execute(
         "SELECT id, username, email, subscription_status FROM users WHERE id=?",
         (session["user_id"],)
     ).fetchone()
-    conn.close()
+    db.close()
     return jsonify({"authenticated": True, **dict(user)})
 
 
@@ -1187,12 +1180,12 @@ def stripe_webhook():
     event_type = event.get("type", "")
     obj = event.get("data", {}).get("object", {})
 
-    conn = get_db()
+    db = get_db()
     if event_type == "checkout.session.completed":
         customer_id = obj.get("customer")
         sub_id = obj.get("subscription")
         email = obj.get("customer_details", {}).get("email", "")
-        conn.execute(
+        db.execute(
             """UPDATE users SET stripe_customer_id=?, stripe_sub_id=?,
                subscription_status='active' WHERE email=?""",
             (customer_id, sub_id, email.lower())
@@ -1200,18 +1193,18 @@ def stripe_webhook():
     elif event_type == "customer.subscription.updated":
         sub_id = obj.get("id")
         status = obj.get("status", "inactive")
-        conn.execute(
+        db.execute(
             "UPDATE users SET subscription_status=? WHERE stripe_sub_id=?",
             (status, sub_id)
         )
     elif event_type == "customer.subscription.deleted":
         sub_id = obj.get("id")
-        conn.execute(
+        db.execute(
             "UPDATE users SET subscription_status='inactive' WHERE stripe_sub_id=?",
             (sub_id,)
         )
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
     return "ok", 200
 
 
@@ -1219,13 +1212,13 @@ def stripe_webhook():
 @app.route("/api/dev/activate", methods=["POST"])
 @login_required
 def dev_activate():
-    conn = get_db()
-    conn.execute(
+    db = get_db()
+    db.execute(
         "UPDATE users SET subscription_status='active' WHERE id=?",
         (session["user_id"],)
     )
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
     return jsonify({"ok": True, "message": "Dev subscription activated"})
 
 
@@ -1235,22 +1228,22 @@ def dev_activate():
 @app.route("/api/agencies")
 @login_required
 def get_agencies():
-    conn = get_db()
-    rows = conn.execute(
+    db = get_db()
+    rows = db.execute(
         "SELECT id, name, abbreviation FROM federal_agencies ORDER BY name"
     ).fetchall()
-    conn.close()
+    db.close()
     return jsonify([dict(r) for r in rows])
 
 
 @app.route("/api/agencies/<int:agency_id>")
 @login_required
 def get_agency(agency_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT * FROM federal_agencies WHERE id=?", (agency_id,)
     ).fetchone()
-    conn.close()
+    db.close()
     if not row:
         return jsonify({"error": "Not found"}), 404
     return jsonify(dict(row))
@@ -1262,23 +1255,23 @@ def get_agency(agency_id):
 @app.route("/api/states")
 @login_required
 def get_states():
-    conn = get_db()
-    rows = conn.execute(
+    db = get_db()
+    rows = db.execute(
         "SELECT id, state_name, state_code, law_name, citation, response_days, appeal_days "
         "FROM state_laws ORDER BY state_name"
     ).fetchall()
-    conn.close()
+    db.close()
     return jsonify([dict(r) for r in rows])
 
 
 @app.route("/api/states/<state_code>")
 @login_required
 def get_state(state_code):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT * FROM state_laws WHERE state_code=?", (state_code.upper(),)
     ).fetchone()
-    conn.close()
+    db.close()
     if not row:
         return jsonify({"error": "Not found"}), 404
     return jsonify(dict(row))
@@ -1292,11 +1285,11 @@ def get_state(state_code):
 def preview_number():
     """Return what the next FOIA number will be (without consuming it)."""
     year = datetime.now().year
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT last_seq FROM foia_sequence WHERE year=?", (year,)
     ).fetchone()
-    conn.close()
+    db.close()
     seq = (row["last_seq"] if row else 0) + 1
     return jsonify({"foia_number": f"FOIA-{year}-{seq:03d}", "date": date.today().isoformat()})
 
@@ -1312,11 +1305,11 @@ def create_request():
 
     # Fetch agency name if federal id given
     if agency_id:
-        conn = get_db()
-        ag = conn.execute(
+        db = get_db()
+        ag = db.execute(
             "SELECT name FROM federal_agencies WHERE id=?", (agency_id,)
         ).fetchone()
-        conn.close()
+        db.close()
         if ag:
             agency_name = ag["name"]
 
@@ -1327,9 +1320,8 @@ def create_request():
     foia_number  = next_foia_number()
     created_date = date.today().isoformat()
 
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("""
+    db = get_db()
+    req_id = db.insert("""
         INSERT INTO requests
         (user_id, foia_number, created_date, agency_type, agency_id, agency_name,
          state_code, foia_officer_title, subject, notes, status)
@@ -1342,9 +1334,8 @@ def create_request():
         data.get("subject", ""), data.get("notes", ""),
         "new"
     ))
-    req_id = c.lastrowid
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
     log_action(req_id, session["user_id"], "Request created")
     return jsonify({"ok": True, "id": req_id, "foia_number": foia_number})
 
@@ -1353,9 +1344,9 @@ def create_request():
 @subscription_required
 def list_requests():
     status_filter = request.args.get("status")
-    conn = get_db()
+    db = get_db()
     if status_filter:
-        rows = conn.execute(
+        rows = db.execute(
             """SELECT r.*, fa.name as agency_display
                FROM requests r
                LEFT JOIN federal_agencies fa ON r.agency_id = fa.id
@@ -1364,7 +1355,7 @@ def list_requests():
             (session["user_id"], status_filter)
         ).fetchall()
     else:
-        rows = conn.execute(
+        rows = db.execute(
             """SELECT r.*, fa.name as agency_display
                FROM requests r
                LEFT JOIN federal_agencies fa ON r.agency_id = fa.id
@@ -1372,7 +1363,7 @@ def list_requests():
                ORDER BY r.created_at DESC""",
             (session["user_id"],)
         ).fetchall()
-    conn.close()
+    db.close()
 
     result = []
     for r in rows:
@@ -1386,12 +1377,12 @@ def list_requests():
 @app.route("/api/requests/<int:req_id>")
 @subscription_required
 def get_request(req_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT * FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
-    conn.close()
+    db.close()
     if not row:
         return jsonify({"error": "Not found"}), 404
     d = dict(row)
@@ -1403,18 +1394,18 @@ def get_request(req_id):
 @app.route("/api/requests/<int:req_id>", methods=["DELETE"])
 @subscription_required
 def delete_request(req_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT id FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
-    conn.execute("DELETE FROM requests WHERE id=?", (req_id,))
-    conn.execute("DELETE FROM action_log WHERE request_id=?", (req_id,))
-    conn.commit()
-    conn.close()
+    db.execute("DELETE FROM requests WHERE id=?", (req_id,))
+    db.execute("DELETE FROM action_log WHERE request_id=?", (req_id,))
+    db.commit()
+    db.close()
     return jsonify({"ok": True})
 
 
@@ -1427,20 +1418,20 @@ def save_letter(req_id):
     data = request.get_json()
     letter_text = data.get("letter_text", "")
 
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT * FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
 
     # Calculate deadline
     rd = row["response_days"] or 20
     deadline = add_business_days(row["created_date"], rd)
 
-    conn.execute("""
+    db.execute("""
         UPDATE requests SET
             letter_text=?, letter_saved_at=?,
             status='active', response_days=?, deadline_date=?,
@@ -1452,8 +1443,8 @@ def save_letter(req_id):
         datetime.now().isoformat(sep=" ", timespec="seconds"),
         req_id
     ))
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
     log_action(req_id, session["user_id"], "Letter saved — moved to Active",
                f"Deadline: {deadline.isoformat()}")
     return jsonify({"ok": True, "deadline_date": deadline.isoformat(), "response_days": rd})
@@ -1465,8 +1456,8 @@ def save_letter(req_id):
 @app.route("/api/requests/<int:req_id>/generate-letter")
 @subscription_required
 def generate_letter(req_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT r.*, fa.foia_officer_title FROM requests r "
         "LEFT JOIN federal_agencies fa ON r.agency_id = fa.id "
         "WHERE r.id=? AND r.user_id=?",
@@ -1476,12 +1467,12 @@ def generate_letter(req_id):
     # For state requests, look up state law details
     state_law = None
     if row and row["agency_type"] == "State" and row["state_code"]:
-        state_law = conn.execute(
+        state_law = db.execute(
             "SELECT * FROM state_laws WHERE state_code=?",
             (row["state_code"],)
         ).fetchone()
 
-    conn.close()
+    db.close()
     if not row:
         return jsonify({"error": "Not found"}), 404
 
@@ -1511,13 +1502,13 @@ def generate_letter(req_id):
 @subscription_required
 def update_request(req_id):
     data = request.get_json()
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT id FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
 
     fields = []
@@ -1532,7 +1523,7 @@ def update_request(req_id):
             values.append(data[field])
 
     if not fields:
-        conn.close()
+        db.close()
         return jsonify({"error": "Nothing to update"}), 400
 
     now = datetime.now().isoformat(sep=" ", timespec="seconds")
@@ -1540,9 +1531,9 @@ def update_request(req_id):
     values.append(now)
     values.append(req_id)
 
-    conn.execute(f"UPDATE requests SET {', '.join(fields)} WHERE id=?", values)
-    conn.commit()
-    conn.close()
+    db.execute(f"UPDATE requests SET {', '.join(fields)} WHERE id=?", values)
+    db.commit()
+    db.close()
     log_action(req_id, session["user_id"], "Request updated",
                ", ".join(k for k in data if k in allowed))
     return jsonify({"ok": True})
@@ -1554,21 +1545,21 @@ def update_request(req_id):
 @app.route("/api/requests/<int:req_id>/close", methods=["POST"])
 @subscription_required
 def close_request(req_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT id FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
     now = date.today().isoformat()
-    conn.execute(
+    db.execute(
         "UPDATE requests SET status='closed', closed_date=?, updated_at=? WHERE id=?",
         (now, datetime.now().isoformat(), req_id)
     )
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
     log_action(req_id, session["user_id"], "Request closed")
     return jsonify({"ok": True})
 
@@ -1682,12 +1673,12 @@ def generate_appeal(req_id):
     appeal_type = request.args.get("type", "constructive_denial")
     exemption   = request.args.get("exemption", "")
 
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT * FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
-    conn.close()
+    db.close()
     if not row:
         return jsonify({"error": "Not found"}), 404
 
@@ -1707,17 +1698,17 @@ def generate_appeal(req_id):
 @subscription_required
 def save_appeal(req_id):
     data = request.get_json()
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT id FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
 
     now = datetime.now().isoformat(sep=" ", timespec="seconds")
-    conn.execute("""
+    db.execute("""
         UPDATE requests SET
             appeal_type=?, appeal_text=?, appeal_saved_at=?,
             appeal_exemption=?, status='appealed', updated_at=?
@@ -1726,8 +1717,8 @@ def save_appeal(req_id):
         data.get("appeal_type"), data.get("appeal_text"),
         now, data.get("exemption", ""), now, req_id
     ))
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
     log_action(req_id, session["user_id"], "Appeal filed",
                f"Type: {data.get('appeal_type','')}")
     return jsonify({"ok": True})
@@ -1739,34 +1730,34 @@ def save_appeal(req_id):
 @app.route("/api/requests/<int:req_id>/attachments")
 @subscription_required
 def list_attachments(req_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT id FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
-    files = conn.execute(
+    files = db.execute(
         "SELECT * FROM request_attachments WHERE request_id=? ORDER BY uploaded_at DESC",
         (req_id,)
     ).fetchall()
-    conn.close()
+    db.close()
     return jsonify([dict(f) for f in files])
 
 
 @app.route("/api/requests/<int:req_id>/attachments", methods=["POST"])
 @subscription_required
 def upload_attachment(req_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT id FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
-    conn.close()
+    db.close()
 
     if "file" not in request.files:
         return jsonify({"error": "No file provided"}), 400
@@ -1797,16 +1788,15 @@ def upload_attachment(req_id):
     label = request.form.get("label", "").strip()
     now = datetime.now().isoformat(sep=" ", timespec="seconds")
 
-    conn = get_db()
-    conn.execute("""
+    db = get_db()
+    att_id = db.insert("""
         INSERT INTO request_attachments
             (request_id, user_id, filename, original_name, file_size, mime_type, label, uploaded_at)
         VALUES (?,?,?,?,?,?,?,?)
     """, (req_id, session["user_id"], safe_name, original_name, size,
           f.content_type or "", label, now))
-    conn.commit()
-    att_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-    conn.close()
+    db.commit()
+    db.close()
 
     log_action(req_id, session["user_id"], "Attachment uploaded", original_name)
     return jsonify({"ok": True, "id": att_id, "original_name": original_name, "file_size": size})
@@ -1815,12 +1805,12 @@ def upload_attachment(req_id):
 @app.route("/api/attachments/<int:att_id>/download")
 @subscription_required
 def download_attachment(att_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT * FROM request_attachments WHERE id=? AND user_id=?",
         (att_id, session["user_id"])
     ).fetchone()
-    conn.close()
+    db.close()
     if not row:
         abort(404)
 
@@ -1835,13 +1825,13 @@ def download_attachment(att_id):
 @app.route("/api/attachments/<int:att_id>", methods=["DELETE"])
 @subscription_required
 def delete_attachment(att_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT * FROM request_attachments WHERE id=? AND user_id=?",
         (att_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
 
     path = os.path.join(UPLOAD_FOLDER, str(session["user_id"]),
@@ -1849,9 +1839,9 @@ def delete_attachment(att_id):
     if os.path.exists(path):
         os.remove(path)
 
-    conn.execute("DELETE FROM request_attachments WHERE id=?", (att_id,))
-    conn.commit()
-    conn.close()
+    db.execute("DELETE FROM request_attachments WHERE id=?", (att_id,))
+    db.commit()
+    db.close()
     log_action(row["request_id"], session["user_id"], "Attachment deleted", row["original_name"])
     return jsonify({"ok": True})
 
@@ -1862,19 +1852,19 @@ def delete_attachment(att_id):
 @app.route("/api/requests/<int:req_id>/log")
 @subscription_required
 def get_action_log(req_id):
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT id FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
     if not row:
-        conn.close()
+        db.close()
         return jsonify({"error": "Not found"}), 404
-    logs = conn.execute(
+    logs = db.execute(
         "SELECT * FROM action_log WHERE request_id=? ORDER BY logged_at DESC",
         (req_id,)
     ).fetchall()
-    conn.close()
+    db.close()
     return jsonify([dict(l) for l in logs])
 
 
@@ -1887,14 +1877,14 @@ def download_docx(req_id):
     """Generate and stream a .docx letter for a request."""
     import subprocess, tempfile, json as _json
 
-    conn = get_db()
-    row = conn.execute(
+    db = get_db()
+    row = db.execute(
         "SELECT r.*, fa.foia_officer_title FROM requests r "
         "LEFT JOIN federal_agencies fa ON r.agency_id = fa.id "
         "WHERE r.id=? AND r.user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
-    conn.close()
+    db.close()
     if not row:
         return jsonify({"error": "Not found"}), 404
 

@@ -10,57 +10,46 @@
 
 /* ── Dark mode (default) ───────────────────────────────────── */
 :root {
-  --bg:        #0f0f0f;
-  --bg2:       #1a1a1a;
-  --bg3:       #252525;
-  --border:    #333333;
-  --accent:    #ffffff;
-  --accent-dim:#a0a0a0;
-  --amber:     #cba152;
-  --amber-dim: #cba152;
-  --red:       #824a3a;
-  --red-dim:   #9a7065;
-  --green:     #84b6ae;
-  --green-dim: #639483;
-  --blue:      #547e9a;
-  --blue-dim:  #547e9a;
-  --gold:      #b09363;
-  --gold-dim:  #b09363;
-  --text:      #ffffff;
-  --text-dim:  #999999;
+  --bg:        #121212;
+  --bg2:       #1e1e1e;
+  --bg3:       #2a2a2a;
+  --border:    #3a3a3a;
+  --accent:    #BB86FC;
+  --accent-dim:#3700B3;
+  --primary:   #BB86FC;
+  --secondary: #03DAC6;
+  --error:     #CF6679;
+  --text:      #FFFFFF;
+  --text-dim:  #B3B3B3;
+  --on-primary:#000000;
+  --on-secondary:#000000;
+  --avatar-bg: #b3b3b3;
+  --avatar-text:#000000;
   --radius:    6px;
-  --shadow:    0 1px 3px rgba(0,0,0,0.3);
-  --shadow-lg: 0 10px 40px rgba(0,0,0,0.5);
+  --shadow:    0 2px 8px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
   --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
-  /* semantic aliases */
-  --cyan:      var(--accent);
-  --cyan-dim:  var(--accent-dim);
 }
 
 /* ── Light mode ────────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg:        #fafafa;
-  --bg2:       #ffffff;
-  --bg3:       #f5f5f5;
-  --border:    #e0e0e0;
-  --accent:    #000000;
-  --accent-dim:#505050;
-  --amber:     #d68910;
-  --amber-dim: #f39c12;
-  --red:       #c0392b;
-  --red-dim:   #e74c3c;
-  --green:     #229954;
-  --green-dim: #27ae60;
-  --blue:      #2980b9;
-  --blue-dim:  #3498db;
-  --gold:      #d68910;
-  --gold-dim:  #f39c12;
+  --bg:        #FFFFFF;
+  --bg2:       #F5F5F5;
+  --bg3:       #EEEEEE;
+  --border:    #E0E0E0;
+  --accent:    #BB86FC;
+  --accent-dim:#3700B3;
+  --primary:   #BB86FC;
+  --secondary: #03DAC6;
+  --error:     #B00020;
   --text:      #000000;
-  --text-dim:  #666666;
-  --shadow:    0 1px 3px rgba(0,0,0,0.08);
-  --shadow-lg: 0 10px 40px rgba(0,0,0,0.1);
-  --cyan:      var(--accent);
-  --cyan-dim:  var(--accent-dim);
+  --text-dim:  #757575;
+  --on-primary:#000000;
+  --on-secondary:#000000;
+  --avatar-bg: #FFFFFF;
+  --avatar-text:#000000;
+  --shadow:    0 1px 4px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
 }
 
 body {
@@ -92,8 +81,11 @@ body {
 }
 .sidebar-logo h1 {
   font-size: 1.4rem; font-weight: 700;
-  color: #9a7065; letter-spacing: -0.8px;
-  
+  background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.8px;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
 }
 .sidebar-logo p {
@@ -119,10 +111,10 @@ body {
 }
 .nav-item:hover { background: var(--bg3); color: var(--text); }
 .nav-item.active {
-  background: rgba(255,255,255,.08);
-  color: #ffffff;
+  background: rgba(212,165,116,.12);
+  color: var(--accent);
   font-weight: 600;
-  border-left: 3px solid #ffffff;
+  border-left: 3px solid var(--accent);
   padding-left: 9px;
 }
 .nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; opacity: 0.7; }
@@ -133,7 +125,7 @@ body {
   color: var(--bg); font-size: .65rem; font-weight: 700;
   padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center;
 }
-.nav-badge.red { background: var(--red); color: #fff; }
+.nav-badge.red { background: var(--red); color: var(--bg); }
 
 .sidebar-footer {
   padding: 16px; border-top: 1px solid var(--border);
@@ -144,7 +136,8 @@ body {
 }
 .user-avatar {
   width: 32px; height: 32px; border-radius: 50%;
-  background: var(--cyan); color: var(--bg);
+  background: var(--avatar-bg);
+  color: var(--avatar-text);
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: .85rem; flex-shrink: 0;
 }
@@ -164,7 +157,6 @@ body {
   min-width: 0; overflow-y: auto;
 }
 .topbar {
-  background-color: var(--bg2);
   border-bottom: 1px solid var(--border);
   padding: 18px 32px;
   display: flex;
@@ -175,7 +167,7 @@ body {
   top: 0;
   z-index: 50;
   backdrop-filter: blur(10px);
-  background: rgba(26, 26, 26, 0.95);
+  background: var(--bg2);
 }
 .topbar-title {
   font-size: 1.15rem;
@@ -293,13 +285,13 @@ td { padding: 13px 16px; }
   border-radius: 20px; font-size: .72rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: .5px;
 }
-.badge-new     { background: rgba(255,255,255,.08); color: #999999; }
-.badge-active  { background: rgba(52,152,219,.15); color: #3498db; }
-.badge-overdue { background: rgba(231,76,60,.15); color: #e74c3c; }
-.badge-closed  { background: rgba(39,174,96,.15); color: #27ae60; }
-.badge-appealed { background: rgba(243,156,18,.15); color: #f39c12; }
-.badge-myturn  { background: rgba(243,156,18,.15); color: #f39c12; }
-.badge-theirturn { background: rgba(52,152,219,.15); color: #3498db; }
+.badge-new     { background: rgba(3,218,198,.12); color: var(--secondary); }
+.badge-active  { background: rgba(3,218,198,.15); color: var(--secondary); }
+.badge-overdue { background: rgba(207,102,121,.15); color: var(--error); }
+.badge-closed  { background: rgba(3,218,198,.15); color: var(--secondary); }
+.badge-appealed { background: rgba(187,134,252,.15); color: var(--primary); }
+.badge-myturn  { background: rgba(3,218,198,.15); color: var(--secondary); }
+.badge-theirturn { background: rgba(187,134,252,.15); color: var(--primary); }
 
 /* ── Buttons ───────────────────────────────────────────────── */
 .btn {
@@ -309,18 +301,19 @@ td { padding: 13px 16px; }
   border: none; transition: all .15s; white-space: nowrap;
 }
 .btn-primary {
-  background: #ffffff;
-  color: #000000;
-  border: 1px solid #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
+  border: 1px solid var(--primary);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(255,255,255,0.15);
+  box-shadow: 0 2px 8px rgba(98,0,238,0.2);
   transition: all 0.2s;
 }
 .btn-primary:hover {
-  background: #f0f0f0;
-  border-color: #f0f0f0;
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
+  color: var(--on-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255,255,255,0.2);
+  box-shadow: 0 4px 12px rgba(98,0,238,0.3);
 }
 .btn-ghost {
   background: none; border: 1px solid var(--border);
@@ -650,7 +643,7 @@ textarea { resize: vertical; min-height: 100px; }
     <div class="sidebar-nav">
       <div class="nav-label">Overview</div>
       <button class="nav-item active" data-page="dashboard" onclick="nav('dashboard')">
-        <span style="color: #9a7065;" class="icon">△</span> Dashboard
+        <span class="icon">△</span> Dashboard
       </button>
 
       <div class="nav-label" style="margin-top:12px;">Requests</div>
@@ -703,7 +696,7 @@ textarea { resize: vertical; min-height: 100px; }
     <div class="topbar">
       <button class="hamburger" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <button style="background-color: #9a7065; color: #e0e0e0; border-color: #64453e;" class="btn btn-primary btn-sm" onclick="nav('new-request')">+ New Request</button>
+      <button class="btn btn-primary btn-sm" onclick="nav('new-request')">+ New Request</button>
     </div>
 
     <div class="content">
