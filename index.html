@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOIA.io — FOIA Request Manager</title>
+<style>
+/* ── Reset & Variables ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Dark mode (default) ───────────────────────────────────── */
+:root {
+  --bg:        #0f0f0f;
+  --bg2:       #1a1a1a;
+  --bg3:       #252525;
+  --border:    #333333;
+  --accent:    #ffffff;
+  --accent-dim:#a0a0a0;
+  --amber:     #cba152;
+  --amber-dim: #cba152;
+  --red:       #824a3a;
+  --red-dim:   #9a7065;
+  --green:     #84b6ae;
+  --green-dim: #639483;
+  --blue:      #547e9a;
+  --blue-dim:  #547e9a;
+  --gold:      #b09363;
+  --gold-dim:  #b09363;
+  --text:      #ffffff;
+  --text-dim:  #999999;
+  --radius:    6px;
+  --shadow:    0 1px 3px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.5);
+  --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+  /* semantic aliases */
+  --cyan:      var(--accent);
+  --cyan-dim:  var(--accent-dim);
+}
+
+/* ── Light mode ────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:        #fafafa;
+  --bg2:       #ffffff;
+  --bg3:       #f5f5f5;
+  --border:    #e0e0e0;
+  --accent:    #000000;
+  --accent-dim:#505050;
+  --amber:     #d68910;
+  --amber-dim: #f39c12;
+  --red:       #c0392b;
+  --red-dim:   #e74c3c;
+  --green:     #229954;
+  --green-dim: #27ae60;
+  --blue:      #2980b9;
+  --blue-dim:  #3498db;
+  --gold:      #d68910;
+  --gold-dim:  #f39c12;
+  --text:      #000000;
+  --text-dim:  #666666;
+  --shadow:    0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.1);
+  --cyan:      var(--accent);
+  --cyan-dim:  var(--accent-dim);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  line-height: 1.6;
+  transition: background .25s, color .25s;
+}
+
+/* ── Layout ────────────────────────────────────────────────── */
+#app { display: flex; min-height: 100vh; align-items: stretch; }
+
+/* Sidebar */
+#sidebar {
+  width: 240px; min-width: 240px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto;
+  transition: transform .3s;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo h1 {
+  font-size: 1.4rem; font-weight: 700;
+  color: #9a7065; letter-spacing: -0.8px;
+  
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+.sidebar-logo p {
+  font-size: .7rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+
+.sidebar-nav { padding: 16px 12px; flex: 1; }
+.nav-label {
+  font-size: .65rem; font-weight: 700;
+  color: var(--text-dim); letter-spacing: 1.2px;
+  text-transform: uppercase; padding: 8px 8px 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px;
+  cursor: pointer; font-size: .9rem; color: var(--text-dim);
+  transition: all .15s; margin-bottom: 2px;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active {
+  background: rgba(255,255,255,.08);
+  color: #ffffff;
+  font-weight: 600;
+  border-left: 3px solid #ffffff;
+  padding-left: 9px;
+}
+.nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; opacity: 0.7; }
+.nav-item.active .icon { opacity: 1; }
+.nav-item:hover .icon { opacity: 1; }
+.nav-badge {
+  margin-left: auto; background: var(--cyan);
+  color: var(--bg); font-size: .65rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center;
+}
+.nav-badge.red { background: var(--red); color: #fff; }
+
+.sidebar-footer {
+  padding: 16px; border-top: 1px solid var(--border);
+}
+.user-pill {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg3); border-radius: 8px; padding: 10px 12px;
+}
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--cyan); color: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem; flex-shrink: 0;
+}
+.user-name { font-size: .85rem; font-weight: 600; }
+.user-status { font-size: .7rem; color: var(--green); }
+#btnLogout {
+  display: block; width: 100%; margin-top: 8px;
+  background: none; border: 1px solid var(--border); color: var(--text-dim);
+  padding: 7px; border-radius: 8px; cursor: pointer; font-size: .8rem;
+  transition: all .15s;
+}
+#btnLogout:hover { border-color: var(--red); color: var(--red); }
+
+/* Main content */
+#main {
+  flex: 1; display: flex; flex-direction: column;
+  min-width: 0; overflow-y: auto;
+}
+.topbar {
+  background-color: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+  background: rgba(26, 26, 26, 0.95);
+}
+.topbar-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+.hamburger {
+  display: none; background: none; border: none;
+  color: var(--text); font-size: 1.4rem; cursor: pointer; padding: 4px;
+}
+
+.content { padding: 28px; max-width: 1200px; width: 100%; }
+
+/* ── Pages ─────────────────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .15s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── Cards / Panels ────────────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.card + .card { margin-top: 16px; }
+.card-title {
+  font-size: .95rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Stats row ─────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px; margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.stat-num {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.stat-num.amber { color: var(--amber); }
+.stat-num.red { color: var(--red); }
+.stat-num.green { color: var(--green); }
+.stat-label {
+  font-size: .75rem;
+  color: var(--text-dim);
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+/* ── Tables ────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); }
+table {
+  width: 100%; border-collapse: collapse;
+  background: var(--bg2); font-size: .875rem;
+}
+thead th {
+  background: var(--bg3);
+  padding: 14px 16px;
+  text-align: left;
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+}
+tbody tr:hover {
+  background: var(--bg3);
+  transform: translateX(2px);
+}
+tbody tr:last-child { border-bottom: none; }
+td { padding: 13px 16px; }
+.td-number { font-family: monospace; color: var(--cyan); font-size: .8rem; font-weight: 700; }
+.td-subject { font-weight: 600; }
+.td-agency { color: var(--text-dim); font-size: .85rem; }
+
+/* ── Badges ────────────────────────────────────────────────── */
+.badge {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 20px; font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.badge-new     { background: rgba(255,255,255,.08); color: #999999; }
+.badge-active  { background: rgba(52,152,219,.15); color: #3498db; }
+.badge-overdue { background: rgba(231,76,60,.15); color: #e74c3c; }
+.badge-closed  { background: rgba(39,174,96,.15); color: #27ae60; }
+.badge-appealed { background: rgba(243,156,18,.15); color: #f39c12; }
+.badge-myturn  { background: rgba(243,156,18,.15); color: #f39c12; }
+.badge-theirturn { background: rgba(52,152,219,.15); color: #3498db; }
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px; border-radius: 8px;
+  font-size: .875rem; font-weight: 600; cursor: pointer;
+  border: none; transition: all .15s; white-space: nowrap;
+}
+.btn-primary {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255,255,255,0.15);
+  transition: all 0.2s;
+}
+.btn-primary:hover {
+  background: #f0f0f0;
+  border-color: #f0f0f0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,255,255,0.2);
+}
+.btn-ghost {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger {
+  background: none; border: 1px solid var(--border);
+  color: var(--red);
+}
+.btn-danger:hover { background: rgba(231,76,60,.1); border-color: var(--red); }
+.btn-sm { padding: 7px 14px; font-size: .8rem; }
+.btn-icon { padding: 8px; border-radius: 6px; }
+
+/* ── Forms ─────────────────────────────────────────────────── */
+.form-group { margin-bottom: 18px; }
+label { display: block; font-size: .8rem; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+input, select, textarea {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-size: .9rem;
+  font-family: var(--font);
+  transition: all .2s;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--text-dim);
+  background: var(--bg2);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.05);
+}
+select option { background: var(--bg3); }
+textarea { resize: vertical; min-height: 100px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-info {
+  background: var(--bg3); border-radius: 8px; padding: 14px 16px;
+  font-size: .85rem; line-height: 1.8;
+}
+.form-info .info-label { color: var(--text-dim); font-size: .75rem; }
+.form-info .info-val { color: var(--text); font-weight: 500; }
+.form-actions {
+  display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+  padding-top: 20px; border-top: 1px solid var(--border);
+}
+
+/* ── Auth pages ────────────────────────────────────────────── */
+#authWrap {
+  min-height: 100vh; display: flex; align-items: center;
+  justify-content: center; background: var(--bg);
+  padding: 20px;
+}
+.auth-box {
+  width: 100%; max-width: 420px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 48px 40px;
+  box-shadow: var(--shadow-lg);
+}
+.auth-logo {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.auth-logo h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+.auth-logo p {
+  color: var(--text-dim);
+  font-size: .85rem;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+.auth-tabs {
+  display: flex; background: var(--bg3); border-radius: 8px;
+  padding: 4px; margin-bottom: 28px; gap: 4px;
+}
+.auth-tab {
+  flex: 1; text-align: center; padding: 8px;
+  border-radius: 6px; cursor: pointer; font-size: .875rem;
+  font-weight: 600; color: var(--text-dim); transition: all .15s;
+  border: none; background: none;
+}
+.auth-tab.active { background: var(--bg2); color: var(--text); }
+.auth-error {
+  background: rgba(231,76,60,.08);
+  border: 1px solid rgba(231,76,60,.3);
+  color: var(--red);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: .85rem;
+  margin-bottom: 16px;
+  display: none;
+  font-weight: 500;
+}
+
+/* ── Modal ─────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.85);
+  z-index: 500; display: flex; align-items: center;
+  justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; width: 100%; max-width: 720px;
+  max-height: 90vh; overflow-y: auto;
+  transform: translateY(20px); transition: transform .2s;
+  box-shadow: var(--shadow);
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  position: sticky; top: 0; background: var(--bg2); z-index: 1;
+}
+.modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+.modal-close {
+  background: none; border: none; color: var(--text-dim);
+  font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 4px;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 24px 28px; }
+
+/* Letter modal specifics */
+.letter-pre {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px;
+  white-space: pre-wrap; font-family: 'Georgia', serif;
+  font-size: .88rem; line-height: 1.9; color: var(--text);
+  min-height: 300px; outline: none;
+}
+.letter-pre:focus { border-color: var(--cyan); }
+.copy-row {
+  display: flex; gap: 10px; align-items: center;
+  margin-top: 12px; flex-wrap: wrap;
+}
+.copy-success {
+  color: var(--green); font-size: .8rem; display: none;
+}
+
+/* ── Agency auto-fill panel ────────────────────────────────── */
+.agency-info-panel {
+  display: none; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px; margin-top: 12px;
+  grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.agency-info-panel.visible { display: grid; }
+.ai-field { }
+.ai-field .ai-label { font-size: .7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .6px; }
+.ai-field .ai-val { font-size: .85rem; color: var(--text); margin-top: 2px; font-weight: 500; }
+.ai-field.full { grid-column: 1 / -1; }
+
+/* ── Detail panel ──────────────────────────────────────────── */
+.detail-header {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.detail-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.meta-chip {
+  background: var(--bg3); border-radius: 6px; padding: 5px 12px;
+  font-size: .78rem; color: var(--text-dim);
+}
+.meta-chip strong { color: var(--text); }
+
+.deadline-banner {
+  border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 600; font-size: .9rem;
+}
+.deadline-banner.ok { background: rgba(39,174,96,.08); border: 1px solid rgba(39,174,96,.3); color: var(--green); }
+.deadline-banner.warn { background: rgba(243,156,18,.08); border: 1px solid rgba(243,156,18,.3); color: var(--amber); }
+.deadline-banner.over { background: rgba(231,76,60,.08); border: 1px solid rgba(231,76,60,.3); color: var(--red); }
+
+.action-log-list { list-style: none; }
+.action-log-list li {
+  display: flex; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid var(--border); font-size: .85rem;
+}
+.action-log-list li:last-child { border-bottom: none; }
+.al-date { color: var(--text-dim); font-size: .78rem; white-space: nowrap; }
+.al-action { color: var(--text); font-weight: 500; }
+.al-note { color: var(--text-dim); font-size: .8rem; }
+
+/* ── Alert / Toast ─────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 12px 20px; border-radius: 10px;
+  font-size: .88rem; font-weight: 500; box-shadow: var(--shadow);
+  transform: translateY(80px); opacity: 0; transition: all .25s;
+  max-width: 340px;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast.success { border-color: var(--green); color: var(--green); }
+#toast.error { border-color: var(--red); color: var(--red); }
+
+/* ── Subscribe page ────────────────────────────────────────── */
+.subscribe-card {
+  max-width: 480px; margin: 60px auto;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 40px; text-align: center;
+}
+.subscribe-card h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 12px; }
+.subscribe-card p { color: var(--text-dim); margin-bottom: 24px; }
+.price-tag {
+  font-size: 2.5rem; font-weight: 800; color: var(--cyan);
+  margin: 24px 0 8px;
+}
+.price-tag span { font-size: 1rem; font-weight: 400; color: var(--text-dim); }
+.feature-list {
+  list-style: none; text-align: left; margin: 24px 0;
+  padding: 20px; background: var(--bg3); border-radius: 10px;
+}
+.feature-list li {
+  padding: 6px 0; color: var(--text-dim); font-size: .9rem;
+  display: flex; gap: 8px;
+}
+.feature-list li::before { content: "✓"; color: var(--green); font-weight: 700; }
+
+/* ── Empty states ──────────────────────────────────────────── */
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--text-dim);
+}
+.empty-state .e-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; font-weight: 300; }
+.empty-state h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.empty-state p { font-size: .9rem; max-width: 360px; margin: 0 auto 20px; }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  #sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    transform: translateX(-100%);
+  }
+  #sidebar.open { transform: translateX(0); }
+  .hamburger { display: block; }
+  .content { padding: 20px 16px; }
+  .topbar { padding: 14px 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .modal { max-width: 100%; border-radius: 12px 12px 0 0; }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .agency-info-panel { grid-template-columns: 1fr; }
+  .detail-header { flex-direction: column; }
+  .form-actions { flex-direction: column; }
+  .form-actions .btn { width: 100%; justify-content: center; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .auth-box { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Auth Screen ─────────────────────────────────────────── -->
+<div id="authWrap">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <h1 style="text-transform: none;">FOIA.io</h1>
+      <p>FOIA Request Management</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="authTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="authTab('register')">Create Account</button>
+    </div>
+    <div id="authError" class="auth-error"></div>
+
+    <!-- Login -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label>Username or Email</label>
+        <input type="text" id="loginUser" placeholder="your@email.com" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Sign In</button>
+    </div>
+
+    <!-- Register -->
+    <div id="registerForm" style="display:none;">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="regUser" placeholder="journaliststeve" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="you@press.org" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password <small style="color:var(--text-dim)">(min 8 characters)</small></label>
+        <input type="password" id="regPass" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="doRegister()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main App ────────────────────────────────────────────── -->
+<div id="app" style="display:none;">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <h1>FOIA.io</h1>
+      <p>Request Manager</p>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-label">Overview</div>
+      <button class="nav-item active" data-page="dashboard" onclick="nav('dashboard')">
+        <span style="color: #9a7065;" class="icon">△</span> Dashboard
+      </button>
+
+      <div class="nav-label" style="margin-top:12px;">Requests</div>
+      <button class="nav-item" data-page="new-request" onclick="nav('new-request')">
+        <span class="icon">﹢</span> New Request
+      </button>
+      <button class="nav-item" data-page="all-requests" onclick="nav('all-requests')">
+        <span class="icon">≡</span> All Requests
+        <span class="nav-badge" id="badgeAll">0</span>
+      </button>
+      <button class="nav-item" data-page="active-requests" onclick="nav('active-requests')">
+        <span class="icon">⍛</span> Active Requests
+        <span class="nav-badge" id="badgeActive">0</span>
+      </button>
+      <button class="nav-item" data-page="closed-requests" onclick="nav('closed-requests')">
+        <span class="icon">☑︎</span> Closed Requests
+        <span class="nav-badge" id="badgeClosed" style="background:var(--bg3);color:var(--text-dim);">0</span>
+      </button>
+
+      <div class="nav-label" style="margin-top:12px;">Reference</div>
+      <button class="nav-item" data-page="agency-dir" onclick="nav('agency-dir')">
+        <span class="icon">⚖︎</span> Federal Agencies
+      </button>
+      <button class="nav-item" data-page="state-laws" onclick="nav('state-laws')">
+        <span class="icon">⚖︎</span> State Laws
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <button id="btnTheme" onclick="toggleTheme()" style="
+        width:100%; background:var(--bg3); border:1px solid var(--border);
+        color:var(--text); padding:8px 14px; border-radius:8px; cursor:pointer;
+        font-size:.82rem; display:flex; align-items:center; gap:8px;
+        margin-bottom:8px; transition: background .2s;">
+        <span id="themeIcon">☼</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div>
+          <div class="user-name" id="userName">Loading…</div>
+          <div class="user-status" id="userStatus">● Active</div>
+        </div>
+      </div>
+      <button id="btnLogout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div id="main">
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <button style="background-color: #9a7065; color: #e0e0e0; border-color: #64453e;" class="btn btn-primary btn-sm" onclick="nav('new-request')">+ New Request</button>
+    </div>
+
+    <div class="content">
+
+      <!-- ── Dashboard ──────────────────────────────────────── -->
+      <div id="page-dashboard" class="page active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="statTotal">–</div>
+            <div class="stat-label">Total Requests</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num amber" id="statActive">–</div>
+            <div class="stat-label">Active</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num red" id="statOverdue">–</div>
+            <div class="stat-label">Overdue</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num green" id="statClosed">–</div>
+            <div class="stat-label">Closed</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Recently Active</div>
+          <div id="dashRecentList"></div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <div class="card-title">Overdue Deadlines</div>
+          <div id="dashOverdueList"></div>
+        </div>
+      </div>
+
+      <!-- ── New Request ────────────────────────────────────── -->
+      <div id="page-new-request" class="page">
+        <div class="card">
+          <div class="card-title">﹢ New FOIA Request</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>FOIA Number (auto-generated)</label>
+              <input type="text" id="nrFoiaNum" readonly style="opacity:.6;cursor:default;">
+            </div>
+            <div class="form-group">
+              <label>Date Created</label>
+              <input type="text" id="nrDate" readonly style="opacity:.6;cursor:default;">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Jurisdiction</label>
+            <select id="nrType" onchange="onTypeChange()">
+              <option value="">— Select jurisdiction —</option>
+              <option value="Federal">Federal</option>
+              <option value="State">State</option>
+              <option value="Local" disabled>Local (coming soon)</option>
+              <option value="University" disabled>University (coming soon)</option>
+            </select>
+          </div>
+
+          <div id="federalAgencySection" style="display:none;">
+            <div class="form-group">
+              <label>Federal Agency</label>
+              <select id="nrAgency" onchange="onAgencyChange()">
+                <option value="">— Select agency —</option>
+              </select>
+            </div>
+            <div class="agency-info-panel" id="agencyInfoPanel">
+              <div class="ai-field">
+                <div class="ai-label">FOIA Officer Title</div>
+                <div class="ai-val" id="aipTitle">—</div>
+              </div>
+              <div class="ai-field">
+                <div class="ai-label">Email</div>
+                <div class="ai-val" id="aipEmail">—</div>
+              </div>
+              <div class="ai-field">
+                <div class="ai-label">Phone</div>
+                <div class="ai-val" id="aipPhone">—</div>
+              </div>
+              <div class="ai-field">
+                <div class="ai-label">Fax</div>
+                <div class="ai-val" id="aipFax">—</div>
+              </div>
+              <div class="ai-field full">
+                <div class="ai-label">Mailing Address</div>
+                <div class="ai-val" id="aipAddress" style="white-space:pre-line;">—</div>
+              </div>
+              <div class="ai-field full" id="aipPortalRow" style="display:none;">
+                <div class="ai-label">Online Portal</div>
+                <div class="ai-val">
+                  <a id="aipPortalLink" href="#" target="_blank" rel="noopener"
+                     style="color:var(--cyan);font-size:.85rem;">🌐 Open Agency FOIA Portal →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- State section -->
+          <div id="stateSection" style="display:none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>State</label>
+                <select id="nrState" onchange="onStateChange()">
+                  <option value="">— Select state —</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Records Custodian / Officer Title</label>
+                <input type="text" id="nrStateOfficer" placeholder="e.g. Custodian of Records, FOIA Officer…">
+              </div>
+            </div>
+            <div id="stateLawPanel" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <div>
+                  <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;">Law Name</div>
+                  <div style="font-size:.85rem;font-weight:600;margin-top:2px;" id="slLawName">—</div>
+                </div>
+                <div>
+                  <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;">Citation</div>
+                  <div style="font-size:.85rem;font-weight:600;margin-top:2px;color:var(--cyan);" id="slCitation">—</div>
+                </div>
+                <div>
+                  <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;">Response Days</div>
+                  <div style="font-size:.85rem;font-weight:600;margin-top:2px;" id="slDays">—</div>
+                </div>
+              </div>
+              <div style="margin-top:10px;">
+                <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;">Notes</div>
+                <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;" id="slNotes">—</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Agency Name</label>
+              <input type="text" id="nrStateAgency" placeholder="e.g. Missouri State Highway Patrol, Indiana DNR…">
+            </div>
+          </div>
+            <input type="text" id="nrSubject" placeholder="Briefly describe what records you are requesting…">
+          </div>
+
+          <div class="form-group">
+            <label>Internal Notes (not included in letter)</label>
+            <textarea id="nrNotes" placeholder="Investigation context, related cases, prior requests…"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-danger" onclick="clearNewRequestForm()">🗑 Discard</button>
+            <button class="btn btn-primary" onclick="saveNewRequest()">💾 Save Request</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── All Requests ───────────────────────────────────── -->
+      <div id="page-all-requests" class="page">
+        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm active-filter" data-f="all" onclick="filterAll('all',this)">All</button>
+            <button class="btn btn-ghost btn-sm" data-f="new" onclick="filterAll('new',this)">New</button>
+            <button class="btn btn-ghost btn-sm" data-f="active" onclick="filterAll('active',this)">Active</button>
+            <button class="btn btn-ghost btn-sm" data-f="closed" onclick="filterAll('closed',this)">Closed</button>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="nav('new-request')">+ New Request</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>FOIA #</th>
+                <th>Agency</th>
+                <th>Subject</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Last Action</th>
+              </tr>
+            </thead>
+            <tbody id="allRequestsBody"></tbody>
+          </table>
+        </div>
+        <div id="allEmpty" class="empty-state" style="display:none;">
+          <div class="e-icon">—</div>
+          <h3>No requests yet</h3>
+          <p>Create your first FOIA request to get started.</p>
+          <button class="btn btn-primary" onclick="nav('new-request')">+ New Request</button>
+        </div>
+      </div>
+
+      <!-- ── Active Requests ────────────────────────────────── -->
+      <div id="page-active-requests" class="page">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>FOIA #</th>
+                <th>Agency</th>
+                <th>Subject</th>
+                <th>Deadline</th>
+                <th>Days</th>
+                <th>Turn</th>
+                <th>Last Action</th>
+              </tr>
+            </thead>
+            <tbody id="activeRequestsBody"></tbody>
+          </table>
+        </div>
+        <div id="activeEmpty" class="empty-state" style="display:none;">
+          <div class="e-icon">—</div>
+          <h3>No active requests</h3>
+          <p>Save a request letter to move a request into Active status.</p>
+        </div>
+      </div>
+
+      <!-- ── Closed Requests ────────────────────────────────── -->
+      <div id="page-closed-requests" class="page">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>FOIA #</th>
+                <th>Agency</th>
+                <th>Subject</th>
+                <th>Created</th>
+                <th>Closed</th>
+                <th>Last Action</th>
+              </tr>
+            </thead>
+            <tbody id="closedRequestsBody"></tbody>
+          </table>
+        </div>
+        <div id="closedEmpty" class="empty-state" style="display:none;">
+          <div class="e-icon">—</div>
+          <h3>No closed requests</h3>
+          <p>Requests you close will appear here.</p>
+        </div>
+      </div>
+
+      <!-- ── Agency Directory ───────────────────────────────── -->
+      <div id="page-agency-dir" class="page">
+        <div class="card">
+          <div class="card-title">🏛️ Federal FOIA Agency Directory</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Agency</th>
+                  <th>Abbrev</th>
+                  <th>FOIA Officer</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                </tr>
+              </thead>
+              <tbody id="agencyDirBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── State Laws ─────────────────────────────────────── -->
+      <div id="page-state-laws" class="page">
+        <div class="card">
+          <div class="card-title">🗺️ State Public Records Laws — All 50 States</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>State</th>
+                  <th>Code</th>
+                  <th>Law Name</th>
+                  <th>Citation</th>
+                  <th>Response Days</th>
+                  <th>Appeal Days</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="stateLawsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Request Detail ─────────────────────────────────── -->
+      <div id="page-detail" class="page">
+        <button class="btn btn-ghost btn-sm" onclick="goBack()" style="margin-bottom:20px;">← Back</button>
+        <div id="detailContent"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── Letter Modal ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="letterModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>📄 FOIA Request Letter</h2>
+        <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;" id="letterModalSub">Edit the letter below before sending.</div>
+      </div>
+      <button class="modal-close" onclick="closeLetter()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div
+        id="letterText"
+        class="letter-pre"
+        contenteditable="true"
+        spellcheck="true"
+      ></div>
+      <div class="copy-row">
+        <button class="btn btn-ghost btn-sm" onclick="copyLetter()">Copy to Clipboard</button>
+        <button class="btn btn-ghost btn-sm" id="btnDownloadDocx" onclick="downloadDocx()" style="display:none;">Download .docx</button>
+        <span class="copy-success" id="copySuccess">✓ Copied</span>
+        <a id="foiaGovLink" href="https://www.foia.gov/create-a-request" target="_blank" rel="noopener"
+           class="btn btn-ghost btn-sm" style="margin-left:auto;">🌐 Open FOIA.gov Portal</a>
+      </div>
+      <div class="form-actions" style="margin-top:20px;">
+        <button class="btn btn-danger" onclick="discardLetter()">Discard Letter</button>
+        <button class="btn btn-primary" onclick="saveLetter()">Save Letter → Move to Active</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Update Request Modal ─────────────────────────────────── -->
+<div class="modal-overlay" id="updateModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏️ Update Request</h2>
+      <button class="modal-close" onclick="closeUpdateModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Additional Notes</label>
+        <textarea id="updNotes" rows="4" placeholder="Log responses, follow-ups, exemptions cited…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Override Deadline Date</label>
+          <input type="date" id="updDeadline">
+        </div>
+        <div class="form-group">
+          <label>Turn</label>
+          <select id="updTurn">
+            <option value="My Turn">My Turn</option>
+            <option value="Their Turn">Their Turn</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Secondary Contact Name</label>
+          <input type="text" id="updSecName" placeholder="Name">
+        </div>
+        <div class="form-group">
+          <label>Secondary Contact Email</label>
+          <input type="email" id="updSecEmail" placeholder="email@agency.gov">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="closeUpdateModal()">Discard</button>
+        <button class="btn btn-primary" onclick="saveUpdate()">Save Updates</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Appeal Modal ──────────────────────────────────────────── -->
+<div class="modal-overlay" id="appealModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>⚖️ Administrative Appeal</h2>
+        <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;" id="appealModalSub">Federal — Office of Information Policy</div>
+      </div>
+      <button class="modal-close" onclick="closeAppealModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label>Appeal Type</label>
+          <select id="appealType" onchange="onAppealTypeChange()">
+            <option value="constructive_denial">No Response / Constructive Denial</option>
+            <option value="improper_exemption">Improper Exemption Claimed</option>
+            <option value="inadequate_search">Inadequate Search</option>
+            <option value="fee_dispute">Fee Dispute</option>
+          </select>
+        </div>
+        <div class="form-group" id="exemptionRow" style="display:none;">
+          <label>Exemption Cited by Agency</label>
+          <input type="text" id="appealExemption" placeholder="e.g. 5, 7(C), 7(E)…">
+        </div>
+      </div>
+      <div
+        id="appealText"
+        class="letter-pre"
+        contenteditable="true"
+        spellcheck="true"
+        style="min-height:360px;"
+      ></div>
+      <div class="copy-row" style="margin-top:12px;">
+        <button class="btn btn-ghost btn-sm" onclick="copyAppeal()">Copy to Clipboard</button>
+        <span class="copy-success" id="appealCopySuccess">✓ Copied</span>
+        <button class="btn btn-ghost btn-sm" onclick="regenerateAppeal()" style="margin-left:8px;">Regenerate</button>
+      </div>
+      <div class="form-actions" style="margin-top:20px;">
+        <button class="btn btn-danger" onclick="closeAppealModal()">Discard</button>
+        <button class="btn btn-primary" onclick="saveAppeal()">Save Appeal → Mark as Appealed</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ── Subscribe Page (shown over app when needed) ─────────── -->
+<div id="subscribePage" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;overflow-y:auto;">
+  <div class="subscribe-card">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🗂️</div>
+    <h2>Unlock FOIA.io</h2>
+    <p>Manage unlimited FOIA requests, auto-generate letters, and track every deadline.</p>
+    <div class="price-tag">$19 <span>/ month</span></div>
+    <ul class="feature-list">
+      <li>Unlimited requests across all statuses</li>
+      <li>Auto-generated FOIA numbers &amp; letters</li>
+      <li>Federal agency directory (20+ agencies)</li>
+      <li>Deadline tracking with business-day math</li>
+      <li>Full action log per request</li>
+      <li>Word doc letter export</li>
+      <li>Fee waiver boilerplate included</li>
+    </ul>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;font-size:1rem;padding:14px;" onclick="goToCheckout()">
+      Subscribe with Stripe →
+    </button>
+    <p style="margin-top:12px;font-size:.8rem;color:var(--text-dim);">
+      During development, use the button below to activate a free trial.
+    </p>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="devActivate()">
+      🛠 Dev: Activate Free Access
+    </button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────
+let currentPage = 'dashboard';
+let previousPage = 'dashboard';
+let currentRequestId = null;
+let allRequestsData = [];
+let agenciesData = [];
+let pendingLetterId = null;
+let pendingUpdateId = null;
+
+// ─────────────────────────────────────────────────────────────
+// API helper
+// ─────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(path, opts);
+  return { status: res.status, data: await res.json().catch(() => ({})) };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Toast
+// ─────────────────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.className = '', 3200);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Auth
+// ─────────────────────────────────────────────────────────────
+function authTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(tab)));
+  document.getElementById('loginForm').style.display    = tab === 'login'    ? '' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? '' : 'none';
+  document.getElementById('authError').style.display    = 'none';
+}
+
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const { status, data } = await api('POST', '/api/auth/login', { username, password });
+  if (status !== 200) {
+    showAuthError(data.error || 'Login failed');
+    return;
+  }
+  bootApp(data.username, data.subscription_status);
+}
+
+async function doRegister() {
+  const username = document.getElementById('regUser').value.trim();
+  const email    = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPass').value;
+  const { status, data } = await api('POST', '/api/auth/register', { username, email, password });
+  if (status !== 200) {
+    showAuthError(data.error || 'Registration failed');
+    return;
+  }
+  bootApp(data.username, data.subscription_status || 'active');
+}
+
+async function doLogout() {
+  await api('POST', '/api/auth/logout');
+  location.reload();
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ─────────────────────────────────────────────────────────────
+// Theme toggle
+// ─────────────────────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('foiaio-theme') || 'dark';
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('themeIcon').textContent  = '☾';
+    document.getElementById('themeLabel').textContent = 'Dark Mode';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('themeIcon').textContent  = '☀';
+    document.getElementById('themeLabel').textContent = 'Light Mode';
+  }
+  localStorage.setItem('foiaio-theme', theme);
+}
+
+function toggleTheme() {
+  const current = localStorage.getItem('foiaio-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+async function bootApp(username, subStatus) {
+  document.getElementById('authWrap').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('userName').textContent = username;
+  document.getElementById('userAvatar').textContent = username[0].toUpperCase();
+  initTheme();
+
+  // ── TEST MODE: subscription gate disabled ──────────────────
+  await loadAgencies();
+  await refreshAllData();
+  nav('dashboard');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Subscription
+// ─────────────────────────────────────────────────────────────
+async function goToCheckout() {
+  const { status, data } = await api('POST', '/api/stripe/create-checkout', {});
+  toast(data.message || 'Redirecting to Stripe…', '');
+}
+
+async function devActivate() {
+  const { status, data } = await api('POST', '/api/dev/activate', {});
+  if (status === 200) {
+    document.getElementById('subscribePage').style.display = 'none';
+    await loadAgencies();
+    await refreshAllData();
+    nav('dashboard');
+    toast('Dev access activated ✓', 'success');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Navigation
+// ─────────────────────────────────────────────────────────────
+const PAGE_TITLES = {
+  'dashboard':       'Dashboard',
+  'new-request':     'New Request',
+  'all-requests':    'All Requests',
+  'active-requests': 'Active Requests',
+  'closed-requests': 'Closed Requests',
+  'agency-dir':      'Federal Agency Directory',
+  'state-laws':      'State Public Records Laws',
+  'detail':          'Request Detail',
+};
+
+async function nav(page) {
+  previousPage = currentPage;
+  currentPage = page;
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+  const el = document.getElementById(`page-${page}`);
+  if (el) el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[page] || page;
+  closeSidebar();
+
+  if (page === 'dashboard')       await loadDashboard();
+  if (page === 'all-requests')    await loadAllRequests();
+  if (page === 'active-requests') await loadActiveRequests();
+  if (page === 'closed-requests') await loadClosedRequests();
+  if (page === 'new-request')     await initNewRequestForm();
+  if (page === 'agency-dir')      await loadAgencyDir();
+  if (page === 'state-laws')      await loadStateLaws();
+}
+
+function goBack() { nav(previousPage === 'detail' ? 'all-requests' : previousPage); }
+
+// ─────────────────────────────────────────────────────────────
+// Sidebar (mobile)
+// ─────────────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').style.display =
+    document.getElementById('sidebar').classList.contains('open') ? '' : 'none';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').style.display = 'none';
+}
+
+// ─────────────────────────────────────────────────────────────
+// Data loaders
+// ─────────────────────────────────────────────────────────────
+async function refreshAllData() {
+  const { data } = await api('GET', '/api/requests');
+  allRequestsData = Array.isArray(data) ? data : [];
+  updateBadges();
+}
+
+function updateBadges() {
+  const all    = allRequestsData.length;
+  const active = allRequestsData.filter(r => r.status === 'active').length;
+  const closed = allRequestsData.filter(r => r.status === 'closed').length;
+  document.getElementById('badgeAll').textContent    = all;
+  document.getElementById('badgeActive').textContent = active;
+  document.getElementById('badgeClosed').textContent = closed;
+
+  const overdue = allRequestsData.filter(r =>
+    r.status === 'active' && r.days_since_deadline > 0
+  ).length;
+  const badge = document.getElementById('badgeActive');
+  if (overdue > 0) badge.classList.add('red'); else badge.classList.remove('red');
+}
+
+async function loadDashboard() {
+  await refreshAllData();
+  const total   = allRequestsData.length;
+  const active  = allRequestsData.filter(r => r.status === 'active').length;
+  const closed  = allRequestsData.filter(r => r.status === 'closed').length;
+  const overdue = allRequestsData.filter(r =>
+    r.status === 'active' && r.days_since_deadline > 0
+  ).length;
+
+  document.getElementById('statTotal').textContent   = total;
+  document.getElementById('statActive').textContent  = active;
+  document.getElementById('statOverdue').textContent = overdue;
+  document.getElementById('statClosed').textContent  = closed;
+
+  // Recent
+  const recent = [...allRequestsData]
+    .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''))
+    .slice(0, 5);
+  document.getElementById('dashRecentList').innerHTML =
+    recent.length ? renderMiniTable(recent) :
+    '<p style="color:var(--text-dim);padding:20px 0;text-align:center;">No requests yet.</p>';
+
+  // Overdue
+  const od = allRequestsData.filter(r =>
+    r.status === 'active' && r.days_since_deadline > 0
+  );
+  document.getElementById('dashOverdueList').innerHTML =
+    od.length ? renderMiniTable(od) :
+    '<p style="color:var(--green);padding:20px 0;text-align:center;">✓ No overdue requests</p>';
+}
+
+function renderMiniTable(rows) {
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>FOIA #</th><th>Agency</th><th>Subject</th><th>Status</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr onclick="openDetail(${r.id})">
+        <td class="td-number">${esc(r.foia_number)}</td>
+        <td class="td-agency">${esc(r.agency_name||'—')}</td>
+        <td class="td-subject">${esc(r.subject||'—')}</td>
+        <td>${statusBadge(r)}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+async function loadAllRequests(filter = 'all') {
+  await refreshAllData();
+  let rows = filter === 'all' ? allRequestsData :
+             allRequestsData.filter(r => r.status === filter);
+  const tbody = document.getElementById('allRequestsBody');
+  tbody.innerHTML = rows.map(r => `
+    <tr onclick="openDetail(${r.id})">
+      <td class="td-number">${esc(r.foia_number)}</td>
+      <td class="td-agency">${esc(r.agency_name||'—')}</td>
+      <td class="td-subject">${esc(r.subject||'—')}</td>
+      <td>${fmtDate(r.created_date)}</td>
+      <td>${statusBadge(r)}</td>
+      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
+    </tr>`).join('');
+  document.getElementById('allEmpty').style.display = rows.length ? 'none' : '';
+}
+
+async function loadActiveRequests() {
+  await refreshAllData();
+  const rows = allRequestsData.filter(r => r.status === 'active' || r.status === 'appealed');
+  const tbody = document.getElementById('activeRequestsBody');
+  tbody.innerHTML = rows.map(r => {
+    const dsd = r.days_since_deadline ?? null;
+    let daysTxt = '—';
+    if (dsd !== null) {
+      if (dsd > 0)       daysTxt = `<span style="color:var(--red)">+${dsd}d overdue</span>`;
+      else if (dsd === 0) daysTxt = `<span style="color:var(--amber)">Due today</span>`;
+      else                daysTxt = `<span style="color:var(--green)">${Math.abs(dsd)}d left</span>`;
+    }
+    const turnDropdown = `
+      <select class="turn-select" onclick="event.stopPropagation()"
+              onchange="quickSetTurn(${r.id}, this.value)"
+              style="background:var(--bg3);border:1px solid var(--border);color:${r.turn==='Their Turn'?'var(--cyan)':'var(--amber)'};
+                     padding:4px 8px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;outline:none;">
+        <option value="My Turn"   ${r.turn!=='Their Turn'?'selected':''}>My Turn</option>
+        <option value="Their Turn" ${r.turn==='Their Turn'?'selected':''}>Their Turn</option>
+      </select>`;
+    return `<tr onclick="openDetail(${r.id})">
+      <td class="td-number">${esc(r.foia_number)}</td>
+      <td class="td-agency">${esc(r.agency_name||'—')}</td>
+      <td class="td-subject">${esc(r.subject||'—')}</td>
+      <td>${fmtDate(r.deadline_date)}</td>
+      <td>${daysTxt}</td>
+      <td>${turnDropdown}</td>
+      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('activeEmpty').style.display = rows.length ? 'none' : '';
+}
+
+async function loadClosedRequests() {
+  await refreshAllData();
+  const rows = allRequestsData.filter(r => r.status === 'closed');
+  const tbody = document.getElementById('closedRequestsBody');
+  tbody.innerHTML = rows.map(r => `
+    <tr onclick="openDetail(${r.id})">
+      <td class="td-number">${esc(r.foia_number)}</td>
+      <td class="td-agency">${esc(r.agency_name||'—')}</td>
+      <td class="td-subject">${esc(r.subject||'—')}</td>
+      <td>${fmtDate(r.created_date)}</td>
+      <td>${fmtDate(r.closed_date)}</td>
+      <td style="font-size:.78rem;color:var(--text-dim);">${fmtDateTime(r.last_action_date)}</td>
+    </tr>`).join('');
+  document.getElementById('closedEmpty').style.display = rows.length ? 'none' : '';
+}
+
+async function loadAgencies() {
+  const { data } = await api('GET', '/api/agencies');
+  agenciesData = Array.isArray(data) ? data : [];
+  const sel = document.getElementById('nrAgency');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Select agency —</option>' +
+    agenciesData.map(a =>
+      `<option value="${a.id}">${esc(a.name)}${a.abbreviation ? ' ('+esc(a.abbreviation)+')' : ''}</option>`
+    ).join('');
+}
+
+async function loadAgencyDir() {
+  const tbody = document.getElementById('agencyDirBody');
+  if (agenciesData.length === 0) await loadAgencies();
+  // Fetch full detail for each
+  const { data: agencies } = await api('GET', '/api/agencies');
+  tbody.innerHTML = '';
+  for (const a of agencies) {
+    const { data: full } = await api('GET', `/api/agencies/${a.id}`);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:600;">${esc(full.name)}</td>
+      <td><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
+      <td>${esc(full.foia_officer_title||'—')}</td>
+      <td><a href="mailto:${esc(full.foia_email||'')}" style="color:var(--cyan);">${esc(full.foia_email||'—')}</a></td>
+      <td>${esc(full.foia_phone||'—')}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// New Request Form
+// ─────────────────────────────────────────────────────────────
+async function initNewRequestForm() {
+  const { data } = await api('GET', '/api/requests/new-number');
+  document.getElementById('nrFoiaNum').value = data.foia_number || '';
+  document.getElementById('nrDate').value    = fmtDate(data.date) || '';
+  document.getElementById('nrType').value    = '';
+  document.getElementById('nrSubject').value = '';
+  document.getElementById('nrNotes').value   = '';
+  document.getElementById('federalAgencySection').style.display = 'none';
+  document.getElementById('stateSection').style.display = 'none';
+  document.getElementById('agencyInfoPanel').classList.remove('visible');
+  document.getElementById('stateLawPanel').style.display = 'none';
+  document.getElementById('nrAgency').value  = '';
+  document.getElementById('nrState').value   = '';
+  document.getElementById('nrStateAgency').value = '';
+  document.getElementById('nrStateOfficer').value = '';
+  await loadAgencies();
+  await loadStatesDropdown();
+}
+
+function onTypeChange() {
+  const t = document.getElementById('nrType').value;
+  document.getElementById('federalAgencySection').style.display =
+    t === 'Federal' ? '' : 'none';
+  document.getElementById('stateSection').style.display =
+    t === 'State' ? '' : 'none';
+}
+
+let statesData = [];
+
+async function loadStatesDropdown() {
+  if (statesData.length > 0) return; // already loaded
+  const { data } = await api('GET', '/api/states');
+  statesData = Array.isArray(data) ? data : [];
+  const sel = document.getElementById('nrState');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Select state —</option>' +
+    statesData.map(s =>
+      `<option value="${esc(s.state_code)}">${esc(s.state_name)}</option>`
+    ).join('');
+}
+
+async function onStateChange() {
+  const code = document.getElementById('nrState').value;
+  if (!code) {
+    document.getElementById('stateLawPanel').style.display = 'none';
+    return;
+  }
+  const { data } = await api('GET', `/api/states/${code}`);
+  document.getElementById('slLawName').textContent  = data.law_name || '—';
+  document.getElementById('slCitation').textContent = data.citation || '—';
+  document.getElementById('slDays').textContent     =
+    data.response_days ? `${data.response_days} business days` : 'Reasonable time';
+  document.getElementById('slNotes').textContent    = data.notes || '—';
+  document.getElementById('stateLawPanel').style.display = '';
+}
+
+async function loadStateLaws() {
+  const { data } = await api('GET', '/api/states');
+  const tbody = document.getElementById('stateLawsBody');
+  tbody.innerHTML = data.map(s => `
+    <tr>
+      <td style="font-weight:600;">${esc(s.state_name)}</td>
+      <td><span class="badge badge-active">${esc(s.state_code)}</span></td>
+      <td style="font-size:.82rem;">${esc(s.law_name)}</td>
+      <td style="font-size:.78rem;color:var(--cyan);font-family:monospace;">${esc(s.citation)}</td>
+      <td style="text-align:center;">${s.response_days || '<span style="color:var(--text-dim)">Reasonable</span>'}</td>
+      <td style="text-align:center;">${s.appeal_days || '<span style="color:var(--text-dim)">—</span>'}</td>
+      <td style="font-size:.78rem;color:var(--text-dim);max-width:300px;">${esc(s.notes||'')}</td>
+    </tr>`).join('');
+}
+
+async function onAgencyChange() {
+  const id = document.getElementById('nrAgency').value;
+  if (!id) {
+    document.getElementById('agencyInfoPanel').classList.remove('visible');
+    document.getElementById('aipPortalRow').style.display = 'none';
+    return;
+  }
+  const { data } = await api('GET', `/api/agencies/${id}`);
+  document.getElementById('aipTitle').textContent   = data.foia_officer_title || '—';
+  document.getElementById('aipEmail').textContent   = data.foia_email || '—';
+  document.getElementById('aipPhone').textContent   = data.foia_phone || '—';
+  document.getElementById('aipFax').textContent     = data.foia_fax || '—';
+  document.getElementById('aipAddress').textContent = data.foia_address || '—';
+  // Portal link
+  if (data.portal_url) {
+    document.getElementById('aipPortalLink').href = data.portal_url;
+    document.getElementById('aipPortalRow').style.display = '';
+  } else {
+    document.getElementById('aipPortalRow').style.display = 'none';
+  }
+  document.getElementById('agencyInfoPanel').classList.add('visible');
+}
+
+function clearNewRequestForm() {
+  if (!confirm('Discard this request?')) return;
+  initNewRequestForm();
+}
+
+async function saveNewRequest() {
+  const agencyType = document.getElementById('nrType').value;
+  const agencyId   = document.getElementById('nrAgency').value || null;
+  const subject    = document.getElementById('nrSubject').value.trim();
+  const notes      = document.getElementById('nrNotes').value.trim();
+  const stateCode  = document.getElementById('nrState')?.value || null;
+  const stateAgency = document.getElementById('nrStateAgency')?.value.trim() || '';
+  const stateOfficer = document.getElementById('nrStateOfficer')?.value.trim() || '';
+
+  if (!agencyType) { toast('Please select a jurisdiction', 'error'); return; }
+  if (agencyType === 'Federal' && !agencyId) { toast('Please select an agency', 'error'); return; }
+  if (agencyType === 'State' && !stateCode) { toast('Please select a state', 'error'); return; }
+  if (agencyType === 'State' && !stateAgency) { toast('Please enter the agency name', 'error'); return; }
+  if (!subject) { toast('Please enter a subject', 'error'); return; }
+
+  const payload = {
+    agency_type: agencyType,
+    agency_id: agencyId ? parseInt(agencyId) : null,
+    agency_name: agencyType === 'State' ? stateAgency : undefined,
+    state_code: agencyType === 'State' ? stateCode : null,
+    foia_officer_title: agencyType === 'State' ? (stateOfficer || 'Custodian of Records') : undefined,
+    subject, notes
+  };
+
+  const { status, data } = await api('POST', '/api/requests', payload);
+
+  if (status !== 200) {
+    toast(data.error || 'Save failed', 'error');
+    return;
+  }
+
+  toast(`✓ Saved as ${data.foia_number}`, 'success');
+  await refreshAllData();
+  nav('all-requests');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Filter
+// ─────────────────────────────────────────────────────────────
+function filterAll(f, btn) {
+  document.querySelectorAll('.active-filter').forEach(b => b.classList.remove('active-filter'));
+  btn.classList.add('active-filter');
+  loadAllRequests(f);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Request Detail
+// ─────────────────────────────────────────────────────────────
+async function openDetail(id) {
+  currentRequestId = id;
+  const { data: r } = await api('GET', `/api/requests/${id}`);
+  const { data: log } = await api('GET', `/api/requests/${id}/log`);
+
+  previousPage = currentPage;
+  currentPage = 'detail';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-detail').classList.add('active');
+  document.getElementById('topbarTitle').textContent = r.foia_number;
+
+  const dsd = r.days_since_deadline ?? null;
+  let deadlineBanner = '';
+  if (r.status === 'active' && r.deadline_date) {
+    let cls = 'ok', msg = '';
+    if (dsd > 0)       { cls = 'over'; msg = `⚑ Overdue by ${dsd} business days (deadline was ${fmtDate(r.deadline_date)})`; }
+    else if (dsd === 0){ cls = 'warn'; msg = `⏲ Deadline is TODAY — ${fmtDate(r.deadline_date)}`; }
+    else if (dsd > -5) { cls = 'warn'; msg = `⏲ Deadline approaching — ${fmtDate(r.deadline_date)} (${Math.abs(dsd)} days remaining)`; }
+    else               { cls = 'ok';   msg = `✓ On track — deadline ${fmtDate(r.deadline_date)} (${Math.abs(dsd)} days remaining)`; }
+    deadlineBanner = `<div class="deadline-banner ${cls}">${msg}</div>`;
+  }
+
+  const logHtml = Array.isArray(log) && log.length
+    ? `<ul class="action-log-list">${log.map(l => `
+        <li>
+          <div class="al-date">${fmtDateTime(l.logged_at)}</div>
+          <div>
+            <div class="al-action">${esc(l.action)}</div>
+            ${l.note ? `<div class="al-note">${esc(l.note)}</div>` : ''}
+          </div>
+        </li>`).join('')}
+      </ul>`
+    : '<p style="color:var(--text-dim);font-size:.85rem;">No actions logged yet.</p>';
+
+  const isActive = r.status === 'active';
+  const isNew    = r.status === 'new';
+  const isClosed = r.status === 'closed';
+  const isAppealed = r.status === 'appealed';
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-header">
+      <div>
+        <h2 style="font-size:1.4rem;font-weight:800;color:var(--cyan);">${esc(r.foia_number)}</h2>
+        <div style="font-size:1rem;font-weight:600;margin-top:4px;">${esc(r.subject||'—')}</div>
+        <div class="detail-meta">
+          <div class="meta-chip"><strong>Agency:</strong> ${esc(r.agency_name||'—')}</div>
+          <div class="meta-chip"><strong>Created:</strong> ${fmtDate(r.created_date)}</div>
+          <div class="meta-chip"><strong>Status:</strong> ${statusBadge(r)}</div>
+          ${isActive ? `<div class="meta-chip"><strong>Turn:</strong> ${r.turn||'My Turn'}</div>` : ''}
+          ${r.secondary_contact_name ? `<div class="meta-chip"><strong>2nd Contact:</strong> ${esc(r.secondary_contact_name)}</div>` : ''}
+          ${r.last_action_date ? `<div class="meta-chip"><strong>Last Action:</strong> ${fmtDateTime(r.last_action_date)}</div>` : ''}
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${isNew ? `<button class="btn btn-primary btn-sm" onclick="openLetter(${r.id})">📄 View/Send Letter</button>` : ''}
+        ${isActive ? `
+          <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
+          <button class="btn btn-primary btn-sm" onclick="openUpdateModal(${r.id})">Update Request</button>
+          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">File Appeal</button>
+          <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
+        ${r.status === 'appealed' ? `
+          <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
+          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View Appeal</button>
+          <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
+        ${!isClosed ? `<button class="btn btn-danger btn-sm" onclick="deleteReq(${r.id})">Delete</button>` : ''}
+      </div>
+    </div>
+
+    ${deadlineBanner}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="card">
+        <div class="card-title">Notes</div>
+        <p style="font-size:.9rem;color:var(--text-dim);white-space:pre-wrap;">${esc(r.notes)||'No notes.'}</p>
+      </div>
+      ${(isActive || isAppealed) ? `<div class="card">
+        <div class="card-title">Deadline Info</div>
+        <div class="form-info">
+          <div class="info-label">Response Days</div>
+          <div class="info-val">${r.response_days||20} business days</div>
+          <div class="info-label" style="margin-top:10px;">Deadline Date</div>
+          <div class="info-val">${fmtDate(r.deadline_date)||'—'}</div>
+          ${r.secondary_contact_email ? `
+          <div class="info-label" style="margin-top:10px;">2nd Contact Email</div>
+          <div class="info-val"><a href="mailto:${esc(r.secondary_contact_email)}" style="color:var(--cyan);">${esc(r.secondary_contact_email)}</a></div>` : ''}
+        </div>
+      </div>` : '<div></div>'}
+    </div>
+
+    ${isAppealed && r.appeal_text ? `
+    <div class="card" style="margin-bottom:16px;border-color:rgba(245,166,35,.3);">
+      <div class="card-title" style="color:var(--amber);">⚖️ Appeal on File</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+        <div class="meta-chip"><strong>Type:</strong> ${esc(appealTypeLabel(r.appeal_type))}</div>
+        <div class="meta-chip"><strong>Filed:</strong> ${fmtDateTime(r.appeal_saved_at)}</div>
+        ${r.appeal_exemption ? `<div class="meta-chip"><strong>Exemption:</strong> ${esc(r.appeal_exemption)}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View / Edit Appeal</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyAppealText(${JSON.stringify(r.appeal_text).replace(/'/g,'&#39;')})">Copy Appeal</button>
+      </div>
+    </div>` : ''}
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>📎 Attachments</span>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0;">
+          ⬆️ Upload File
+          <input type="file" style="display:none;" onchange="uploadAttachment(${r.id}, this)">
+        </label>
+      </div>
+      <div id="attachmentList-${r.id}">
+        <div style="color:var(--text-dim);font-size:.85rem;padding:4px 0;">Loading…</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🕐 Action Log</div>
+      ${logHtml}
+    </div>`;
+
+  // Load attachments after rendering
+  loadAttachments(r.id);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Attachments
+// ─────────────────────────────────────────────────────────────
+function fmtBytes(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes/1024).toFixed(1)} KB`;
+  return `${(bytes/(1024*1024)).toFixed(1)} MB`;
+}
+
+async function loadAttachments(reqId) {
+  const el = document.getElementById(`attachmentList-${reqId}`);
+  if (!el) return;
+  const { status, data } = await api('GET', `/api/requests/${reqId}/attachments`);
+  if (status !== 200 || !Array.isArray(data)) {
+    el.innerHTML = `<div style="color:var(--text-dim);font-size:.85rem;">No attachments yet.</div>`;
+    return;
+  }
+  if (!data.length) {
+    el.innerHTML = `<div style="color:var(--text-dim);font-size:.85rem;">No attachments yet.</div>`;
+    return;
+  }
+  el.innerHTML = data.map(a => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:1.2rem;">${fileIcon(a.original_name)}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ${esc(a.original_name)}
+        </div>
+        <div style="font-size:.75rem;color:var(--text-dim);">
+          ${fmtBytes(a.file_size)} · ${fmtDateTime(a.uploaded_at)}
+          ${a.label ? ` · <em>${esc(a.label)}</em>` : ''}
+        </div>
+      </div>
+      <a href="/api/attachments/${a.id}/download"
+         class="btn btn-ghost btn-sm" style="flex-shrink:0;">⬇ Download</a>
+      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;color:var(--amber);"
+              onclick="deleteAttachment(${a.id}, ${reqId})">×</button>
+    </div>
+  `).join('');
+}
+
+function fileIcon(name) {
+  const ext = (name || '').split('.').pop().toLowerCase();
+  if (['pdf'].includes(ext)) return '□';
+  if (['jpg','jpeg','png','gif','webp','heic'].includes(ext)) return '▢';
+  if (['doc','docx'].includes(ext)) return '▪';
+  if (['xls','xlsx','csv'].includes(ext)) return '▫';
+  if (['mp4','mov','avi','mkv'].includes(ext)) return '▸';
+  if (['mp3','wav','m4a'].includes(ext)) return '♪';
+  if (['zip','tar','gz'].includes(ext)) return '⬚';
+  return '○';
+}
+
+async function uploadAttachment(reqId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) {
+    toast('File exceeds 20MB limit', 'error'); return;
+  }
+  const formData = new FormData();
+  formData.append('file', file);
+  toast(`Uploading ${file.name}…`, '');
+  try {
+    const res = await fetch(`/api/requests/${reqId}/attachments`, {
+      method: 'POST', body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) { toast(data.error || 'Upload failed', 'error'); return; }
+    toast(`✓ ${file.name} uploaded`, 'success');
+    input.value = '';
+    await loadAttachments(reqId);
+  } catch(e) {
+    toast('Upload failed', 'error');
+  }
+}
+
+async function deleteAttachment(attId, reqId) {
+  if (!confirm('Delete this attachment? This cannot be undone.')) return;
+  const { status, data } = await api('DELETE', `/api/attachments/${attId}`);
+  if (status !== 200) { toast(data.error || 'Delete failed', 'error'); return; }
+  toast('Attachment deleted', 'success');
+  await loadAttachments(reqId);
+}
+async function openLetter(id) {
+  pendingLetterId = id;
+  const { data: r } = await api('GET', `/api/requests/${id}`);
+
+  let text = r.letter_text;
+  if (!text) {
+    const { data: gen } = await api('GET', `/api/requests/${id}/generate-letter`);
+    text = gen.letter_text || '';
+  }
+
+  document.getElementById('letterText').textContent = text;
+  document.getElementById('letterModalSub').textContent =
+    r.status === 'active'
+      ? 'Letter already saved. You can copy it or download it as a Word doc.'
+      : 'Edit the letter, then save it to move this request to Active.';
+
+  // Show download button only if letter is already saved (active requests)
+  document.getElementById('btnDownloadDocx').style.display =
+    r.status === 'active' ? 'inline-flex' : 'none';
+
+  // Only show FOIA.gov portal link for federal requests
+  const portalLink = document.getElementById('foiaGovLink');
+  if (portalLink) {
+    portalLink.style.display = (r.jurisdiction === 'Federal') ? '' : 'none';
+  }
+
+  const overlay = document.getElementById('letterModal');
+  overlay.classList.add('open');
+}
+
+async function downloadDocx() {
+  if (!pendingLetterId) return;
+  toast('Generating Word doc…', '');
+  window.location.href = `/api/requests/${pendingLetterId}/download-docx`;
+}
+
+async function quickSetTurn(id, value) {
+  const { status, data } = await api('POST', `/api/requests/${id}/update`, { turn: value });
+  if (status !== 200) {
+    toast(data.error || 'Update failed', 'error');
+    return;
+  }
+  toast(`✓ Marked as "${value}"`, 'success');
+  await refreshAllData();
+  // Re-render the active table without full page nav
+  await loadActiveRequests();
+}
+
+function closeLetter() {
+  document.getElementById('letterModal').classList.remove('open');
+  pendingLetterId = null;
+}
+
+function discardLetter() {
+  if (!confirm('Discard this letter? The request will remain in New status.')) return;
+  closeLetter();
+}
+
+function copyLetter() {
+  const text = document.getElementById('letterText').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const el = document.getElementById('copySuccess');
+    el.style.display = 'inline';
+    setTimeout(() => el.style.display = 'none', 2500);
+  });
+}
+
+async function saveLetter() {
+  if (!pendingLetterId) return;
+  const text = document.getElementById('letterText').innerText;
+  const { status, data } = await api('POST', `/api/requests/${pendingLetterId}/save-letter`, {
+    letter_text: text
+  });
+  if (status !== 200) { toast(data.error || 'Save failed', 'error'); return; }
+  toast(`✓ Letter saved — moved to Active. Deadline: ${fmtDate(data.deadline_date)}`, 'success');
+  closeLetter();
+  await refreshAllData();
+  nav('active-requests');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Update Request modal
+// ─────────────────────────────────────────────────────────────
+async function openUpdateModal(id) {
+  pendingUpdateId = id;
+  const { data: r } = await api('GET', `/api/requests/${id}`);
+  document.getElementById('updNotes').value    = r.notes || '';
+  document.getElementById('updDeadline').value = r.deadline_date || '';
+  document.getElementById('updTurn').value     = r.turn || 'My Turn';
+  document.getElementById('updSecName').value  = r.secondary_contact_name || '';
+  document.getElementById('updSecEmail').value = r.secondary_contact_email || '';
+  document.getElementById('updateModal').classList.add('open');
+}
+
+function closeUpdateModal() {
+  document.getElementById('updateModal').classList.remove('open');
+  pendingUpdateId = null;
+}
+
+async function saveUpdate() {
+  if (!pendingUpdateId) return;
+  const payload = {
+    notes:                   document.getElementById('updNotes').value,
+    deadline_date:           document.getElementById('updDeadline').value || undefined,
+    turn:                    document.getElementById('updTurn').value,
+    secondary_contact_name:  document.getElementById('updSecName').value,
+    secondary_contact_email: document.getElementById('updSecEmail').value,
+  };
+  const { status, data } = await api('POST', `/api/requests/${pendingUpdateId}/update`, payload);
+  if (status !== 200) { toast(data.error || 'Update failed', 'error'); return; }
+  toast('✓ Request updated', 'success');
+  closeUpdateModal();
+  await openDetail(pendingUpdateId);
+  await refreshAllData();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Close / Delete
+// ─────────────────────────────────────────────────────────────
+async function closeReq(id) {
+  if (!confirm('Mark this request as closed?')) return;
+  const { status, data } = await api('POST', `/api/requests/${id}/close`, {});
+  if (status !== 200) { toast(data.error || 'Failed', 'error'); return; }
+  toast('✓ Request closed', 'success');
+  await refreshAllData();
+  nav('closed-requests');
+}
+
+async function deleteReq(id) {
+  if (!confirm('Permanently delete this request? This cannot be undone.')) return;
+  const { status, data } = await api('DELETE', `/api/requests/${id}`);
+  if (status !== 200) { toast(data.error || 'Failed', 'error'); return; }
+  toast('Request deleted', '');
+  await refreshAllData();
+  nav('all-requests');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d + 'T12:00:00').toLocaleDateString('en-US',
+      { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch { return d; }
+}
+
+function fmtDateTime(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleString('en-US',
+      { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  } catch { return d; }
+}
+
+function statusBadge(r) {
+  if (r.status === 'new')      return `<span class="badge badge-new">New</span>`;
+  if (r.status === 'closed')   return `<span class="badge badge-closed">Closed</span>`;
+  if (r.status === 'appealed') return `<span class="badge badge-appealed">Appealed</span>`;
+  if (r.status === 'active') {
+    if (r.days_since_deadline > 0)
+      return `<span class="badge badge-overdue">Overdue</span>`;
+    return `<span class="badge badge-active">Active</span>`;
+  }
+  return `<span class="badge badge-new">${esc(r.status)}</span>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Appeal modal
+// ─────────────────────────────────────────────────────────────
+let pendingAppealId = null;
+
+const APPEAL_TYPE_LABELS = {
+  constructive_denial: 'No Response / Constructive Denial',
+  improper_exemption:  'Improper Exemption Claimed',
+  inadequate_search:   'Inadequate Search',
+  fee_dispute:         'Fee Dispute',
+};
+
+function appealTypeLabel(type) {
+  return APPEAL_TYPE_LABELS[type] || type || '—';
+}
+
+function onAppealTypeChange() {
+  const t = document.getElementById('appealType').value;
+  document.getElementById('exemptionRow').style.display =
+    t === 'improper_exemption' ? '' : 'none';
+  regenerateAppeal();
+}
+
+async function openAppealModal(id) {
+  pendingAppealId = id;
+  const { data: r } = await api('GET', `/api/requests/${id}`);
+
+  // Pre-select type and exemption if appeal already saved
+  if (r.appeal_type) {
+    document.getElementById('appealType').value = r.appeal_type;
+    document.getElementById('appealExemption').value = r.appeal_exemption || '';
+    document.getElementById('exemptionRow').style.display =
+      r.appeal_type === 'improper_exemption' ? '' : 'none';
+  } else {
+    document.getElementById('appealType').value = 'constructive_denial';
+    document.getElementById('exemptionRow').style.display = 'none';
+  }
+
+  // Load saved appeal text or generate fresh
+  if (r.appeal_text) {
+    document.getElementById('appealText').textContent = r.appeal_text;
+  } else {
+    await regenerateAppeal();
+  }
+
+  document.getElementById('appealModalSub').textContent =
+    `${r.foia_number} — Federal appeal to DOJ Office of Information Policy`;
+  document.getElementById('appealModal').classList.add('open');
+}
+
+async function regenerateAppeal() {
+  if (!pendingAppealId) return;
+  const type      = document.getElementById('appealType').value;
+  const exemption = document.getElementById('appealExemption').value;
+  const params    = new URLSearchParams({ type, exemption });
+  const { data }  = await api('GET', `/api/requests/${pendingAppealId}/generate-appeal?${params}`);
+  document.getElementById('appealText').textContent = data.appeal_text || '';
+}
+
+function closeAppealModal() {
+  document.getElementById('appealModal').classList.remove('open');
+  pendingAppealId = null;
+}
+
+function copyAppeal() {
+  const text = document.getElementById('appealText').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const el = document.getElementById('appealCopySuccess');
+    el.style.display = 'inline';
+    setTimeout(() => el.style.display = 'none', 2500);
+  });
+}
+
+function copyAppealText(text) {
+  navigator.clipboard.writeText(text).then(() => toast('✓ Appeal copied', 'success'));
+}
+
+async function saveAppeal() {
+  if (!pendingAppealId) return;
+  const appeal_type = document.getElementById('appealType').value;
+  const appeal_text = document.getElementById('appealText').innerText;
+  const exemption   = document.getElementById('appealExemption').value;
+
+  const { status, data } = await api('POST', `/api/requests/${pendingAppealId}/save-appeal`, {
+    appeal_type, appeal_text, exemption
+  });
+  if (status !== 200) { toast(data.error || 'Save failed', 'error'); return; }
+
+  toast('✓ Appeal saved — request marked as Appealed', 'success');
+  closeAppealModal();
+  await refreshAllData();
+  await openDetail(pendingAppealId);
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('letterModal').classList.remove('open');
+    document.getElementById('updateModal').classList.remove('open');
+    document.getElementById('appealModal').classList.remove('open');
+    closeSidebar();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (document.getElementById('letterModal').classList.contains('open')) saveLetter();
+    if (document.getElementById('updateModal').classList.contains('open')) saveUpdate();
+    if (document.getElementById('appealModal').classList.contains('open')) saveAppeal();
+  }
+});
+
+// Enter key on auth inputs
+['loginUser','loginPass'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+});
+['regUser','regEmail','regPass'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') doRegister();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// Boot — check if already logged in
+// ─────────────────────────────────────────────────────────────
+// Apply saved theme immediately to avoid flash on reload
+(function() {
+  const t = localStorage.getItem('foiaio-theme') || 'dark';
+  if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+})();
+
+(async () => {
+  const { data } = await api('GET', '/api/auth/me');
+  if (data.authenticated) {
+    bootApp(data.username, data.subscription_status);
+  }
+})();
+</script>
+</body>
+</html>
