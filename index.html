@@ -1042,31 +1042,35 @@ textarea { resize: vertical; min-height: 100px; }
 
   /* Table spacing */
   table {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
   thead th {
-    padding: 8px 6px;
-    font-size: 0.55rem;
-    letter-spacing: 0.3px;
+    padding: 6px 4px;
+    font-size: 0.5rem;
+    letter-spacing: 0.2px;
   }
   tbody tr {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
   tbody tr:hover {
     transform: none;
   }
   td {
-    padding: 8px 6px;
-    font-size: 0.7rem;
+    padding: 6px 4px;
+    font-size: 0.65rem;
   }
   .td-number {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
   }
   .td-subject {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
   .td-agency {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
+  }
+  .badge {
+    font-size: 0.55rem;
+    padding: 1px 6px;
   }
 
   /* Badge refinements */
@@ -2085,8 +2089,8 @@ async function loadActiveRequests() {
               onchange="quickSetTurn(${r.id}, this.value)"
               style="background:var(--bg3);border:1px solid var(--border);color:${r.turn==='Their Turn'?'var(--cyan)':'var(--amber)'};
                      padding:4px 8px;border-radius:6px;font-size:.5rem;font-weight:700;cursor:pointer;outline:none;">
-        <option value="My Turn"   ${r.turn!=='Their Turn'?'selected':''}>My Turn</option>
-        <option value="Their Turn" ${r.turn==='Their Turn'?'selected':''}>Their Turn</option>
+        <option value="My Turn"   ${r.turn!=='Their Turn'?'selected':''}>${window.innerWidth <= 768 ? 'Me' : 'My Turn'}</option>
+        <option value="Their Turn" ${r.turn==='Their Turn'?'selected':''}>${window.innerWidth <= 768 ? 'Them' : 'Their Turn'}</option>
       </select>`;
     return `<tr onclick="openDetail(${r.id})">
       <td class="td-number">${esc(r.foia_number)}</td>
@@ -2657,16 +2661,22 @@ function esc(str) {
 function fmtDate(d) {
   if (!d) return '—';
   try {
-    return new Date(d + 'T12:00:00').toLocaleDateString('en-US',
-      { month: 'short', day: 'numeric', year: 'numeric' });
+    const isMobile = window.innerWidth <= 768;
+    const opts = isMobile
+      ? { month: 'numeric', day: 'numeric' }
+      : { month: 'short', day: 'numeric', year: 'numeric' };
+    return new Date(d + 'T12:00:00').toLocaleDateString('en-US', opts);
   } catch { return d; }
 }
 
 function fmtDateTime(d) {
   if (!d) return '—';
   try {
-    return new Date(d).toLocaleString('en-US',
-      { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const isMobile = window.innerWidth <= 768;
+    const opts = isMobile
+      ? { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: false }
+      : { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+    return new Date(d).toLocaleString('en-US', opts);
   } catch { return d; }
 }
 
