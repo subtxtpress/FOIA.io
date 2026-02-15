@@ -1040,46 +1040,58 @@ textarea { resize: vertical; min-height: 100px; }
     margin-top: 6px;
   }
 
-  /* Table spacing */
+  /* Table mobile layout */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   table {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
+    min-width: 100%;
+    table-layout: auto;
   }
   thead th {
-    padding: 6px 4px;
-    font-size: 0.5rem;
-    letter-spacing: 0.2px;
+    padding: 8px 6px;
+    font-size: 0.6rem;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
   }
   tbody tr {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
   }
   tbody tr:hover {
     transform: none;
   }
   td {
-    padding: 6px 4px;
-    font-size: 0.65rem;
+    padding: 8px 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
   }
   .td-number {
-    font-size: 0.6rem;
-  }
-  .td-subject {
     font-size: 0.65rem;
   }
+  .td-subject {
+    font-size: 0.7rem;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .td-agency {
+    font-size: 0.65rem;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .badge {
     font-size: 0.6rem;
+    padding: 2px 6px;
   }
-  .badge {
-    font-size: 0.55rem;
-    padding: 1px 6px;
-  }
-  .col-days {
-    display: none;
-  }
-
-  /* Badge refinements */
-  .badge {
-    padding: 2px 8px;
-    font-size: 0.68rem;
+  /* Hide Days column on mobile */
+  th.col-days,
+  td.col-days {
+    display: none !important;
   }
 
   /* Button refinements */
