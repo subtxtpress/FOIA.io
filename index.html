@@ -1679,6 +1679,26 @@ textarea {
   justify-content: center;
   margin-top: 8px;
 }
+
+.copy-ref-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-size: .8rem;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.copy-ref-btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.copy-ref-btn.copied {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
 </style>
 </head>
 <body>
@@ -2284,7 +2304,7 @@ function applyTheme(theme) {
     document.getElementById('themeLabel').textContent = 'Dark Mode';
   } else {
     document.documentElement.removeAttribute('data-theme');
-    document.getElementById('themeIcon').textContent  = '☀';
+    document.getElementById('themeIcon').textContent  = '☼';
     document.getElementById('themeLabel').textContent = 'Light Mode';
   }
   localStorage.setItem('foiaio-theme', theme);
@@ -2298,6 +2318,7 @@ function toggleTheme() {
 async function bootApp(username, subStatus) {
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+  window.scrollTo(0, 0);
   document.getElementById('userName').textContent = username;
   document.getElementById('userAvatar').textContent = username[0].toUpperCase();
   initTheme();
@@ -2525,12 +2546,14 @@ async function loadAgencyDir() {
   for (const a of agencies) {
     const { data: full } = await api('GET', `/api/agencies/${a.id}`);
     const tr = document.createElement('tr');
+    const email = full.foia_email || '';
     tr.innerHTML = `
       <td style="font-weight:600;">${esc(full.name)}</td>
       <td><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
       <td>${esc(full.foia_officer_title||'—')}</td>
-      <td><a href="mailto:${esc(full.foia_email||'')}" style="color:var(--cyan);">${esc(full.foia_email||'—')}</a></td>
-      <td>${esc(full.foia_phone||'—')}</td>`;
+      <td><a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email||'—')}</a></td>
+      <td>${esc(full.foia_phone||'—')}</td>
+      <td>${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
     tbody.appendChild(tr);
   }
 }
@@ -2606,6 +2629,7 @@ async function loadStateLaws() {
       <td style="text-align:center;">${s.response_days || '<span style="color:var(--text-dim)">Reasonable</span>'}</td>
       <td style="text-align:center;">${s.appeal_days || '<span style="color:var(--text-dim)">—</span>'}</td>
       <td style="font-size:.78rem;color:var(--text-dim);max-width:300px;">${esc(s.notes||'')}</td>
+      <td><button class="copy-ref-btn" onclick="copyRef(this,'${esc(s.citation).replace(/'/g,"\'").replace(/"/g,'&quot;')}','Citation copied')" title="Copy citation">⎘</button></td>
     </tr>`).join('');
 }
 
@@ -3222,7 +3246,7 @@ document.addEventListener('keydown', e => {
         style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
       <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
         <table>
-          <thead><tr><th>Agency</th><th>Code</th><th>FOIA Officer</th><th>Email</th><th>Phone</th></tr></thead>
+          <thead><tr><th>Agency</th><th>Code</th><th>FOIA Officer</th><th>Email</th><th>Phone</th><th></th></tr></thead>
           <tbody id="agencyDirBody"></tbody>
         </table>
       </div>
@@ -3246,7 +3270,7 @@ document.addEventListener('keydown', e => {
         style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
       <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
         <table>
-          <thead><tr><th>State</th><th>Code</th><th>Law Name</th><th>Citation</th><th>Response Days</th><th>Appeal Days</th><th>Notes</th></tr></thead>
+          <thead><tr><th>State</th><th>Code</th><th>Law Name</th><th>Citation</th><th>Response Days</th><th>Appeal Days</th><th>Notes</th><th></th></tr></thead>
           <tbody id="stateLawsBody"></tbody>
         </table>
       </div>
@@ -3294,6 +3318,18 @@ function filterStateLaws() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeAgencyModal(); closeStateLawsModal(); }
 });
+
+function copyRef(btn, text, label) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ ' + label;
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
 </script>
 </body>
 </html>
