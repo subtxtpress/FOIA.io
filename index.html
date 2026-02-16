@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta property="og:title" content="FOIA.io — FOIA Request Management">
 <meta property="og:description" content="Track, generate, and appeal public records requests">
-<meta property="og:image" content="../img/og-image.png">
+<meta property="og:image" content="/img/og-image.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="../img/og-image.png">
+<meta name="twitter:image" content="/img/og-image.png">
 <title>FOIA.io — FOIA Request Manager</title>
 <!-- Prevents phone number auto-detection formatting -->
 <meta name="format-detection" content="telephone=no">
@@ -37,7 +37,6 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <!-- Performance -->
 <link rel="preconnect" href="https://your-api-domain.com">
-<!-- Styles -->
 <style>
 /* ── Dark mode (default) ───────────────────────────────────── */
 :root {
@@ -539,11 +538,11 @@ td {
   transition: all 0.2s;
 }
 .btn-primary:hover {
-  background: var(--accent-dim);
-  border-color: var(--accent-dim);
-  color: var(--on-primary);
+  background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  border-color: #d8d8d8;
+  color: #000000;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(98,0,238,0.3);
+  box-shadow: 0 4px 12px rgba(77,77,77,0.4);
 }
 .btn-ghost {
   background: none;
@@ -3258,7 +3257,7 @@ document.addEventListener('keydown', e => {
 <script>
 let agencyDirLoaded = false;
 async function openAgencyModal() {
-  document.getElementById('agencyDirModal').style.display = 'flex';
+  document.getElementById('agencyDirModal').classList.add('open');
   document.getElementById('agencyDirSearch').value = '';
   if (!agencyDirLoaded) { await loadAgencyDir(); agencyDirLoaded = true; }
   filterAgencyDir();
@@ -3266,7 +3265,7 @@ async function openAgencyModal() {
 }
 function closeAgencyModal(e) {
   if (!e || e.target === document.getElementById('agencyDirModal'))
-    document.getElementById('agencyDirModal').style.display = 'none';
+    document.getElementById('agencyDirModal').classList.remove('open');
 }
 function filterAgencyDir() {
   const q = document.getElementById('agencyDirSearch').value.toLowerCase();
@@ -3276,7 +3275,7 @@ function filterAgencyDir() {
 }
 let stateLawsLoaded = false;
 async function openStateLawsModal() {
-  document.getElementById('stateLawsModal').style.display = 'flex';
+  document.getElementById('stateLawsModal').classList.add('open');
   document.getElementById('stateLawsSearch').value = '';
   if (!stateLawsLoaded) { await loadStateLaws(); stateLawsLoaded = true; }
   filterStateLaws();
@@ -3284,7 +3283,7 @@ async function openStateLawsModal() {
 }
 function closeStateLawsModal(e) {
   if (!e || e.target === document.getElementById('stateLawsModal'))
-    document.getElementById('stateLawsModal').style.display = 'none';
+    document.getElementById('stateLawsModal').classList.remove('open');
 }
 function filterStateLaws() {
   const q = document.getElementById('stateLawsSearch').value.toLowerCase();
