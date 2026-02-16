@@ -1927,7 +1927,22 @@ def download_docx(req_id):
 
 
 # ─────────────────────────────────────────────
-# Serve frontend
+# Serve static assets (icons, img, manifest)
+# ─────────────────────────────────────────────
+@app.route("/icons/<path:filename>")
+def serve_icons(filename):
+    return send_file(os.path.join(os.path.dirname(__file__), "icons", filename))
+
+@app.route("/img/<path:filename>")
+def serve_img(filename):
+    return send_file(os.path.join(os.path.dirname(__file__), "img", filename))
+
+@app.route("/manifest.json")
+def serve_manifest():
+    return send_file(os.path.join(os.path.dirname(__file__), "manifest.json"))
+
+# ─────────────────────────────────────────────
+# Serve frontend (catch-all — must be last)
 # ─────────────────────────────────────────────
 @app.route("/")
 @app.route("/<path:path>")
