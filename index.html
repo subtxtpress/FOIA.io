@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="FOIA.io — FOIA Request Management">
+<meta property="og:description" content="Track, generate, and appeal public records requests">
+<meta property="og:image" content="../img/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="../img/og-image.png">
 <title>FOIA.io — FOIA Request Manager</title>
 <!-- Prevents phone number auto-detection formatting -->
 <meta name="format-detection" content="telephone=no">
@@ -21,6 +27,17 @@
 <!-- SEO / social sharing -->
 <meta name="description" content="FOIA Request Manager — track, generate, and appeal public records requests">
 <meta name="robots" content="noindex, nofollow">
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<!-- Security Headers -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- Performance -->
+<link rel="preconnect" href="https://your-api-domain.com">
+<!-- Styles -->
 <style>
 /* ── Dark mode (default) ───────────────────────────────────── */
 :root {
@@ -678,11 +695,12 @@ textarea {
   padding: 4px;
   margin-bottom: 28px;
   gap: 4px;
+  border: 1px solid var(--border);
 }
 .auth-tab {
   flex: 1;
   text-align: center;
-  padding: 8px;
+  padding: 9px 8px;
   border-radius: 6px;
   cursor: pointer;
   font-size: .875rem;
@@ -695,8 +713,15 @@ textarea {
 .auth-tab.active {
   background: var(--bg2);
   color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.auth-tab:not(.active):hover {
+  color: var(--text);
 }
 .auth-submit {
+  width: 100%;
+  margin-top: 8px;
+  justify-content: center;
   background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
   color: #000000;
   border: 1px solid #d8d8d8;
@@ -1740,10 +1765,10 @@ textarea {
       </button>
 
       <div class="nav-label">Reference</div>
-      <button class="nav-item" data-page="agency-dir" onclick="nav('agency-dir')">
+      <button class="nav-item" onclick="openAgencyModal()">
         <span class="icon">⚖︎</span> Federal Agencies
       </button>
-      <button class="nav-item" data-page="state-laws" onclick="nav('state-laws')">
+      <button class="nav-item" onclick="openStateLawsModal()">
         <span class="icon">⚖︎</span> State Laws
       </button>
     </div>
@@ -1998,50 +2023,6 @@ textarea {
             <div class="e-icon">—</div>
             <h3>No closed requests</h3>
             <p>Requests you close will appear here.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Agency Directory ───────────────────────────────── -->
-      <div id="page-agency-dir" class="page">
-        <div class="card">
-          <div class="card-title">⚖︎ Federal FOIA Agency Directory</div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Agency</th>
-                  <th>Abbrev</th>
-                  <th>FOIA Officer</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                </tr>
-              </thead>
-              <tbody id="agencyDirBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── State Laws ─────────────────────────────────────── -->
-      <div id="page-state-laws" class="page">
-        <div class="card">
-          <div class="card-title">⚖︎ State Public Records Laws — All 50 States</div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>State</th>
-                  <th>Code</th>
-                  <th>Law Name</th>
-                  <th>Citation</th>
-                  <th>Response Days</th>
-                  <th>Appeal Days</th>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody id="stateLawsBody"></tbody>
-            </table>
           </div>
         </div>
       </div>
@@ -3224,6 +3205,96 @@ document.addEventListener('keydown', e => {
     bootApp(data.username, data.subscription_status);
   }
 })();
+</script>
+
+<!-- ── Federal Agency Directory Modal ──────────────────────── -->
+<div class="modal-overlay" id="agencyDirModal" onclick="closeAgencyModal(event)">
+  <div class="modal" style="max-width:860px;width:95%;">
+    <div class="modal-header">
+      <div>
+        <h2>⚖︎ Federal FOIA Agency Directory</h2>
+        <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">Federal agency FOIA contacts</div>
+      </div>
+      <button class="modal-close" onclick="closeAgencyModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input id="agencyDirSearch" type="text" placeholder="Search agencies..."
+        oninput="filterAgencyDir()"
+        style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
+      <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
+        <table>
+          <thead><tr><th>Agency</th><th>Code</th><th>FOIA Officer</th><th>Email</th><th>Phone</th></tr></thead>
+          <tbody id="agencyDirBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── State Laws Modal ──────────────────────────────────────── -->
+<div class="modal-overlay" id="stateLawsModal" onclick="closeStateLawsModal(event)">
+  <div class="modal" style="max-width:900px;width:95%;">
+    <div class="modal-header">
+      <div>
+        <h2>⚖︎ State Public Records Laws</h2>
+        <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">All 50 states + DC</div>
+      </div>
+      <button class="modal-close" onclick="closeStateLawsModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input id="stateLawsSearch" type="text" placeholder="Search states..."
+        oninput="filterStateLaws()"
+        style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
+      <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
+        <table>
+          <thead><tr><th>State</th><th>Code</th><th>Law Name</th><th>Citation</th><th>Response Days</th><th>Appeal Days</th><th>Notes</th></tr></thead>
+          <tbody id="stateLawsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let agencyDirLoaded = false;
+async function openAgencyModal() {
+  document.getElementById('agencyDirModal').style.display = 'flex';
+  document.getElementById('agencyDirSearch').value = '';
+  if (!agencyDirLoaded) { await loadAgencyDir(); agencyDirLoaded = true; }
+  filterAgencyDir();
+  document.getElementById('agencyDirSearch').focus();
+}
+function closeAgencyModal(e) {
+  if (!e || e.target === document.getElementById('agencyDirModal'))
+    document.getElementById('agencyDirModal').style.display = 'none';
+}
+function filterAgencyDir() {
+  const q = document.getElementById('agencyDirSearch').value.toLowerCase();
+  document.querySelectorAll('#agencyDirBody tr').forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+let stateLawsLoaded = false;
+async function openStateLawsModal() {
+  document.getElementById('stateLawsModal').style.display = 'flex';
+  document.getElementById('stateLawsSearch').value = '';
+  if (!stateLawsLoaded) { await loadStateLaws(); stateLawsLoaded = true; }
+  filterStateLaws();
+  document.getElementById('stateLawsSearch').focus();
+}
+function closeStateLawsModal(e) {
+  if (!e || e.target === document.getElementById('stateLawsModal'))
+    document.getElementById('stateLawsModal').style.display = 'none';
+}
+function filterStateLaws() {
+  const q = document.getElementById('stateLawsSearch').value.toLowerCase();
+  document.querySelectorAll('#stateLawsBody tr').forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeAgencyModal(); closeStateLawsModal(); }
+});
 </script>
 </body>
 </html>
