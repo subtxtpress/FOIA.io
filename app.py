@@ -1248,6 +1248,255 @@ def get_agency(agency_id):
         return jsonify({"error": "Not found"}), 404
     return jsonify(dict(row))
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Routes: State & Local Law Enforcement Agencies
+# Add these routes to app.py after your existing /api/agencies routes
+# ─────────────────────────────────────────────────────────────────────────────
+@app.route("/api/law-enforcement/agencies")
+@login_required
+def get_le_agencies():
+    """
+    List state & local law enforcement agencies.
+
+    Query params:
+        state     — filter by state abbreviation (e.g. ?state=TX)
+        type      — filter by agency type (e.g. ?type=City)
+        q         — search by name (e.g. ?q=austin)
+        limit     — max results, default 50, max 200
+        offset    — pagination offset, default 0
+
+    Examples:
+        /api/law-enforcement/agencies?state=TX
+        /api/law-enforcement/agencies?state=TX&type=City
+        /api/law-enforcement/agencies?q=austin&state=TX
+        /api/law-enforcement/agencies?type=Sheriff&limit=100
+    """
+    db = get_db()
+
+    state  = request.args.get("state", "").upper().strip()
+    agency_type = request.args.get("type", "").strip()
+    query  = request.args.get("q", "").strip()
+
+    try:
+        limit  = min(int(request.args.get("limit", 50)), 200)
+        offset = max(int(request.args.get("offset", 0)), 0)
+    except ValueError:
+        limit, offset = 50, 0
+
+    # Build query dynamically based on filters provided
+    conditions = []
+    params = []
+
+    if state:
+        conditions.append("state_abbr = ?")
+        params.append(state)
+
+    if agency_type:
+        conditions.append("agency_type = ?")
+        params.append(agency_type)
+
+    if query:
+        conditions.append("(agency_name LIKE ? OR county_name LIKE ?)")
+        params.append(f"%{query}%")
+        params.append(f"%{query}%")
+
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
+    # Get total count for pagination
+    count_row = db.execute(
+        f"SELECT COUNT(*) as total FROM state_local_agencies {where}",
+        tuple(params)
+    ).fetchone()
+    total = count_row["total"] if count_row else 0
+
+    # Get paginated results
+    params_with_limit = params + [limit, offset]
+    rows = db.execute(
+        f"""
+        SELECT
+            id, ori, agency_name, agency_unit, state_abbr,
+            county_name, agency_type, population_group, population,
+            division_name, region_name, officer_ct, civilian_ct,
+            total_pe_ct, data_year,
+            foia_officer, foia_email, foia_phone, foia_address, foia_portal_url,
+            notes
+        FROM state_local_agencies
+        {where}
+        ORDER BY state_abbr, agency_name
+        LIMIT ? OFFSET ?
+        """,
+        tuple(params_with_limit)
+    ).fetchall()
+
+    db.close()
+
+    return jsonify({
+        "total":   total,
+        "limit":   limit,
+        "offset":  offset,
+        "results": [dict(r) for r in rows]
+    })
+
+
+@app.route("/api/law-enforcement/agencies/<int:agency_id>")
+@login_required
+def get_le_agency(agency_id):
+    """
+    Get a single state/local agency by its database ID.
+
+    Example:
+        /api/law-enforcement/agencies/42
+    """
+    db = get_db()
+    row = db.execute(
+        "SELECT * FROM state_local_agencies WHERE id = ?",
+        (agency_id,)
+    ).fetchone()
+    db.close()
+
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+
+    return jsonify(dict(row))
+
+
+@app.route("/api/law-enforcement/agencies/ori/<string:ori>")
+@login_required
+def get_le_agency_by_ori(ori):
+    """
+    Look up an agency by its ORI code (FBI unique identifier).
+    Useful for joining to crime data, NIBRS, Fatal Force datasets, etc.
+
+    Example:
+        /api/law-enforcement/agencies/ori/TX0100100
+    """
+    db = get_db()
+    row = db.execute(
+        "SELECT * FROM state_local_agencies WHERE ori = ?",
+        (ori.upper(),)
+    ).fetchone()
+    db.close()
+
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+
+    return jsonify(dict(row))
+
+
+@app.route("/api/law-enforcement/agencies/<int:agency_id>/foia", methods=["POST"])
+@login_required
+def update_le_agency_foia(agency_id):
+    """
+    Update FOIA contact info for a state/local agency.
+    This is how you populate foia_officer, foia_email, etc.
+    from your own investigations.
+
+    Body (JSON, all fields optional):
+        {
+            "foia_officer":   "Jane Smith",
+            "foia_email":     "foia@agency.gov",
+            "foia_phone":     "512-555-0100",
+            "foia_address":   "123 Main St, Austin TX 78701",
+            "foia_portal_url":"https://agency.gov/foia",
+            "notes":          "Prefers email. Slow responder."
+        }
+    """
+    db = get_db()
+
+    # Verify agency exists
+    row = db.execute(
+        "SELECT id FROM state_local_agencies WHERE id = ?",
+        (agency_id,)
+    ).fetchone()
+
+    if not row:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+
+    data = request.get_json() or {}
+
+    allowed = ["foia_officer", "foia_email", "foia_phone",
+               "foia_address", "foia_portal_url", "notes"]
+
+    updates = {k: v for k, v in data.items() if k in allowed}
+
+    if not updates:
+        db.close()
+        return jsonify({"error": "No valid fields provided"}), 400
+
+    set_clause = ", ".join(f"{k} = ?" for k in updates)
+    values     = list(updates.values()) + [agency_id]
+
+    db.execute(
+        f"UPDATE state_local_agencies SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        tuple(values)
+    )
+    db.commit()
+
+    # Return updated row
+    updated = db.execute(
+        "SELECT * FROM state_local_agencies WHERE id = ?",
+        (agency_id,)
+    ).fetchone()
+    db.close()
+
+    return jsonify(dict(updated))
+
+
+@app.route("/api/law-enforcement/types")
+@login_required
+def get_le_agency_types():
+    """
+    List all distinct agency types with counts.
+    Useful for populating filter dropdowns in the UI.
+
+    Example response:
+        [
+            {"agency_type": "City",       "count": 10202},
+            {"agency_type": "County",     "count": 2728},
+            ...
+        ]
+    """
+    db = get_db()
+    rows = db.execute(
+        """
+        SELECT agency_type, COUNT(*) as count
+        FROM state_local_agencies
+        GROUP BY agency_type
+        ORDER BY count DESC
+        """
+    ).fetchall()
+    db.close()
+
+    return jsonify([dict(r) for r in rows])
+
+
+@app.route("/api/law-enforcement/states")
+@login_required
+def get_le_states():
+    """
+    List all states with their agency counts.
+    Useful for state picker dropdowns.
+
+    Example response:
+        [
+            {"state_abbr": "TX", "count": 1512},
+            {"state_abbr": "PA", "count": 1165},
+            ...
+        ]
+    """
+    db = get_db()
+    rows = db.execute(
+        """
+        SELECT state_abbr, COUNT(*) as count
+        FROM state_local_agencies
+        GROUP BY state_abbr
+        ORDER BY state_abbr
+        """
+    ).fetchall()
+    db.close()
+
+    return jsonify([dict(r) for r in rows])
 
 # ─────────────────────────────────────────────
 # Routes: State Laws

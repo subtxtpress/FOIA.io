@@ -1794,6 +1794,9 @@ textarea {
       <button class="nav-item" onclick="openStateLawsModal()">
         <span class="icon">⚖︎</span> State Laws
       </button>
+      <button class="nav-item" onclick="openLawEnforcementModal()">
+        <span class="icon">✭</span> Law Enforcement
+      </button>
     </div>
     <div class="sidebar-footer">
       <button id="btnTheme" onclick="toggleTheme()">
@@ -3228,6 +3231,122 @@ document.addEventListener('keydown', e => {
 
 window.scrollTo(0, 0);
 
+// ── Law Enforcement Modal ────────────────────────────────────
+let leCurrentOffset = 0;
+let leCurrentTotal = 0;
+const lePageSize = 50;
+
+async function openLawEnforcementModal() {
+  document.getElementById('lawEnforcementModal').classList.add('open');
+  
+  // Load states and types for filters
+  const [statesRes, typesRes] = await Promise.all([
+    api('GET', '/api/law-enforcement/states'),
+    api('GET', '/api/law-enforcement/types')
+  ]);
+  
+  if (statesRes.data?.states) {
+    const sel = document.getElementById('leStateFilter');
+    sel.innerHTML = '<option value="">All States</option>';
+    statesRes.data.states.forEach(s => {
+      sel.innerHTML += `<option value="${s.state_abbr}">${s.state_abbr} (${s.count.toLocaleString()})</option>`;
+    });
+  }
+  
+  if (typesRes.data?.types) {
+    const sel = document.getElementById('leTypeFilter');
+    sel.innerHTML = '<option value="">All Types</option>';
+    typesRes.data.types.forEach(t => {
+      const name = t.agency_type || 'Other';
+      sel.innerHTML += `<option value="${name}">${name} (${t.count.toLocaleString()})</option>`;
+    });
+  }
+  
+  // Auto-search to show some results
+  searchLawEnforcement();
+}
+
+function closeLawEnforcementModal(e) {
+  if (e && e.target.id !== 'lawEnforcementModal') return;
+  document.getElementById('lawEnforcementModal').classList.remove('open');
+}
+
+async function searchLawEnforcement() {
+  leCurrentOffset = 0;
+  await loadLawEnforcementResults();
+}
+
+async function loadLawEnforcementPage(dir) {
+  if (dir === 'next') leCurrentOffset += lePageSize;
+  else if (dir === 'prev') leCurrentOffset = Math.max(0, leCurrentOffset - lePageSize);
+  await loadLawEnforcementResults();
+}
+
+async function loadLawEnforcementResults() {
+  const search = document.getElementById('leSearch').value.trim();
+  const state = document.getElementById('leStateFilter').value;
+  const type = document.getElementById('leTypeFilter').value;
+  
+  const params = new URLSearchParams({
+    limit: lePageSize,
+    offset: leCurrentOffset
+  });
+  if (search) params.set('q', search);
+  if (state) params.set('state', state);
+  if (type) params.set('type', type);
+  
+  const { data } = await api('GET', `/api/law-enforcement/agencies?${params}`);
+  
+  if (!data || !data.results) {
+    document.getElementById('leResults').innerHTML = 
+      '<div style="text-align:center;padding:40px;color:var(--text-dim);">Error loading results</div>';
+    return;
+  }
+  
+  leCurrentTotal = data.total || 0;
+  
+  // Update stats
+  document.getElementById('leStats').textContent = 
+    `Showing ${data.results.length} of ${leCurrentTotal.toLocaleString()} agencies`;
+  
+  // Render results
+  const html = data.results.map(a => `
+    <div style="padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:start;">
+      <div style="flex:1;">
+        <div style="font-weight:500;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` - ${escapeHtml(a.agency_unit)}` : ''}</div>
+        <div style="font-size:.85rem;color:var(--text-dim);margin-top:4px;">
+          ${a.agency_type || 'Unknown Type'} • ${a.state_abbr}${a.county_name ? ` • ${a.county_name}` : ''}
+          ${a.population ? ` • Pop: ${a.population.toLocaleString()}` : ''}
+        </div>
+        ${a.officer_ct ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">Officers: ${a.officer_ct}</div>` : ''}
+      </div>
+      <div style="font-size:.75rem;color:var(--text-muted);font-family:monospace;margin-left:12px;">
+        ${a.ori}
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('leResults').innerHTML = html || 
+    '<div style="text-align:center;padding:40px;color:var(--text-dim);">No agencies found</div>';
+  
+  // Update pagination
+  const hasResults = data.results.length > 0;
+  document.getElementById('lePagination').style.display = hasResults ? 'block' : 'none';
+  if (hasResults) {
+    const start = leCurrentOffset + 1;
+    const end = Math.min(leCurrentOffset + data.results.length, leCurrentTotal);
+    document.getElementById('lePageInfo').textContent = `${start}–${end} of ${leCurrentTotal.toLocaleString()}`;
+    document.getElementById('lePrevBtn').disabled = leCurrentOffset === 0;
+    document.getElementById('leNextBtn').disabled = end >= leCurrentTotal;
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 (async () => {
   const { data } = await api('GET', '/api/auth/me');
   if (data.authenticated) {
@@ -3255,6 +3374,46 @@ window.scrollTo(0, 0);
           <thead><tr><th>Agency</th><th>Code</th><th>FOIA Officer</th><th>Email</th><th>Phone</th><th></th></tr></thead>
           <tbody id="agencyDirBody"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Law Enforcement Agency Directory Modal ──────────────── -->
+<div class="modal-overlay" id="lawEnforcementModal" onclick="closeLawEnforcementModal(event)">
+  <div class="modal" style="max-width:960px;width:95%;">
+    <div class="modal-header">
+      <div>
+        <h2>👮 State & Local Law Enforcement Directory</h2>
+        <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">15,554 agencies • FBI 2024 data</div>
+      </div>
+      <button class="modal-close" onclick="closeLawEnforcementModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <input id="leSearch" type="text" placeholder="Search by name or county..." 
+               style="flex:1;min-width:200px;" onkeyup="searchLawEnforcement()">
+        <select id="leStateFilter" onchange="searchLawEnforcement()" style="min-width:120px;">
+          <option value="">All States</option>
+        </select>
+        <select id="leTypeFilter" onchange="searchLawEnforcement()" style="min-width:150px;">
+          <option value="">All Types</option>
+        </select>
+      </div>
+      
+      <div id="leStats" style="font-size:.85rem;color:var(--text-dim);margin-bottom:12px;"></div>
+      
+      <div id="leResults" style="max-height:500px;overflow-y:auto;">
+        <div style="text-align:center;padding:40px;color:var(--text-dim);">
+          Enter search criteria or select filters
+        </div>
+      </div>
+      
+      <div id="lePagination" style="margin-top:16px;text-align:center;display:none;">
+        <button onclick="loadLawEnforcementPage('prev')" id="lePrevBtn" class="btn btn-sm">← Prev</button>
+        <span id="lePageInfo" style="margin:0 16px;"></span>
+        <button onclick="loadLawEnforcementPage('next')" id="leNextBtn" class="btn btn-sm">Next →</button>
       </div>
     </div>
   </div>
