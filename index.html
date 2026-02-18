@@ -46,7 +46,7 @@
   --border:    #3a3a3a;
   --accent:    /*#BB86FC;*/#03DAC6;
   --accent-dim:#3700B3;
-  --primary:   /*#BB86FC;*/linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  --primary:   /*#BB86FC;*/#cccccc;
   --secondary: #03DAC6;
   --error:     #CF6679;
   --text:      #FFFFFF;
@@ -2708,7 +2708,7 @@ function onTypeChange() {
   document.getElementById('federalAgencySection').style.display =
     t === 'Federal' ? '' : 'none';
   document.getElementById('stateSection').style.display =
-    t === 'State' ? '' : 'none';
+    t === 'State' ? 'block' : 'none';
   document.getElementById('localUnivSection').style.display =
     (t === 'Local' || t === 'University') ? '' : 'none';
   document.getElementById('manualJurisdictionSection').style.display =
@@ -2730,6 +2730,8 @@ function onTypeChange() {
   }
 }
 
+let statesData = [];
+
 async function populateLocalStateDropdown() {
   const sel = document.getElementById('nrLocalState');
   if (!sel || sel.options.length > 1) return; // already populated
@@ -2743,19 +2745,24 @@ async function populateLocalStateDropdown() {
     ).join('');
 }
 
-let statesData = [];
-
 async function loadStatesDropdown() {
-  if (statesData.length > 0) return; // already loaded
-  const { data } = await api('GET', '/api/states');
-  statesData = Array.isArray(data) ? data : [];
   const sel = document.getElementById('nrState');
   if (!sel) return;
+  if (sel.options.length > 1) return; // already populated
+  
+  // Fetch states from API
+  if (statesData.length === 0) {
+    const { data } = await api('GET', '/api/states');
+    statesData = Array.isArray(data) ? data : [];
+  }
+  
+  // Populate dropdown
   sel.innerHTML = '<option value="">— Select state —</option>' +
     statesData.map(s =>
-      `<option value="${esc(s.state_code)}">${esc(s.state_name)}</option>`
+      `<option value="${s.state_code}">${s.state_name}</option>`
     ).join('');
 }
+
 
 async function onStateChange() {
   const code = document.getElementById('nrState').value;
