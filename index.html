@@ -44,9 +44,9 @@
   --bg2:       #1e1e1e;
   --bg3:       #2a2a2a;
   --border:    #3a3a3a;
-  --accent:    #BB86FC;
+  --accent:    /*#BB86FC;*/#03DAC6;
   --accent-dim:#3700B3;
-  --primary:   #BB86FC;
+  --primary:   /*#BB86FC;*/linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
   --secondary: #03DAC6;
   --error:     #CF6679;
   --text:      #FFFFFF;
@@ -68,10 +68,10 @@
   --bg2:       #F5F5F5;
   --bg3:       #EEEEEE;
   --border:    #E0E0E0;
-  --accent:    #BB86FC;
+  --accent:    /*#BB86FC;*/#00897B;
   --accent-dim:#3700B3;
-  --primary:   #BB86FC;
-  --secondary: #03DAC6;
+  --primary:   /*#BB86FC;*/#cccccc;
+  --secondary: /*#03DAC6;*/#00897B;
   --error:     #B00020;
   --text:      #000000;
   --text-dim:  #757575;
@@ -250,7 +250,7 @@ body {
 }
 .user-status {
     font-size: .7rem;
-    color: var(--green);
+    color: /*var(--green);*/#00897B;
 }
 #btnLogout {
   display: block;
@@ -2714,14 +2714,15 @@ function onTypeChange() {
   document.getElementById('manualJurisdictionSection').style.display =
     t === 'Other' ? '' : 'none';
 
-  // Update label for local vs university
-  const lbl = document.getElementById('localUnivAgencyLabel');
-  if (lbl) lbl.textContent = t === 'University' ? 'Institution Name' : 'Agency Name';
-
+    
   // Populate the state dropdown for State jurisdiction
   if (t === 'State') {
     loadStatesDropdown();
   }
+
+  // Update label for local vs university
+  const lbl = document.getElementById('localUnivAgencyLabel');
+  if (lbl) lbl.textContent = t === 'University' ? 'Institution Name' : 'Agency Name';
 
   // Populate the local/univ state dropdown if needed
   if (t === 'Local' || t === 'University') {
@@ -3018,7 +3019,7 @@ async function openDetail(id) {
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
         <span style="font-size:.75rem;width:120px;">📁 Attachments</span>
         <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0;padding:4px 8px;font-size:.7rem;width:80px;">
-          ⬆ Upload
+          ↑ Upload
           <input type="file" style="display:none;" onchange="uploadAttachment(${r.id}, this)">
         </label>
       </div>
@@ -3070,7 +3071,7 @@ async function loadAttachments(reqId) {
         </div>
       </div>
       <a href="/api/attachments/${a.id}/download"
-         class="btn btn-ghost btn-sm" style="flex-shrink:0;">⬇ Download</a>
+         class="btn btn-ghost btn-sm" style="flex-shrink:0;">↓ Download</a>
       <button class="btn btn-ghost btn-sm" style="flex-shrink:0;color:var(--amber);"
               onclick="deleteAttachment(${a.id}, ${reqId})">×</button>
     </div>
