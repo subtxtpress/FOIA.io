@@ -1468,7 +1468,7 @@ def get_le_agency_types():
     ).fetchall()
     db.close()
 
-    return jsonify([dict(r) for r in rows])
+    return jsonify({"types": [dict(r) for r in rows]})
 
 
 @app.route("/api/law-enforcement/states")
@@ -1496,7 +1496,7 @@ def get_le_states():
     ).fetchall()
     db.close()
 
-    return jsonify([dict(r) for r in rows])
+    return jsonify({"states": [dict(r) for r in rows]})
 
 # ─────────────────────────────────────────────
 # Routes: State Laws

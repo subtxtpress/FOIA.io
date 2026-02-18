@@ -2718,6 +2718,11 @@ function onTypeChange() {
   const lbl = document.getElementById('localUnivAgencyLabel');
   if (lbl) lbl.textContent = t === 'University' ? 'Institution Name' : 'Agency Name';
 
+  // Populate the state dropdown for State jurisdiction
+  if (t === 'State') {
+    loadStatesDropdown();
+  }
+
   // Populate the local/univ state dropdown if needed
   if (t === 'Local' || t === 'University') {
     populateLocalStateDropdown();
