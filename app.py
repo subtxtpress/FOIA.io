@@ -1798,32 +1798,6 @@ def update_request(req_id):
                ", ".join(k for k in data if k in allowed))
     return jsonify({"ok": True})
 
-
-# ─────────────────────────────────────────────
-# Routes: Close request
-# ─────────────────────────────────────────────
-@app.route("/api/requests/<int:req_id>/close", methods=["POST"])
-@subscription_required
-def close_request(req_id):
-    db = get_db()
-    row = db.execute(
-        "SELECT id FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
-    ).fetchone()
-    if not row:
-        db.close()
-        return jsonify({"error": "Not found"}), 404
-    now = date.today().isoformat()
-    db.execute(
-        "UPDATE requests SET status='closed', closed_date=?, updated_at=? WHERE id=?",
-        (now, datetime.now().isoformat(), req_id)
-    )
-    db.commit()
-    db.close()
-    log_action(req_id, session["user_id"], "Request closed")
-    return jsonify({"ok": True})
-
-
 # ─────────────────────────────────────────────
 # Appeal template builder
 # ─────────────────────────────────────────────
@@ -1837,79 +1811,83 @@ Respectfully submitted,"""
 def build_appeal_text(appeal_type, agency_name, foia_officer_title,
                       subject, foia_number, created_date, exemption=None,
                       agency_type="Federal", state_info=None):
+
     today = date.today().strftime("%B %d, %Y")
     filed = foia_number
 
+    # ─────────────────────────────────────────────
+    # Improper Exemption
+    # ─────────────────────────────────────────────
     if appeal_type == "improper_exemption":
         exemption_ref = f"Exemption {exemption}" if exemption else "the cited exemption"
         body = f"""I am writing to appeal the denial of my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
 
 The agency denied my request in whole or in part based on {exemption_ref}. I respectfully challenge this withholding on the following grounds:
 
-FOIA exemptions must be construed narrowly. See FBI v. Abramson, 456 U.S. 615, 621 (1982) ("FOIA exemptions are to be construed narrowly"). The agency bears the burden of demonstrating that withheld material falls squarely within the claimed exemption. DOJ v. Tax Analysts, 492 U.S. 136, 151 (1989).
+FOIA exemptions must be construed narrowly. See FBI v. Abramson, 456 U.S. 615, 621 (1982). The agency bears the burden of demonstrating that withheld material falls squarely within the claimed exemption.
 
-[Please specify here why the exemption does not apply to the records you requested — e.g., the records are not pre-decisional, the deliberative process privilege has been waived, the harm standard is not met, etc.]
+Furthermore, even if some portions of the responsive records fall within a claimed exemption, the agency is required to segregate and release all non-exempt portions. 5 U.S.C. § 552(b)."""
 
-Furthermore, even if some portions of the responsive records fall within a claimed exemption, the agency is required to segregate and release all non-exempt portions. 5 U.S.C. § 552(b). I request that the agency provide all reasonably segregable non-exempt information.
-
-I request that this appeal be forwarded to the Office of Information Policy, U.S. Department of Justice, if the agency cannot resolve it at the component level."""
-
+    # ─────────────────────────────────────────────
+    # Constructive Denial
+    # ─────────────────────────────────────────────
     elif appeal_type == "constructive_denial":
-        body = f"""I am writing to appeal the constructive denial of my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
 
-As of the date of this appeal, the agency has failed to issue a determination within the twenty (20) business day period mandated by 5 U.S.C. § 552(a)(6)(A)(i). This failure to respond constitutes a constructive denial of my request, and I am therefore entitled to treat it as such and file an administrative appeal or seek judicial review. See 5 U.S.C. § 552(a)(6)(C)(i).
+        # STATE / LOCAL TEMPLATE
+        if state_info and agency_type in ("State", "Local", "University"):
+            authority = state_info.get("appeal_authority", "Records Custodian")
+            address = state_info.get("appeal_address", "[Appeal address not yet added]")
 
-I have received no acknowledgment, no tracking number, no request for clarification, and no notification of any extension under 5 U.S.C. § 552(a)(6)(B). The agency's complete failure to respond is a violation of the statute.
+            body = f"""{today}
 
-I request that the agency immediately:
-1. Confirm receipt of my original request
-2. Assign a tracking number and place my request in the appropriate processing queue
-3. Issue a determination as expeditiously as possible
-4. Provide a realistic timeline for production of responsive records
+{authority}
+{address}
 
-I am prepared to seek judicial review in U.S. District Court under 5 U.S.C. § 552(a)(4)(B) if the agency does not respond promptly to this appeal."""
+Re: Administrative Appeal of Public Records Request {filed} — {subject}
 
+Dear {authority}:
+
+I am writing to appeal the constructive denial of my public records request, {filed}, submitted on {created_date}, seeking: {subject}
+
+As of the date of this appeal, the agency has failed to issue a determination within the timeframe required by state law. This constitutes a constructive denial."""
+
+        # FEDERAL TEMPLATE
+        else:
+            body = f"""I am writing to appeal the constructive denial of my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
+
+As of the date of this appeal, the agency has failed to issue a determination within the twenty (20) business day period mandated by 5 U.S.C. § 552(a)(6)(A)(i)."""
+
+    # ─────────────────────────────────────────────
+    # Inadequate Search
+    # ─────────────────────────────────────────────
     elif appeal_type == "inadequate_search":
         body = f"""I am writing to appeal the adequacy of the search conducted in response to my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
 
-The agency's response does not demonstrate that it conducted a search reasonably calculated to uncover all documents responsive to my request. An agency's search obligations under FOIA require more than a cursory review. See Weisberg v. U.S. Dep't of Justice, 705 F.2d 1344, 1351 (D.C. Cir. 1983) (agency must show search was "reasonably calculated to uncover all relevant documents"). The agency bears the burden of establishing the adequacy of its search. See Valencia-Lucena v. U.S. Coast Guard, 180 F.3d 321, 326 (D.C. Cir. 1999).
+The agency's response does not demonstrate that it conducted a search reasonably calculated to uncover all responsive documents."""
 
-Specifically, I have reason to believe the search was inadequate because:
-
-[Please explain here why you believe records exist that were not produced — e.g., you have prior knowledge of specific documents, agency communications reference records not produced, the volume of production seems implausibly low, etc.]
-
-I request that the agency:
-1. Identify all offices, divisions, and custodians that were searched
-2. Describe the search terms and methods used
-3. Explain why any locations that were not searched were excluded
-4. Conduct a supplemental search of all locations reasonably likely to contain responsive records and produce any additional responsive documents"""
-
+    # ─────────────────────────────────────────────
+    # Fee Dispute
+    # ─────────────────────────────────────────────
     elif appeal_type == "fee_dispute":
         body = f"""I am writing to appeal the fee assessment associated with my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
 
-The agency has assessed fees of [INSERT FEE AMOUNT] in connection with this request. I challenge this assessment on the following grounds:
+The agency has assessed fees that I challenge on multiple grounds."""
 
-FEE WAIVER: In my original request, I requested a fee waiver on the grounds that I am a member of the news media and the requested records concern the operations or activities of the federal government. Disclosure will contribute significantly to public understanding of government operations and is not primarily in my commercial interest. See 5 U.S.C. § 552(a)(4)(A)(iii). The agency has not adequately addressed this fee waiver request.
-
-NEWS MEDIA STATUS: As a journalist, I qualify as a "representative of the news media" under FOIA and am therefore entitled to have search and review fees waived. See Nat'l Sec. Archive v. DOD, 880 F.2d 1381 (D.C. Cir. 1989). Search fees may not be charged to news media requesters. 5 U.S.C. § 552(a)(4)(A)(ii)(II).
-
-FEE ITEMIZATION: The agency has not provided an adequate itemization of the assessed fees. I request a complete breakdown of all fees charged, including the number of hours spent searching, the grade level of personnel who conducted the search, the number of pages reviewed, and the per-page duplication cost.
-
-I request that the agency waive all fees, or in the alternative, provide a detailed itemization and reduce fees to duplication costs only."""
-
+    # ─────────────────────────────────────────────
+    # Unknown Appeal Type
+    # ─────────────────────────────────────────────
     else:
         body = "[Appeal type not recognized]"
-    
-    # Generate header based on jurisdiction type
+
+    # ─────────────────────────────────────────────
+    # HEADER GENERATION
+    # ─────────────────────────────────────────────
     if state_info and agency_type in ("State", "Local", "University"):
-        # State/Local appeal
         state_name = state_info.get("state_name", "")
         appeal_authority = state_info.get("appeal_authority", "Attorney General")
         appeal_address = state_info.get("appeal_address", "")
-        
-        # Build state appeal header
-        if appeal_address:
-            header = f"""{today}
+
+        header = f"""{today}
 
 {appeal_authority}
 {state_name}
@@ -1919,18 +1897,9 @@ Via Electronic Submission
 
 Re: Administrative Appeal of {state_info.get('law_name', 'Public Records')} Request {foia_number} — {subject}
 
-Dear {appeal_authority.split()[-1] if appeal_authority else 'Sir/Madam'}:"""
-        else:
-            header = f"""{today}
+Dear {appeal_authority.split()[-1]}:"""
 
-{foia_officer_title}
-{agency_name}
-
-Re: Administrative Appeal of {state_info.get('law_name', 'Public Records')} Request {foia_number} — {subject}
-
-Dear {foia_officer_title}:"""
     else:
-        # Federal appeal - DOJ OIP
         header = f"""{today}
 
 Director, Office of Information Policy
@@ -1972,21 +1941,23 @@ def generate_appeal(req_id):
         "SELECT * FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
-    
+
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
-    
-    # Check if this is a state/local request and fetch state info
+
     state_info = None
+
     if row["agency_type"] in ("State", "Local", "University") and row["state_code"]:
         state_row = db.execute(
-            "SELECT * FROM states WHERE state_code=?",
-            (row["state_code"],)
+            "SELECT * FROM state_local_agencies WHERE state_abbr=? AND agency_name=?",
+            (row["state_code"], row["agency_name"])
         ).fetchone()
+
         if state_row:
             state_info = dict(state_row)
-    
+            print("STATE INFO FOR APPEAL:", state_info)
+
     db.close()
 
     text = build_appeal_text(
@@ -2001,37 +1972,6 @@ def generate_appeal(req_id):
         state_info=state_info
     )
     return jsonify({"appeal_text": text})
-
-
-@app.route("/api/requests/<int:req_id>/save-appeal", methods=["POST"])
-@subscription_required
-def save_appeal(req_id):
-    data = request.get_json()
-    db = get_db()
-    row = db.execute(
-        "SELECT id FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
-    ).fetchone()
-    if not row:
-        db.close()
-        return jsonify({"error": "Not found"}), 404
-
-    now = datetime.now().isoformat(sep=" ", timespec="seconds")
-    db.execute("""
-        UPDATE requests SET
-            appeal_type=?, appeal_text=?, appeal_saved_at=?,
-            appeal_exemption=?, status='appealed', updated_at=?
-        WHERE id=?
-    """, (
-        data.get("appeal_type"), data.get("appeal_text"),
-        now, data.get("exemption", ""), now, req_id
-    ))
-    db.commit()
-    db.close()
-    log_action(req_id, session["user_id"], "Appeal filed",
-               f"Type: {data.get('appeal_type','')}")
-    return jsonify({"ok": True})
-
 
 # ─────────────────────────────────────────────
 # Routes: Attachments
