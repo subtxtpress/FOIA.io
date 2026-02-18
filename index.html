@@ -326,7 +326,7 @@ body {
 }
 .content {
   padding: 20px 40px;
-  max-width: 1200px;
+  max-width: 1800px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -863,7 +863,7 @@ textarea {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
-.agency-info-panel .visible {
+.agency-info-panel.visible {
   display: grid;
 }
 .ai-field { 
@@ -885,7 +885,7 @@ textarea {
   margin-top: 2px;
   font-weight: 500;
 }
-.ai-field. full {
+.ai-field.full {
   grid-column: 1 / -1;
 }
 /* ── Detail panel ──────────────────────────────────────────── */
@@ -1658,6 +1658,64 @@ textarea {
     margin: 0 auto 16px;
   }
 }
+/* ── Extra-small screens (≤360px) ─────────────────────────── */
+@media (max-width: 360px) {
+  .content {
+    padding: 12px 8px;
+  }
+  .topbar {
+    padding: 10px 8px;
+  }
+  .card {
+    padding: 10px 8px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-num {
+    font-size: 1.5rem;
+  }
+  .stat-label {
+    font-size: .65rem;
+  }
+  .auth-box {
+    padding: 24px 16px;
+  }
+  .btn {
+    padding: 8px 12px;
+    font-size: .8rem;
+  }
+  .form-actions {
+    gap: 8px;
+  }
+  .nav-item {
+    padding: 7px 8px;
+    font-size: .82rem;
+  }
+  select, input, textarea {
+    font-size: .82rem;
+    padding: 10px 10px;
+  }
+  .modal {
+    border-radius: 8px 8px 0 0;
+  }
+  .modal-body {
+    padding: 10px 8px;
+  }
+  .modal-header {
+    padding: 12px 10px 10px;
+  }
+}
+/* ── Wide screens (≥1400px) ───────────────────────────────── */
+@media (min-width: 1400px) {
+  .content {
+    max-width: 1800px;
+    padding: 28px 60px;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
 /* –– Subscribe Page ────────────────────────────────────────────── */
 #subscribePage {
   display: none;
@@ -1867,8 +1925,8 @@ textarea {
               <input type="text" id="nrFoiaNum" readonly style="opacity:.6;cursor:default;">
             </div>
             <div class="form-group">
-              <label>Date Created</label>
-              <input type="text" id="nrDate" readonly style="opacity:.6;cursor:default;">
+              <label>Filed Date</label>
+              <input type="date" id="nrDate" title="Change this if you're entering an older request">
             </div>
           </div>
 
@@ -1878,9 +1936,22 @@ textarea {
               <option value="">— Select jurisdiction —</option>
               <option value="Federal">Federal</option>
               <option value="State">State</option>
-              <option value="Local" disabled>Local (coming soon)</option>
-              <option value="University" disabled>University (coming soon)</option>
+              <option value="Local">Local</option>
+              <option value="University">University</option>
+              <option value="Other">Other (enter manually)</option>
             </select>
+          </div>
+
+          <!-- Manual jurisdiction (shown for "Other") -->
+          <div id="manualJurisdictionSection" style="display:none;">
+            <div class="form-group">
+              <label>Jurisdiction Name</label>
+              <input type="text" id="nrManualJurisdiction" placeholder="e.g. Tribal, Military, International…">
+            </div>
+            <div class="form-group">
+              <label>Agency / Entity Name</label>
+              <input type="text" id="nrManualAgency" placeholder="e.g. Navajo Nation FOIA Office…">
+            </div>
           </div>
 
           <div id="federalAgencySection" style="display:none;">
@@ -1889,6 +1960,12 @@ textarea {
               <select id="nrAgency" onchange="onAgencyChange()">
                 <option value="">— Select agency —</option>
               </select>
+            </div>
+            <div id="federalManualEntry" style="display:none;">
+              <div class="form-group">
+                <label>Agency Name (not in list)</label>
+                <input type="text" id="nrFedManualAgency" placeholder="e.g. Office of Special Counsel…">
+              </div>
             </div>
             <div class="agency-info-panel" id="agencyInfoPanel">
               <div class="ai-field">
@@ -1920,8 +1997,24 @@ textarea {
             </div>
           </div>
 
+          <!-- Local / University section -->
+          <div id="localUnivSection" style="display:none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>State (optional)</label>
+                <select id="nrLocalState">
+                  <option value="">— Select state —</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label id="localUnivAgencyLabel">Agency / Institution Name</label>
+                <input type="text" id="nrLocalAgency" placeholder="e.g. Austin Police Department, UT Austin…">
+              </div>
+            </div>
+          </div>
+
           <!-- State section -->
-          <div id="stateSection">
+          <div id="stateSection" style="display:none;">
             <div class="form-row">
               <div class="form-group">
                 <label>State</label>
@@ -1959,6 +2052,9 @@ textarea {
               <input type="text" id="nrStateAgency" placeholder="e.g. Missouri State Highway Patrol, Indiana DNR…">
             </div>
           </div>
+
+          <div class="form-group">
+            <label>Subject / Records Requested</label>
             <input type="text" id="nrSubject" placeholder="Briefly describe what records you are requesting…">
           </div>
 
@@ -2373,6 +2469,11 @@ async function nav(page) {
   previousPage = currentPage;
   currentPage = page;
 
+  // Scroll to top on every page transition
+  window.scrollTo(0, 0);
+  const mainEl = document.getElementById('main');
+  if (mainEl) mainEl.scrollTop = 0;
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => {
     b.classList.toggle('active', b.dataset.page === page);
@@ -2541,7 +2642,8 @@ async function loadAgencies() {
   sel.innerHTML = '<option value="">— Select agency —</option>' +
     agenciesData.map(a =>
       `<option value="${a.id}">${esc(a.name)}${a.abbreviation ? ' ('+esc(a.abbreviation)+')' : ''}</option>`
-    ).join('');
+    ).join('') +
+    '<option value="__manual__">✏️ Not listed — enter manually</option>';
 }
 
 async function loadAgencyDir() {
@@ -2571,18 +2673,32 @@ async function loadAgencyDir() {
 async function initNewRequestForm() {
   const { data } = await api('GET', '/api/requests/new-number');
   document.getElementById('nrFoiaNum').value = data.foia_number || '';
-  document.getElementById('nrDate').value    = fmtDate(data.date) || '';
+  document.getElementById('nrDate').value    = data.date || new Date().toISOString().split('T')[0];
   document.getElementById('nrType').value    = '';
   document.getElementById('nrSubject').value = '';
   document.getElementById('nrNotes').value   = '';
   document.getElementById('federalAgencySection').style.display = 'none';
   document.getElementById('stateSection').style.display = 'none';
+  document.getElementById('localUnivSection').style.display = 'none';
+  document.getElementById('manualJurisdictionSection').style.display = 'none';
+  document.getElementById('federalManualEntry').style.display = 'none';
   document.getElementById('agencyInfoPanel').classList.remove('visible');
   document.getElementById('stateLawPanel').style.display = 'none';
   document.getElementById('nrAgency').value  = '';
   document.getElementById('nrState').value   = '';
   document.getElementById('nrStateAgency').value = '';
   document.getElementById('nrStateOfficer').value = '';
+  // Reset manual entry fields
+  const manualJ = document.getElementById('nrManualJurisdiction');
+  if (manualJ) manualJ.value = '';
+  const manualA = document.getElementById('nrManualAgency');
+  if (manualA) manualA.value = '';
+  const fedManualA = document.getElementById('nrFedManualAgency');
+  if (fedManualA) fedManualA.value = '';
+  const localA = document.getElementById('nrLocalAgency');
+  if (localA) localA.value = '';
+  const localS = document.getElementById('nrLocalState');
+  if (localS) localS.value = '';
   await loadAgencies();
   await loadStatesDropdown();
 }
@@ -2593,6 +2709,32 @@ function onTypeChange() {
     t === 'Federal' ? '' : 'none';
   document.getElementById('stateSection').style.display =
     t === 'State' ? '' : 'none';
+  document.getElementById('localUnivSection').style.display =
+    (t === 'Local' || t === 'University') ? '' : 'none';
+  document.getElementById('manualJurisdictionSection').style.display =
+    t === 'Other' ? '' : 'none';
+
+  // Update label for local vs university
+  const lbl = document.getElementById('localUnivAgencyLabel');
+  if (lbl) lbl.textContent = t === 'University' ? 'Institution Name' : 'Agency Name';
+
+  // Populate the local/univ state dropdown if needed
+  if (t === 'Local' || t === 'University') {
+    populateLocalStateDropdown();
+  }
+}
+
+async function populateLocalStateDropdown() {
+  const sel = document.getElementById('nrLocalState');
+  if (!sel || sel.options.length > 1) return; // already populated
+  if (statesData.length === 0) {
+    const { data } = await api('GET', '/api/states');
+    statesData = Array.isArray(data) ? data : [];
+  }
+  sel.innerHTML = '<option value="">— Select state —</option>' +
+    statesData.map(s =>
+      `<option value="${esc(s.state_code)}">${esc(s.state_name)}</option>`
+    ).join('');
 }
 
 let statesData = [];
@@ -2642,6 +2784,19 @@ async function loadStateLaws() {
 
 async function onAgencyChange() {
   const id = document.getElementById('nrAgency').value;
+  const manualEntry = document.getElementById('federalManualEntry');
+
+  if (id === '__manual__') {
+    // Show manual entry, hide agency info panel
+    if (manualEntry) manualEntry.style.display = '';
+    document.getElementById('agencyInfoPanel').classList.remove('visible');
+    document.getElementById('aipPortalRow').style.display = 'none';
+    return;
+  }
+
+  // Hide manual entry when a real agency is selected
+  if (manualEntry) manualEntry.style.display = 'none';
+
   if (!id) {
     document.getElementById('agencyInfoPanel').classList.remove('visible');
     document.getElementById('aipPortalRow').style.display = 'none';
@@ -2670,26 +2825,56 @@ function clearNewRequestForm() {
 
 async function saveNewRequest() {
   const agencyType = document.getElementById('nrType').value;
-  const agencyId   = document.getElementById('nrAgency').value || null;
+  const agencyIdRaw = document.getElementById('nrAgency').value || null;
+  const agencyId   = (agencyIdRaw && agencyIdRaw !== '__manual__') ? agencyIdRaw : null;
   const subject    = document.getElementById('nrSubject').value.trim();
   const notes      = document.getElementById('nrNotes').value.trim();
   const stateCode  = document.getElementById('nrState')?.value || null;
   const stateAgency = document.getElementById('nrStateAgency')?.value.trim() || '';
   const stateOfficer = document.getElementById('nrStateOfficer')?.value.trim() || '';
+  const filedDate  = document.getElementById('nrDate').value || null;
+
+  // Manual entry fields
+  const manualJurisdiction = document.getElementById('nrManualJurisdiction')?.value.trim() || '';
+  const otherManualAgency = document.getElementById('nrManualAgency')?.value.trim() || '';
+  const fedManualAgency = document.getElementById('nrFedManualAgency')?.value.trim() || '';
+  const localAgency = document.getElementById('nrLocalAgency')?.value.trim() || '';
+  const localStateCode = document.getElementById('nrLocalState')?.value || null;
 
   if (!agencyType) { toast('Please select a jurisdiction', 'error'); return; }
-  if (agencyType === 'Federal' && !agencyId) { toast('Please select an agency', 'error'); return; }
+  if (agencyType === 'Other' && !manualJurisdiction) { toast('Please enter the jurisdiction', 'error'); return; }
+  if (agencyType === 'Federal' && !agencyId && !fedManualAgency) { toast('Please select an agency or enter one manually', 'error'); return; }
   if (agencyType === 'State' && !stateCode) { toast('Please select a state', 'error'); return; }
   if (agencyType === 'State' && !stateAgency) { toast('Please enter the agency name', 'error'); return; }
+  if ((agencyType === 'Local' || agencyType === 'University') && !localAgency) { toast('Please enter the agency/institution name', 'error'); return; }
   if (!subject) { toast('Please enter a subject', 'error'); return; }
 
+  // Determine final agency_type and agency_name
+  let finalAgencyType = agencyType;
+  let finalAgencyName = '';
+  let finalStateCode = null;
+
+  if (agencyType === 'Other') {
+    finalAgencyType = manualJurisdiction;
+    finalAgencyName = otherManualAgency;
+  } else if (agencyType === 'Federal') {
+    finalAgencyName = fedManualAgency || ''; // overridden by backend if agencyId set
+  } else if (agencyType === 'State') {
+    finalAgencyName = stateAgency;
+    finalStateCode = stateCode;
+  } else if (agencyType === 'Local' || agencyType === 'University') {
+    finalAgencyName = localAgency;
+    finalStateCode = localStateCode;
+  }
+
   const payload = {
-    agency_type: agencyType,
+    agency_type: finalAgencyType,
     agency_id: agencyId ? parseInt(agencyId) : null,
-    agency_name: agencyType === 'State' ? stateAgency : undefined,
-    state_code: agencyType === 'State' ? stateCode : null,
+    agency_name: finalAgencyName,
+    state_code: finalStateCode,
     foia_officer_title: agencyType === 'State' ? (stateOfficer || 'Custodian of Records') : undefined,
-    subject, notes
+    subject, notes,
+    filed_date: filedDate
   };
 
   const { status, data } = await api('POST', '/api/requests', payload);
@@ -2726,6 +2911,11 @@ async function openDetail(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-detail').classList.add('active');
   document.getElementById('topbarTitle').textContent = r.foia_number;
+
+  // Scroll to top when opening detail
+  window.scrollTo(0, 0);
+  const mainEl = document.getElementById('main');
+  if (mainEl) mainEl.scrollTop = 0;
 
   const dsd = r.days_since_deadline ?? null;
   let deadlineBanner = '';
@@ -2952,6 +3142,9 @@ async function openLetter(id) {
 
   const overlay = document.getElementById('letterModal');
   overlay.classList.add('open');
+  // Scroll modal content to top
+  const modalEl = overlay.querySelector('.modal');
+  if (modalEl) modalEl.scrollTop = 0;
 }
 
 async function downloadDocx() {

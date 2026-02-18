@@ -1567,7 +1567,18 @@ def create_request():
         state_code = state_code.upper()
 
     foia_number  = next_foia_number()
-    created_date = date.today().isoformat()
+
+    # Use user-provided filed date or default to today
+    filed_date = data.get("filed_date")
+    if filed_date:
+        try:
+            # Validate the date format
+            date.fromisoformat(filed_date)
+            created_date = filed_date
+        except (ValueError, TypeError):
+            created_date = date.today().isoformat()
+    else:
+        created_date = date.today().isoformat()
 
     db = get_db()
     req_id = db.insert("""
