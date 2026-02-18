@@ -1835,7 +1835,8 @@ Respectfully submitted,"""
 
 
 def build_appeal_text(appeal_type, agency_name, foia_officer_title,
-                      subject, foia_number, created_date, exemption=None):
+                      subject, foia_number, created_date, exemption=None,
+                      agency_type="Federal", state_info=None):
     today = date.today().strftime("%B %d, %Y")
     filed = foia_number
 
@@ -1898,8 +1899,39 @@ I request that the agency waive all fees, or in the alternative, provide a detai
 
     else:
         body = "[Appeal type not recognized]"
+    
+    # Generate header based on jurisdiction type
+    if state_info and agency_type in ("State", "Local", "University"):
+        # State/Local appeal
+        state_name = state_info.get("state_name", "")
+        appeal_authority = state_info.get("appeal_authority", "Attorney General")
+        appeal_address = state_info.get("appeal_address", "")
+        
+        # Build state appeal header
+        if appeal_address:
+            header = f"""{today}
 
-    return f"""{today}
+{appeal_authority}
+{state_name}
+{appeal_address}
+
+Via Electronic Submission
+
+Re: Administrative Appeal of {state_info.get('law_name', 'Public Records')} Request {foia_number} — {subject}
+
+Dear {appeal_authority.split()[-1] if appeal_authority else 'Sir/Madam'}:"""
+        else:
+            header = f"""{today}
+
+{foia_officer_title}
+{agency_name}
+
+Re: Administrative Appeal of {state_info.get('law_name', 'Public Records')} Request {foia_number} — {subject}
+
+Dear {foia_officer_title}:"""
+    else:
+        # Federal appeal - DOJ OIP
+        header = f"""{today}
 
 Director, Office of Information Policy
 U.S. Department of Justice
@@ -1910,7 +1942,9 @@ Via Electronic Submission
 
 Re: Administrative Appeal of FOIA Request {foia_number} — {subject}
 
-Dear Director:
+Dear Director:"""
+
+    return f"""{header}
 
 {body}
 
@@ -1938,18 +1972,33 @@ def generate_appeal(req_id):
         "SELECT * FROM requests WHERE id=? AND user_id=?",
         (req_id, session["user_id"])
     ).fetchone()
-    db.close()
+    
     if not row:
+        db.close()
         return jsonify({"error": "Not found"}), 404
+    
+    # Check if this is a state/local request and fetch state info
+    state_info = None
+    if row["agency_type"] in ("State", "Local", "University") and row["state_code"]:
+        state_row = db.execute(
+            "SELECT * FROM states WHERE state_code=?",
+            (row["state_code"],)
+        ).fetchone()
+        if state_row:
+            state_info = dict(state_row)
+    
+    db.close()
 
     text = build_appeal_text(
         appeal_type=appeal_type,
-        agency_name=row["agency_name"] or "Federal Agency",
-        foia_officer_title=row["foia_officer_title"] or "FOIA Officer",
+        agency_name=row["agency_name"] or "Agency",
+        foia_officer_title=row["foia_officer_title"] or "Records Custodian",
         subject=row["subject"] or "[Subject]",
         foia_number=row["foia_number"],
         created_date=row["created_date"] or "",
-        exemption=exemption or row["appeal_exemption"]
+        exemption=exemption or row["appeal_exemption"],
+        agency_type=row["agency_type"],
+        state_info=state_info
     )
     return jsonify({"appeal_text": text})
 
