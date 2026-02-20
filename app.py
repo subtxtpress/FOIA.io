@@ -176,6 +176,9 @@ def init_db():
         )
     """)
 
+    # Commit all CREATE TABLE statements before seeding
+    db.commit()
+
     # ── Migrations (safe to run on existing DBs) ───────────────────────────
     try:
         db.execute("ALTER TABLE users ADD COLUMN lifetime_free INTEGER DEFAULT 0")
