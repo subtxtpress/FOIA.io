@@ -3146,23 +3146,40 @@ async function loadAgencies() {
 
 async function loadAgencyDir() {
   const tbody = document.getElementById('agencyDirBody');
+  const tableHead = document.querySelector('#agencyDirModal thead');
   tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-dim);">Loading…</td></tr>';
   const { status, data: agencies } = await api('GET', '/api/agencies');
   if (status !== 200 || !Array.isArray(agencies)) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--red);">Error loading agencies. Please try again.</td></tr>';
     return;
   }
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile && tableHead) tableHead.style.display = 'none';
+  else if (tableHead) tableHead.style.display = '';
   tbody.innerHTML = '';
   for (const full of agencies) {
     const tr = document.createElement('tr');
     const email = full.foia_email || '';
-    tr.innerHTML = `
-      <td style="font-weight:600;padding:8px 12px;">${esc(full.name)}</td>
-      <td style="padding:8px 12px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
-      <td class="hide-mobile" style="padding:8px 12px;color:${full.foia_officer_title ? 'inherit' : 'var(--text-dim)'};">${esc(full.foia_officer_title||'Call agency for contact name')}</td>
-      <td style="padding:8px 12px;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
-      <td class="hide-mobile" style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
-      <td style="padding:8px 12px;">${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
+    if (isMobile) {
+      tr.innerHTML = `
+        <td colspan="6" style="padding:10px 12px;border-bottom:1px solid var(--border);">
+          <div style="font-weight:600;margin-bottom:4px;">${esc(full.name)}</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="badge badge-active">${esc(full.abbreviation||'—')}</span>
+            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);font-size:.78rem;">${esc(email)}</a>
+            <button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>`
+            : `<span style="color:var(--text-dim);font-style:italic;font-size:.78rem;">Call agency for email</span>`}
+          </div>
+        </td>`;
+    } else {
+      tr.innerHTML = `
+        <td style="font-weight:600;padding:8px 12px;">${esc(full.name)}</td>
+        <td style="padding:8px 12px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
+        <td style="padding:8px 12px;color:${full.foia_officer_title ? 'inherit' : 'var(--text-dim)'};">${esc(full.foia_officer_title||'Call agency for contact name')}</td>
+        <td style="padding:8px 12px;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
+        <td style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
+        <td style="padding:8px 12px;">${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
+    }
     tbody.appendChild(tr);
   }
 }
