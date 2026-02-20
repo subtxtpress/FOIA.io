@@ -37,7 +37,7 @@ class Database:
             import psycopg2
             import psycopg2.extras
             self.conn = psycopg2.connect(self.database_url)
-            self.conn.autocommit = False
+            self.conn.autocommit = True
             self._psycopg2 = psycopg2
             self._cursor_factory = psycopg2.extras.RealDictCursor
         else:
