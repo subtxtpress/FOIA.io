@@ -4095,9 +4095,15 @@ async function loadLawEnforcementResults() {
   }
   
   leCurrentTotal = data.total || 0;
-  
+
+  // Update subtitle with real total when unfiltered
+  if (!search && !state && !type) {
+    const subtitle = document.getElementById('leSubtitle');
+    if (subtitle) subtitle.textContent = `${leCurrentTotal.toLocaleString()} agencies • FBI 2024 data`;
+  }
+
   // Update stats
-  document.getElementById('leStats').textContent = 
+  document.getElementById('leStats').textContent =
     `Showing ${data.results.length} of ${leCurrentTotal.toLocaleString()} agencies`;
   
   // Render results
@@ -4175,7 +4181,7 @@ function escapeHtml(text) {
     <div class="modal-header">
       <div>
         <h2>✭ State & Local Agency Directory</h2>
-        <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">17,985 agencies • FBI 2024 data</div>
+        <div id="leSubtitle" style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">17,979 agencies • FBI 2024 data</div>
       </div>
       <button class="modal-close" onclick="closeLawEnforcementModal()">✕</button>
     </div>
