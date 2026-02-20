@@ -28,6 +28,9 @@ class Database:
             database_url: PostgreSQL connection string (if None, checks env or uses SQLite)
         """
         self.database_url = database_url or os.environ.get("DATABASE_URL")
+        # psycopg2 requires postgresql:// not postgres://
+        if self.database_url and self.database_url.startswith("postgres://"):
+            self.database_url = self.database_url.replace("postgres://", "postgresql://", 1)
         self.is_postgres = bool(self.database_url)
 
         if self.is_postgres:
