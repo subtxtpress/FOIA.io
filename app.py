@@ -14,6 +14,7 @@ import hmac
 import os
 import json
 import re
+import secrets
 from datetime import datetime, date, timedelta
 from functools import wraps
 
@@ -50,6 +51,18 @@ def init_db():
             stripe_customer_id  TEXT,
             stripe_sub_id       TEXT,
             subscription_status TEXT DEFAULT 'inactive',
+            lifetime_free       INTEGER DEFAULT 0,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # ── Invite codes ───────────────────────────────────────────────────────
+    db.execute(f"""
+        CREATE TABLE IF NOT EXISTS invite_codes (
+            id          {pk},
+            code        TEXT NOT NULL UNIQUE,
+            used        INTEGER DEFAULT 0,
+            used_by     INTEGER REFERENCES users(id),
             created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -161,6 +174,13 @@ def init_db():
             uploaded_at     TEXT NOT NULL
         )
     """)
+
+    # ── Migrations (safe to run on existing DBs) ───────────────────────────
+    try:
+        db.execute("ALTER TABLE users ADD COLUMN lifetime_free INTEGER DEFAULT 0")
+        db.commit()
+    except Exception:
+        pass  # column already exists
 
     db.commit()
     db.close()
@@ -909,6 +929,15 @@ def subscription_required(f):
     def decorated(*args, **kwargs):
         if "user_id" not in session:
             return jsonify({"error": "Unauthorized"}), 401
+        # ── Lifetime-free users always have access ─────────────────
+        db = get_db()
+        user = db.execute(
+            "SELECT subscription_status, lifetime_free FROM users WHERE id=?",
+            (session["user_id"],)
+        ).fetchone()
+        db.close()
+        if user and user["lifetime_free"]:
+            return f(*args, **kwargs)
         # ── TEST MODE: subscription gate disabled ──────────────────
         # All registered users have full access.
         # Re-enable Stripe check before going live.
@@ -1060,6 +1089,47 @@ def build_letter_text(agency_name, foia_officer_title, subject, statute="5 U.S.C
 
 
 # ─────────────────────────────────────────────
+# Routes: Admin — Invite Codes
+# ─────────────────────────────────────────────
+ADMIN_USER = os.environ.get("ADMIN_USER", "")
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not ADMIN_USER:
+            return jsonify({"error": "Admin not configured"}), 403
+        if session.get("username") != ADMIN_USER:
+            return jsonify({"error": "Forbidden"}), 403
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route("/api/admin/invite-codes", methods=["GET"])
+@admin_required
+def admin_list_codes():
+    db = get_db()
+    rows = db.execute(
+        "SELECT code, used, used_by, created_at FROM invite_codes ORDER BY created_at DESC"
+    ).fetchall()
+    db.close()
+    return jsonify([dict(r) for r in rows])
+
+@app.route("/api/admin/invite-codes", methods=["POST"])
+@admin_required
+def admin_create_codes():
+    data = request.get_json() or {}
+    count = min(int(data.get("count", 1)), 50)
+    db = get_db()
+    created = []
+    for _ in range(count):
+        suffix = secrets.token_hex(4).upper()
+        code = f"AEOD-{suffix}"
+        db.execute("INSERT INTO invite_codes (code) VALUES (?)", (code,))
+        created.append(code)
+    db.commit()
+    db.close()
+    return jsonify({"created": created})
+
+# ─────────────────────────────────────────────
 # Routes: Auth
 # ─────────────────────────────────────────────
 @app.route("/api/auth/register", methods=["POST"])
@@ -1068,6 +1138,7 @@ def register():
     username = (data.get("username") or "").strip()
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
+    invite_code = (data.get("invite_code") or "").strip().upper()
 
     if not username or not email or not password:
         return jsonify({"error": "All fields required"}), 400
@@ -1082,16 +1153,37 @@ def register():
         db.close()
         return jsonify({"error": "Username or email already taken"}), 409
 
+    # Check invite code if provided
+    lifetime_free = 0
+    code_row = None
+    if invite_code:
+        code_row = db.execute(
+            "SELECT id FROM invite_codes WHERE code=? AND used=0", (invite_code,)
+        ).fetchone()
+        if not code_row:
+            db.close()
+            return jsonify({"error": "Invalid or already used invite code"}), 400
+        lifetime_free = 1
+
     db.execute(
-        "INSERT INTO users (username, email, password, subscription_status) VALUES (?,?,?,?)",
-        (username, email, hash_password(password), "active")
+        "INSERT INTO users (username, email, password, subscription_status, lifetime_free) VALUES (?,?,?,?,?)",
+        (username, email, hash_password(password), "active", lifetime_free)
     )
     db.commit()
     user = db.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
+
+    # Mark invite code as used
+    if code_row:
+        db.execute(
+            "UPDATE invite_codes SET used=1, used_by=? WHERE id=?",
+            (user["id"], code_row["id"])
+        )
+        db.commit()
+
     db.close()
     session["user_id"] = user["id"]
     session["username"] = username
-    return jsonify({"ok": True, "username": username, "subscription_status": "active"})
+    return jsonify({"ok": True, "username": username, "subscription_status": "active", "lifetime_free": lifetime_free})
 
 
 @app.route("/api/auth/login", methods=["POST"])
@@ -1807,6 +1899,12 @@ Thank you for your attention to this request. I look forward to your response wi
 
 Respectfully submitted,"""
 
+STATE_APPEAL_CLOSING = """Please issue a timely determination on this appeal as required by state law. If you uphold the denial, please provide a detailed written explanation citing the specific statutory basis for each withholding so that I may seek further review.
+
+Thank you for your attention to this request. I look forward to your response.
+
+Respectfully submitted,"""
+
 
 def build_appeal_text(appeal_type, agency_name, foia_officer_title,
                       subject, foia_number, created_date, exemption=None,
@@ -1820,7 +1918,17 @@ def build_appeal_text(appeal_type, agency_name, foia_officer_title,
     # ─────────────────────────────────────────────
     if appeal_type == "improper_exemption":
         exemption_ref = f"Exemption {exemption}" if exemption else "the cited exemption"
-        body = f"""I am writing to appeal the denial of my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
+        if agency_type in ("State", "Local", "University"):
+            law_name = state_info.get("law_name", "state public records law") if state_info else "state public records law"
+            body = f"""I am writing to appeal the denial of my public records request, {filed}, submitted on {created_date}, seeking: {subject}
+
+The agency denied my request in whole or in part based on {exemption_ref}. I respectfully challenge this withholding under {law_name}.
+
+Exemptions to public records laws must be construed narrowly. The agency bears the burden of demonstrating that withheld material falls squarely within the claimed exemption.
+
+Furthermore, even if some portions of the responsive records fall within a claimed exemption, the agency is required to segregate and release all non-exempt portions."""
+        else:
+            body = f"""I am writing to appeal the denial of my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
 
 The agency denied my request in whole or in part based on {exemption_ref}. I respectfully challenge this withholding on the following grounds:
 
@@ -1834,20 +1942,8 @@ Furthermore, even if some portions of the responsive records fall within a claim
     elif appeal_type == "constructive_denial":
 
         # STATE / LOCAL TEMPLATE
-        if state_info and agency_type in ("State", "Local", "University"):
-            authority = state_info.get("appeal_authority", "Records Custodian")
-            address = state_info.get("appeal_address", "[Appeal address not yet added]")
-
-            body = f"""{today}
-
-{authority}
-{address}
-
-Re: Administrative Appeal of Public Records Request {filed} — {subject}
-
-Dear {authority}:
-
-I am writing to appeal the constructive denial of my public records request, {filed}, submitted on {created_date}, seeking: {subject}
+        if agency_type in ("State", "Local", "University"):
+            body = f"""I am writing to appeal the constructive denial of my public records request, {filed}, submitted on {created_date}, seeking: {subject}
 
 As of the date of this appeal, the agency has failed to issue a determination within the timeframe required by state law. This constitutes a constructive denial."""
 
@@ -1861,7 +1957,13 @@ As of the date of this appeal, the agency has failed to issue a determination wi
     # Inadequate Search
     # ─────────────────────────────────────────────
     elif appeal_type == "inadequate_search":
-        body = f"""I am writing to appeal the adequacy of the search conducted in response to my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
+        if agency_type in ("State", "Local", "University"):
+            law_name = state_info.get("law_name", "state public records law") if state_info else "state public records law"
+            body = f"""I am writing to appeal the adequacy of the search conducted in response to my public records request, {filed}, submitted on {created_date}, seeking: {subject}
+
+The agency's response does not demonstrate that it conducted a search reasonably calculated to uncover all responsive documents under {law_name}."""
+        else:
+            body = f"""I am writing to appeal the adequacy of the search conducted in response to my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
 
 The agency's response does not demonstrate that it conducted a search reasonably calculated to uncover all responsive documents."""
 
@@ -1869,7 +1971,13 @@ The agency's response does not demonstrate that it conducted a search reasonably
     # Fee Dispute
     # ─────────────────────────────────────────────
     elif appeal_type == "fee_dispute":
-        body = f"""I am writing to appeal the fee assessment associated with my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
+        if agency_type in ("State", "Local", "University"):
+            law_name = state_info.get("law_name", "state public records law") if state_info else "state public records law"
+            body = f"""I am writing to appeal the fee assessment associated with my public records request, {filed}, submitted on {created_date}, seeking: {subject}
+
+The agency has assessed fees that I challenge under {law_name}."""
+        else:
+            body = f"""I am writing to appeal the fee assessment associated with my Freedom of Information Act request, {filed}, submitted on {created_date}, seeking: {subject}
 
 The agency has assessed fees that I challenge on multiple grounds."""
 
@@ -1882,10 +1990,11 @@ The agency has assessed fees that I challenge on multiple grounds."""
     # ─────────────────────────────────────────────
     # HEADER GENERATION
     # ─────────────────────────────────────────────
-    if state_info and agency_type in ("State", "Local", "University"):
-        state_name = state_info.get("state_name", "")
-        appeal_authority = state_info.get("appeal_authority", "Attorney General")
-        appeal_address = state_info.get("appeal_address", "")
+    if agency_type in ("State", "Local", "University"):
+        state_name = state_info.get("state_name", "") if state_info else ""
+        appeal_authority = state_info.get("appeal_authority", "Attorney General") if state_info else "Attorney General"
+        appeal_address = state_info.get("appeal_address", "") if state_info else ""
+        law_name = state_info.get("law_name", "Public Records") if state_info else "Public Records"
 
         header = f"""{today}
 
@@ -1895,7 +2004,7 @@ The agency has assessed fees that I challenge on multiple grounds."""
 
 Via Electronic Submission
 
-Re: Administrative Appeal of {state_info.get('law_name', 'Public Records')} Request {foia_number} — {subject}
+Re: Administrative Appeal of {law_name} Request {foia_number} — {subject}
 
 Dear {appeal_authority.split()[-1]}:"""
 
@@ -1913,11 +2022,12 @@ Re: Administrative Appeal of FOIA Request {foia_number} — {subject}
 
 Dear Director:"""
 
+    closing = STATE_APPEAL_CLOSING if agency_type in ("State", "Local", "University") else APPEAL_CLOSING
     return f"""{header}
 
 {body}
 
-{APPEAL_CLOSING}
+{closing}
 
 [Your Name]
 [Your Address]
@@ -1956,7 +2066,14 @@ def generate_appeal(req_id):
 
         if state_row:
             state_info = dict(state_row)
-            print("STATE INFO FOR APPEAL:", state_info)
+        else:
+            # Fall back to state_laws for state-level info (law name, state name)
+            law_row = db.execute(
+                "SELECT * FROM state_laws WHERE state_code=?",
+                (row["state_code"],)
+            ).fetchone()
+            if law_row:
+                state_info = dict(law_row)
 
     db.close()
 

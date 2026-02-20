@@ -473,6 +473,7 @@ td {
   color: var(--cyan);
   font-size: .8rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 .td-subject {
   font-weight: 600;
@@ -774,7 +775,9 @@ textarea {
   width: 100%;
   max-width: 720px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   transform: translateY(20px);
   transition: transform .2s;
   box-shadow: var(--shadow);
@@ -811,6 +814,9 @@ textarea {
 }
 .modal-body {
   padding: 24px 28px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 /* Letter modal specifics */
 .request-letter-modal {
@@ -851,6 +857,26 @@ textarea {
 }
 .discard-save {
   margin-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background: var(--bg2);
+  padding-bottom: 8px;
+  padding-top: 12px;
+  margin-left: -28px;
+  margin-right: -28px;
+  padding-left: 28px;
+  padding-right: 28px;
+  border-top: 1px solid var(--border);
+}
+.modal-body > .form-actions:last-child {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg2);
+  padding-bottom: 8px;
+  margin-left: -28px;
+  margin-right: -28px;
+  padding-left: 28px;
+  padding-right: 28px;
 }
 /* ── Agency auto-fill panel ────────────────────────────────── */
 .agency-info-panel {
@@ -1013,6 +1039,18 @@ textarea {
 #toast.error {
   border-color: var(--red);
   color: var(--red);
+}
+/* ── Pricing page ──────────────────────────────────────────── */
+.pricing-tiers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+@media (max-width: 768px) {
+  .pricing-tiers {
+    grid-template-columns: 1fr;
+  }
 }
 /* ── Subscribe page ────────────────────────────────────────── */
 .subscribe-card {
@@ -1253,6 +1291,7 @@ textarea {
   }
   .modal {
     max-width: 100%;
+    max-height: 92vh;
     border-radius: 12px 12px 0 0;
     width: 100vw;
     box-sizing: border-box;
@@ -1262,16 +1301,30 @@ textarea {
     padding: 0;
   }
   .modal-header {
-    padding: 16px 16px 12px;
+    padding: 16px 20px 12px;
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
   }
+  .modal-header h2 {
+    font-size: .95rem;
+  }
+  .modal-header .request-letter-modal,
+  .modal-header #appealModalSub {
+    font-size: .72rem;
+  }
   .modal-body {
-    padding: 12px;
+    padding: 16px 20px;
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
+  }
+  .discard-save,
+  .modal-body > .form-actions:last-child {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
   .letter-pre {
     padding: 12px;
@@ -1700,10 +1753,17 @@ textarea {
     border-radius: 8px 8px 0 0;
   }
   .modal-body {
-    padding: 10px 8px;
+    padding: 14px 16px;
   }
   .modal-header {
-    padding: 12px 10px 10px;
+    padding: 14px 16px 10px;
+  }
+  .discard-save,
+  .modal-body > .form-actions:last-child {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 /* ── Wide screens (≥1400px) ───────────────────────────────── */
@@ -1805,6 +1865,10 @@ textarea {
         <label>Password <small style="color:var(--text-dim)">(min 8 characters)</small></label>
         <input type="password" id="regPass" placeholder="••••••••" autocomplete="new-password">
       </div>
+      <div class="form-group">
+        <label>Invite Code <small style="color:var(--text-dim)">(optional)</small></label>
+        <input type="text" id="regInvite" placeholder="AEOD-XXXXXXXX" autocomplete="off" style="text-transform:uppercase;letter-spacing:.5px;">
+      </div>
       <button class="btn auth-submit" onclick="doRegister()">Create Account</button>
     </div>
   </div>
@@ -1845,6 +1909,11 @@ textarea {
         <span class="nav-badge" id="badgeClosed" style="background:var(--bg3);color:var(--text-dim);">0</span>
       </button>
 
+      <div class="nav-label" id="adminNavSection" style="display:none;">Admin</div>
+      <button class="nav-item" id="adminNavBtn" data-page="admin" onclick="nav('admin')" style="display:none;">
+        <span class="icon">⚙</span> Invite Codes
+      </button>
+
       <div class="nav-label">Reference</div>
       <button class="nav-item" onclick="openAgencyModal()">
         <span class="icon">⚖︎</span> Federal Agencies
@@ -1853,7 +1922,7 @@ textarea {
         <span class="icon">⚖︎</span> State Laws
       </button>
       <button class="nav-item" onclick="openLawEnforcementModal()">
-        <span class="icon">✭</span> Law Enforcement
+        <span class="icon">✭</span> State & Local Agencies
       </button>
     </div>
     <div class="sidebar-footer">
@@ -1869,6 +1938,15 @@ textarea {
         </div>
       </div>
       <button id="btnLogout" onclick="doLogout()">Sign Out</button>
+      <div style="display:flex;gap:8px;margin-top:4px;padding-top:4px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap;justify-content:center;">
+        <button onclick="nav('help')" style="background:none;border:none;color:var(--text-dim);font-size:.72rem;cursor:pointer;padding:0;">Help</button>
+        <span style="color:var(--border);font-size:.72rem;">·</span>
+        <button onclick="nav('terms')" style="background:none;border:none;color:var(--text-dim);font-size:.72rem;cursor:pointer;padding:0;">Terms</button>
+        <span style="color:var(--border);font-size:.72rem;">·</span>
+        <button onclick="nav('pricing')" style="background:none;border:none;color:var(--text-dim);font-size:.72rem;cursor:pointer;padding:0;">Plans</button>
+        <span style="color:var(--border);font-size:.72rem;">·</span>
+        <button onclick="document.getElementById('betaModal').classList.add('open')" style="background:none;border:none;color:var(--cyan);font-size:.72rem;cursor:pointer;padding:0;font-weight:600;letter-spacing:.3px;">BETA</button>
+      </div>
     </div>
   </nav>
 
@@ -2155,9 +2233,407 @@ textarea {
         <div id="detailContent"></div>
       </div>
 
+      <!-- ── Admin: Invite Codes ───────────────────────────────── -->
+      <div id="page-admin" class="page">
+        <div style="max-width:600px;">
+          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Invite Codes</h2>
+          <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:24px;">Generate AEOD codes for lifetime free access. Each code can only be used once.</p>
+
+          <div class="card" style="margin-bottom:16px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:14px;">Generate New Codes</h3>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="number" id="adminCodeCount" value="1" min="1" max="50" style="width:80px;">
+              <span style="font-size:.85rem;color:var(--text-dim);">codes</span>
+              <button class="btn btn-primary btn-sm" onclick="adminGenerateCodes()">Generate</button>
+            </div>
+            <div id="adminNewCodes" style="margin-top:16px;display:none;">
+              <div style="font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">New codes — copy and share these:</div>
+              <div id="adminNewCodesList" style="font-family:monospace;font-size:.9rem;background:var(--bg3);border-radius:8px;padding:12px;line-height:2;"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+              <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);">All Codes</h3>
+              <button class="btn btn-ghost btn-sm" onclick="adminLoadCodes()">Refresh</button>
+            </div>
+            <div id="adminCodesList">
+              <div style="text-align:center;padding:20px;color:var(--text-dim);font-size:.85rem;">Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Plans & Pricing ───────────────────────────────────── -->
+      <div id="page-pricing" class="page">
+        <div style="max-width:900px;">
+
+          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Plans &amp; Pricing</h2>
+          <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:28px;">Built for the full spectrum — from solo freelancers to institutional investigative teams.</p>
+
+          <!-- Tier cards -->
+          <div class="pricing-tiers">
+
+            <!-- Core -->
+            <div class="card" style="position:relative;display:flex;flex-direction:column;">
+              <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Tier 1</div>
+              <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Core</h3>
+              <p style="font-size:.82rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;">The baseline every reporter needs. A clean, reliable FOIA workspace that eliminates deadline anxiety.</p>
+              <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Unlimited FOIA requests</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Deadline + appeal-window tracking</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Notes, timelines, communication logs</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Basic CSV export</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Email support</li>
+              </ul>
+              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Best for: freelancers, students, early-stage investigations.</div>
+            </div>
+
+            <!-- Pro -->
+            <div class="card" style="position:relative;display:flex;flex-direction:column;border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan);">
+              <div style="position:absolute;top:-1px;right:16px;background:var(--cyan);color:#000;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 10px;border-radius:0 0 6px 6px;">Most Popular</div>
+              <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px;">Tier 2</div>
+              <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Pro</h3>
+              <p style="font-size:.82rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;">The real workhorse. For reporters managing multiple beats, chronic offenders, and long-running investigations.</p>
+              <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:10px;font-style:italic;">Everything in Core, plus:</div>
+              <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Multi-agency portfolio analytics</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Delay + denial pattern detection</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Rolling production tracking</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Advanced search + filters</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Bulk editing + batch updates</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Priority support</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Early access to new features</li>
+              </ul>
+              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Best for: investigative reporters, nonprofit researchers, anyone juggling dozens of active requests.</div>
+            </div>
+
+            <!-- Newsroom -->
+            <div class="card" style="position:relative;display:flex;flex-direction:column;">
+              <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Tier 3</div>
+              <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Newsroom</h3>
+              <p style="font-size:.82rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;">Built for teams that need shared visibility, accountability, and continuity across beats and staff turnover.</p>
+              <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:10px;font-style:italic;">Everything in Pro, plus:</div>
+              <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Multi-user accounts</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Shared dashboards + team visibility</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Request ownership + handoff workflows</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Internal notes + editorial flags</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Organization-level analytics</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Custom exports + audit bundles</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Dedicated support channel</li>
+              </ul>
+              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Best for: newsrooms, legal teams, transparency orgs, multi-reporter investigative units.</div>
+            </div>
+
+          </div>
+
+          <!-- Add-ons -->
+          <div class="card" style="margin-bottom:32px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:14px;">Optional Add-Ons</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+              <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;">
+                <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">Secure Document Vault</div>
+                <div style="font-size:.78rem;color:var(--text-dim);">Encrypted storage for productions and agency responses.</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;">
+                <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">Agency Contact Database</div>
+                <div style="font-size:.78rem;color:var(--text-dim);">Preloaded and maintained directory of FOIA contacts.</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;">
+                <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">Appeals Toolkit Integration</div>
+                <div style="font-size:.78rem;color:var(--text-dim);">Auto-generate appeal drafts directly from denial logs.</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;">
+                <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">API Access</div>
+                <div style="font-size:.78rem;color:var(--text-dim);">For custom dashboards, pipelines, or integrations.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature comparison table -->
+          <div class="card">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:16px;">Feature Comparison</h3>
+            <div class="table-wrap">
+              <table style="width:100%;font-size:.82rem;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;width:55%;">Feature</th>
+                    <th style="text-align:center;">Core</th>
+                    <th style="text-align:center;color:var(--cyan);">Pro</th>
+                    <th style="text-align:center;">Newsroom</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Unlimited FOIA Requests</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Deadline Tracking</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Appeal Window Tracking</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Notes + Communication Logs</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>CSV Export</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="4">Pro &amp; Above</td></tr>
+                  <tr><td>Portfolio Analytics</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Delay/Denial Pattern Detection</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Rolling Production Tracking</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Advanced Search + Filters</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Bulk Editing</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Priority Support</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Early Feature Access</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="4">Newsroom Only</td></tr>
+                  <tr><td>Multi-User Accounts</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Shared Dashboards</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Request Ownership + Handoff</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Internal Notes + Editorial Flags</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Organization-Level Analytics</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Custom Exports + Audit Bundles</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Dedicated Support Channel</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Help (About / Getting Started / Support) ─────────── -->
+      <div id="page-help" class="page">
+        <div style="max-width:720px;">
+
+          <!-- Tab bar -->
+          <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;">
+            <button onclick="helpTab('about')" id="helpTab-about" class="btn btn-ghost btn-sm" style="border-radius:6px 6px 0 0;border-bottom:2px solid var(--cyan);">About</button>
+            <button onclick="helpTab('start')" id="helpTab-start" class="btn btn-ghost btn-sm" style="border-radius:6px 6px 0 0;border-bottom:2px solid transparent;">Getting Started</button>
+            <button onclick="helpTab('support')" id="helpTab-support" class="btn btn-ghost btn-sm" style="border-radius:6px 6px 0 0;border-bottom:2px solid transparent;">Support</button>
+          </div>
+
+          <!-- About -->
+          <div id="helpPane-about" class="card">
+            <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:4px;">About FOIA.io</h2>
+            <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:20px;">A lightweight records-request workspace for journalists, researchers, and watchdogs.</p>
+
+            <p style="font-size:.9rem;line-height:1.75;margin-bottom:16px;">FOIA.io keeps your requests, deadlines, denials, and appeals in one place—without the bloat of a full case-management system. It's designed around real-world FOIA workflows:</p>
+            <ul style="font-size:.9rem;line-height:2;padding-left:1.2em;margin-bottom:20px;">
+              <li>Track Federal, State, and University requests in a single dashboard</li>
+              <li>Log agency responses, delays, denials, and rolling productions</li>
+              <li>Monitor statutory deadlines and appeal windows</li>
+              <li>Store notes, follow-ups, and next steps without losing the thread</li>
+              <li>Keep your entire FOIA portfolio accessible and audit-ready</li>
+            </ul>
+            <p style="font-size:.9rem;line-height:1.75;color:var(--text-dim);border-left:3px solid var(--border);padding-left:14px;font-style:italic;">FOIA.io doesn't tell you how to report. It removes the cognitive load so you can focus on the investigation instead of the paperwork.</p>
+
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin:24px 0 12px;">Tips for Using FOIA.io</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">01</span>
+                <div><strong style="font-size:.88rem;">Update your requests daily.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">A 30-second check-in keeps your deadlines accurate and prevents missed appeal windows.</p></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">02</span>
+                <div><strong style="font-size:.88rem;">Log every agency communication.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">Emails, phone calls, "we're still processing," and rolling productions—they all matter later.</p></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">03</span>
+                <div><strong style="font-size:.88rem;">Use the notes field aggressively.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">Document what you asked for, what they said, and what you suspect they're withholding.</p></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">04</span>
+                <div><strong style="font-size:.88rem;">Track denials immediately.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">Appeal deadlines are short. Enter the denial date as soon as it hits your inbox.</p></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">05</span>
+                <div><strong style="font-size:.88rem;">Keep your portfolio clean.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">Archive closed requests so your active list stays scannable.</p></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">06</span>
+                <div><strong style="font-size:.88rem;">Treat FOIA.io as your institutional memory.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">If an agency stonewalls you for six months, you'll want the full timeline at your fingertips.</p></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Getting Started -->
+          <div id="helpPane-start" class="card" style="display:none;">
+            <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:4px;">Getting Started</h2>
+            <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:20px;">The fastest path from new account to operational FOIA machine.</p>
+
+            <div style="display:flex;flex-direction:column;gap:20px;">
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 1</span>
+                <div>
+                  <strong style="font-size:.92rem;">Add Your First Request</strong>
+                  <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">Start with the basics—the request you already filed or are about to file.</p>
+                  <ul style="font-size:.85rem;color:var(--text-dim);line-height:1.9;padding-left:1.2em;margin-top:6px;">
+                    <li>Agency name</li>
+                    <li>Request description</li>
+                    <li>Date submitted</li>
+                    <li>Statutory deadline (if known)</li>
+                    <li>Tracking number (once assigned)</li>
+                  </ul>
+                  <p style="font-size:.82rem;color:var(--text-dim);margin-top:6px;font-style:italic;">You can add more detail later. The goal is to get it into the system so the clock starts running.</p>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 2</span>
+                <div>
+                  <strong style="font-size:.92rem;">Log Agency Responses as They Come In</strong>
+                  <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">Every email, phone call, delay notice, "still processing," or rolling production belongs here. This builds your timeline—the thing you'll rely on when you appeal, escalate, or write the story.</p>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 3</span>
+                <div>
+                  <strong style="font-size:.92rem;">Track Deadlines and Appeal Windows</strong>
+                  <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">FOIA.io calculates estimated response deadlines, appeal windows after denials, and rolling production dates. If a deadline shifts, update the request or denial date and the system recalculates automatically.</p>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 4</span>
+                <div>
+                  <strong style="font-size:.92rem;">Use Notes to Capture the Real Story</strong>
+                  <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">The notes field is your investigative memory. Use it for what you asked for, what they claimed, what they're avoiding, and what you need to follow up on. Six months from now, you will be glad you did.</p>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 5</span>
+                <div>
+                  <strong style="font-size:.92rem;">Mark Requests as Closed When They're Done</strong>
+                  <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">When you get the records—or the agency gives you a final determination—close it out. Closed requests stay accessible but out of your active workflow, keeping your dashboard clean.</p>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start;">
+                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 6</span>
+                <div>
+                  <strong style="font-size:.92rem;">Build a Portfolio You Can Actually Use</strong>
+                  <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">As you add more requests, FOIA.io becomes a searchable, sortable record of your reporting. Spot patterns across agencies, track chronic delays, build cases for appeals, and support future stories with past timelines.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Support -->
+          <div id="helpPane-support" class="card" style="display:none;">
+            <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:4px;">Contact Support</h2>
+            <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:20px;">If something breaks, behaves strangely, or you're convinced the app is gaslighting you, reach out.</p>
+
+            <div style="background:var(--bg3);border-radius:8px;padding:16px 20px;margin-bottom:20px;">
+              <div style="font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Support Email</div>
+              <a href="mailto:support@subtxtpress.com" style="color:var(--cyan);font-size:1rem;font-weight:600;">support@subtxtpress.com</a>
+            </div>
+
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:12px;">What to Include</h3>
+            <ul style="font-size:.9rem;line-height:2;padding-left:1.2em;margin-bottom:20px;">
+              <li>A short description of what happened</li>
+              <li>The request or page you were working on</li>
+              <li>Any error messages you saw</li>
+              <li>Screenshots if possible</li>
+            </ul>
+
+            <p style="font-size:.88rem;line-height:1.75;color:var(--text-dim);border-left:3px solid var(--border);padding-left:14px;font-style:italic;">Every message gets read. If it's a bug, it gets fixed. If it's a feature request, it goes on the roadmap. If it's an agency problem… well, that's between you and them.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Terms of Service ───────────────────────────────── -->
+      <div id="page-terms" class="page">
+        <div class="card" style="max-width:720px;">
+          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Terms of Service &amp; Privacy Statement</h2>
+          <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:24px;">Effective upon use of the service.</p>
+
+          <section style="margin-bottom:20px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">What FOIA.io Does</h3>
+            <p style="font-size:.9rem;line-height:1.7;">FOIA.io helps you track FOIA requests, deadlines, notes, and agency communications. It is a workspace—not a publishing platform, analytics broker, or data-collection service.</p>
+          </section>
+
+          <section style="margin-bottom:20px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Your Data</h3>
+            <ul style="font-size:.9rem;line-height:1.9;padding-left:1.2em;">
+              <li>You own all data you enter.</li>
+              <li>FOIA.io does not sell, rent, or share your information.</li>
+              <li>FOIA.io only stores the minimum data required to operate the service.</li>
+              <li>You can export your data at any time.</li>
+            </ul>
+          </section>
+
+          <section style="margin-bottom:20px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">How Your Data Is Used</h3>
+            <p style="font-size:.9rem;line-height:1.7;margin-bottom:8px;">Your data is used only to:</p>
+            <ul style="font-size:.9rem;line-height:1.9;padding-left:1.2em;">
+              <li>Display your FOIA portfolio</li>
+              <li>Calculate deadlines and timelines</li>
+              <li>Maintain your account</li>
+              <li>Improve platform stability</li>
+            </ul>
+            <p style="font-size:.9rem;line-height:1.7;margin-top:8px;">No advertising, tracking, or third-party marketing tools are used.</p>
+          </section>
+
+          <section style="margin-bottom:20px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Security</h3>
+            <ul style="font-size:.9rem;line-height:1.9;padding-left:1.2em;">
+              <li>Data is encrypted in transit.</li>
+              <li>Access to systems is restricted to authorized personnel.</li>
+              <li>No unnecessary personal information is collected.</li>
+            </ul>
+          </section>
+
+          <section style="margin-bottom:20px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Service Reliability</h3>
+            <p style="font-size:.9rem;line-height:1.7;">FOIA.io is provided "as is." The platform may experience downtime, bugs, or incomplete features, especially during beta. You are responsible for maintaining your own backups and records.</p>
+          </section>
+
+          <section style="margin-bottom:20px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Your Responsibilities</h3>
+            <ul style="font-size:.9rem;line-height:1.9;padding-left:1.2em;">
+              <li>Keep your login credentials secure.</li>
+              <li>Enter accurate information for deadline calculations.</li>
+              <li>Use the platform lawfully and without disrupting service operations.</li>
+              <li>Do not attempt unauthorized access or interfere with platform operations.</li>
+            </ul>
+          </section>
+
+          <section style="margin-bottom:20px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Liability</h3>
+            <p style="font-size:.9rem;line-height:1.7;">FOIA.io is not responsible for:</p>
+            <ul style="font-size:.9rem;line-height:1.9;padding-left:1.2em;">
+              <li>Missed FOIA deadlines</li>
+              <li>Agency decisions or delays</li>
+              <li>Loss of data due to user error</li>
+              <li>Outcomes of your reporting or legal actions</li>
+            </ul>
+          </section>
+
+          <section style="margin-bottom:20px;">
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Changes</h3>
+            <p style="font-size:.9rem;line-height:1.7;">Features, functionality, and policies may change as the platform evolves. Continued use means you accept those changes. Notice will be provided when material changes occur.</p>
+          </section>
+
+          <section>
+            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Contact</h3>
+            <p style="font-size:.9rem;line-height:1.7;">Questions, issues, or data concerns: <a href="mailto:support@subtxtpress.com" style="color:var(--cyan);">support@subtxtpress.com</a></p>
+          </section>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /app -->
+
+<!-- ── Beta Notice Modal ─────────────────────────────────────── -->
+<div class="modal-overlay" id="betaModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div>
+        <h2>FOIA.io Beta</h2>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('betaModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;line-height:1.75;margin-bottom:12px;">FOIA.io is operating in a controlled beta phase.</p>
+      <p style="font-size:.9rem;line-height:1.75;color:var(--text-dim);">The platform is fully functional for day‑to‑day FOIA management, but certain features are still undergoing refinement. Users may experience occasional inconsistencies or incomplete functionality. Feedback during this period is actively incorporated into development and stability improvements.</p>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-dim);">
+        Questions or feedback: <a href="mailto:support@subtxtpress.com" style="color:var(--cyan);">support@subtxtpress.com</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ── Letter Modal ─────────────────────────────────────────── -->
 <div class="modal-overlay" id="letterModal">
@@ -2240,7 +2716,7 @@ textarea {
     <div class="modal-header">
       <div>
         <h2>⚖︎ Administrative Appeal</h2>
-        <div id="appealModalSub">Federal — Office of Information Policy</div>
+        <div id="appealModalSub"></div>
       </div>
       <button class="modal-close" onclick="closeAppealModal()">✕</button>
     </div>
@@ -2370,10 +2846,11 @@ async function doLogin() {
 }
 
 async function doRegister() {
-  const username = document.getElementById('regUser').value.trim();
-  const email    = document.getElementById('regEmail').value.trim();
-  const password = document.getElementById('regPass').value;
-  const { status, data } = await api('POST', '/api/auth/register', { username, email, password });
+  const username    = document.getElementById('regUser').value.trim();
+  const email       = document.getElementById('regEmail').value.trim();
+  const password    = document.getElementById('regPass').value;
+  const invite_code = document.getElementById('regInvite').value.trim().toUpperCase();
+  const { status, data } = await api('POST', '/api/auth/register', { username, email, password, invite_code });
   if (status !== 200) {
     showAuthError(data.error || 'Registration failed');
     return;
@@ -2429,6 +2906,14 @@ async function bootApp(username, subStatus) {
   // ── TEST MODE: subscription gate disabled ──────────────────
   await loadAgencies();
   await refreshAllData();
+
+  // Show admin nav if the logged-in user is an admin
+  const { status: adminStatus } = await api('GET', '/api/admin/invite-codes');
+  if (adminStatus === 200) {
+    document.getElementById('adminNavSection').style.display = '';
+    document.getElementById('adminNavBtn').style.display = '';
+  }
+
   nav('dashboard');
 }
 
@@ -2463,6 +2948,10 @@ const PAGE_TITLES = {
   'agency-dir':      'Federal Agency Directory',
   'state-laws':      'State Public Records Laws',
   'detail':          'Request Detail',
+  'terms':           'Terms of Service',
+  'help':            'Help',
+  'pricing':         'Plans & Pricing',
+  'admin':           'Admin',
 };
 
 async function nav(page) {
@@ -2490,6 +2979,7 @@ async function nav(page) {
   if (page === 'new-request')     await initNewRequestForm();
   if (page === 'agency-dir')      await loadAgencyDir();
   if (page === 'state-laws')      await loadStateLaws();
+  if (page === 'admin')           adminLoadCodes();
 }
 
 function goBack() { nav(previousPage === 'detail' ? 'all-requests' : previousPage); }
@@ -3352,8 +3842,10 @@ async function openAppealModal(id) {
     await regenerateAppeal();
   }
 
-  document.getElementById('appealModalSub').textContent =
-    `${r.foia_number} — Federal appeal to DOJ Office of Information Policy`;
+  const isState = ['State', 'Local', 'University'].includes(r.agency_type);
+  document.getElementById('appealModalSub').textContent = isState
+    ? `${r.foia_number} — State/Local appeal`
+    : `${r.foia_number} — Federal appeal to DOJ Office of Information Policy`;
   document.getElementById('appealModal').classList.add('open');
 }
 
@@ -3472,9 +3964,73 @@ async function openLawEnforcementModal() {
   searchLawEnforcement();
 }
 
+// ─────────────────────────────────────────────────────────────
+// Admin: Invite Codes
+// ─────────────────────────────────────────────────────────────
+async function adminLoadCodes() {
+  const { status, data } = await api('GET', '/api/admin/invite-codes');
+  const el = document.getElementById('adminCodesList');
+  if (status === 403) {
+    el.innerHTML = '<div style="color:var(--red);font-size:.85rem;">Access denied.</div>';
+    return;
+  }
+  if (!data.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:.85rem;">No codes yet.</div>';
+    return;
+  }
+  el.innerHTML = data.map(c => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-family:monospace;font-size:.88rem;">${escapeHtml(c.code)}</span>
+      <span style="font-size:.75rem;padding:2px 8px;border-radius:4px;${c.used ? 'background:var(--bg3);color:var(--text-dim);' : 'background:rgba(0,200,150,.1);color:var(--green);'}">${c.used ? 'Used' : 'Available'}</span>
+    </div>
+  `).join('');
+}
+
+async function adminGenerateCodes() {
+  const count = parseInt(document.getElementById('adminCodeCount').value) || 1;
+  const { status, data } = await api('POST', '/api/admin/invite-codes', { count });
+  if (status === 403) { showToast('Access denied'); return; }
+  document.getElementById('adminNewCodesList').innerHTML = data.created.join('<br>');
+  document.getElementById('adminNewCodes').style.display = '';
+  adminLoadCodes();
+}
+
+function helpTab(tab) {
+  ['about', 'start', 'support'].forEach(t => {
+    document.getElementById(`helpPane-${t}`).style.display = t === tab ? '' : 'none';
+    const btn = document.getElementById(`helpTab-${t}`);
+    btn.style.borderBottom = t === tab ? '2px solid var(--cyan)' : '2px solid transparent';
+    btn.style.color = t === tab ? 'var(--text)' : '';
+  });
+}
+
 function closeLawEnforcementModal(e) {
   if (e && e.target.id !== 'lawEnforcementModal') return;
   document.getElementById('lawEnforcementModal').classList.remove('open');
+}
+
+async function selectLEAgency(a) {
+  document.getElementById('lawEnforcementModal').classList.remove('open');
+
+  // Navigate to new request page (this calls initNewRequestForm internally)
+  await nav('new-request');
+
+  // Set jurisdiction to State
+  const typeEl = document.getElementById('nrType');
+  typeEl.value = 'State';
+  onTypeChange();
+
+  // Set state and trigger law info load
+  await loadStatesDropdown();
+  const stateEl = document.getElementById('nrState');
+  stateEl.value = a.state_abbr;
+  await onStateChange();
+
+  // Fill agency name and officer if available
+  document.getElementById('nrStateAgency').value = a.agency_name + (a.agency_unit ? ` — ${a.agency_unit}` : '');
+  if (a.foia_officer) {
+    document.getElementById('nrStateOfficer').value = a.foia_officer;
+  }
 }
 
 async function searchLawEnforcement() {
@@ -3517,18 +4073,16 @@ async function loadLawEnforcementResults() {
   
   // Render results
   const html = data.results.map(a => `
-    <div style="padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:start;">
-      <div style="flex:1;">
-        <div style="font-weight:500;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` - ${escapeHtml(a.agency_unit)}` : ''}</div>
-        <div style="font-size:.85rem;color:var(--text-dim);margin-top:4px;">
-          ${a.agency_type || 'Unknown Type'} • ${a.state_abbr}${a.county_name ? ` • ${a.county_name}` : ''}
-          ${a.population ? ` • Pop: ${a.population.toLocaleString()}` : ''}
-        </div>
-        ${a.officer_ct ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">Officers: ${a.officer_ct}</div>` : ''}
+    <div onclick="selectLEAgency(${JSON.stringify(a).replace(/"/g, '&quot;')})"
+         style="padding:12px 4px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;"
+         onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
+      <div style="font-weight:500;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` — ${escapeHtml(a.agency_unit)}` : ''}</div>
+      <div style="font-size:.8rem;color:var(--text-dim);margin-top:3px;">
+        ${a.agency_type || 'Unknown Type'} • ${a.state_abbr}${a.county_name ? ` • ${a.county_name} County` : ''} • <span style="font-family:monospace;">ORI: ${escapeHtml(a.ori)}</span>
       </div>
-      <div style="font-size:.75rem;color:var(--text-muted);font-family:monospace;margin-left:12px;">
-        ${a.ori}
-      </div>
+      ${a.foia_address ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;">📍 ${escapeHtml(a.foia_address)}</div>` : ''}
+      ${a.foia_phone ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">📞 ${escapeHtml(a.foia_phone)}</div>` : ''}
+      ${a.foia_portal_url ? `<div style="margin-top:4px;" onclick="event.stopPropagation()"><a href="${escapeHtml(a.foia_portal_url)}" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--cyan);">🔗 Records Portal</a></div>` : ''}
     </div>
   `).join('');
   
@@ -3591,7 +4145,7 @@ function escapeHtml(text) {
   <div class="modal" style="max-width:960px;width:95%;">
     <div class="modal-header">
       <div>
-        <h2>✭ State & Local Law Enforcement Directory</h2>
+        <h2>✭ State & Local Agency Directory</h2>
         <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">17,985 agencies • FBI 2024 data</div>
       </div>
       <button class="modal-close" onclick="closeLawEnforcementModal()">✕</button>
