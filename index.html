@@ -3144,7 +3144,11 @@ async function loadAgencies() {
 async function loadAgencyDir() {
   const tbody = document.getElementById('agencyDirBody');
   tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-dim);">Loading…</td></tr>';
-  const { data: agencies } = await api('GET', '/api/agencies');
+  const { status, data: agencies } = await api('GET', '/api/agencies');
+  if (status !== 200 || !Array.isArray(agencies)) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--red);">Error loading agencies. Please try again.</td></tr>';
+    return;
+  }
   tbody.innerHTML = '';
   for (const full of agencies) {
     const tr = document.createElement('tr');
@@ -4207,11 +4211,10 @@ function escapeHtml(text) {
 </div>
 
 <script>
-let agencyDirLoaded = false;
 async function openAgencyModal() {
   document.getElementById('agencyDirModal').classList.add('open');
   document.getElementById('agencyDirSearch').value = '';
-  if (!agencyDirLoaded) { await loadAgencyDir(); agencyDirLoaded = true; }
+  await loadAgencyDir();
   filterAgencyDir();
   document.getElementById('agencyDirSearch').focus();
 }
