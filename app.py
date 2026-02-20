@@ -23,6 +23,7 @@ from functools import wraps
 # ─────────────────────────────────────────────
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-production")
+app.permanent_session_lifetime = timedelta(days=30)
 STRIPE_SECRET = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_PRICE_ID = os.environ.get("STRIPE_PRICE_ID", "")  # your monthly price ID
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
@@ -1201,6 +1202,7 @@ def login():
     if not user or not verify_password(user["password"], password):
         return jsonify({"error": "Invalid credentials"}), 401
 
+    session.permanent = True
     session["user_id"] = user["id"]
     session["username"] = user["username"]
     return jsonify({
