@@ -129,7 +129,7 @@ body {
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
+  overflow: hidden;
   transition: transform .3s;
   z-index: 100;
 }
@@ -156,6 +156,8 @@ body {
 .sidebar-nav {
     padding: 16px 12px;
     flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 .nav-label {
   font-size: .65rem;
