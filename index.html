@@ -3162,13 +3162,13 @@ async function loadAgencyDir() {
     const email = full.foia_email || '';
     if (isMobile) {
       tr.innerHTML = `
-        <td colspan="6" style="padding:10px 12px;border-bottom:1px solid var(--border);">
-          <div style="font-weight:600;margin-bottom:4px;">${esc(full.name)}</div>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <td colspan="6" style="padding:8px 12px;border-bottom:1px solid var(--border);">
+          <div style="font-weight:600;font-size:.75rem;margin-bottom:3px;">${esc(full.name)}</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <span class="badge badge-active">${esc(full.abbreviation||'—')}</span>
-            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);font-size:.78rem;">${esc(email)}</a>
+            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);font-size:.7rem;">${esc(email)}</a>
             <button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>`
-            : `<span style="color:var(--text-dim);font-style:italic;font-size:.78rem;">Call agency for email</span>`}
+            : `<span style="color:var(--text-dim);font-style:italic;font-size:.7rem;">Call agency for email</span>`}
           </div>
         </td>`;
     } else {
@@ -4156,7 +4156,7 @@ function escapeHtml(text) {
         oninput="filterAgencyDir()"
         style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
       <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
-        <table style="font-size:.78rem;">
+        <table style="font-size:.7rem;">
           <thead><tr><th>Agency</th><th>Code</th><th>Email</th><th class="hide-mobile">Phone</th><th></th></tr></thead>
           <tbody id="agencyDirBody"></tbody>
         </table>
