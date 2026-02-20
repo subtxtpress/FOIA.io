@@ -1054,6 +1054,9 @@ textarea {
   .pricing-tiers {
     grid-template-columns: 1fr;
   }
+  .hide-mobile {
+    display: none;
+  }
 }
 /* ── Subscribe page ────────────────────────────────────────── */
 .subscribe-card {
@@ -3156,9 +3159,9 @@ async function loadAgencyDir() {
     tr.innerHTML = `
       <td style="font-weight:600;padding:8px 12px;">${esc(full.name)}</td>
       <td style="padding:8px 12px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
-      <td style="padding:8px 12px;color:${full.foia_officer_title ? 'inherit' : 'var(--text-dim)'};">${esc(full.foia_officer_title||'Call agency for contact name')}</td>
+      <td class="hide-mobile" style="padding:8px 12px;color:${full.foia_officer_title ? 'inherit' : 'var(--text-dim)'};">${esc(full.foia_officer_title||'Call agency for contact name')}</td>
       <td style="padding:8px 12px;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
-      <td style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
+      <td class="hide-mobile" style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
       <td style="padding:8px 12px;">${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
     tbody.appendChild(tr);
   }
@@ -4138,7 +4141,7 @@ function escapeHtml(text) {
         style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
       <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
         <table style="font-size:.78rem;">
-          <thead><tr><th>Agency</th><th>Code</th><th>FOIA Officer</th><th>Email</th><th>Phone</th><th></th></tr></thead>
+          <thead><tr><th>Agency</th><th>Code</th><th class="hide-mobile">FOIA Officer</th><th>Email</th><th class="hide-mobile">Phone</th><th></th></tr></thead>
           <tbody id="agencyDirBody"></tbody>
         </table>
       </div>

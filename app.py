@@ -1322,14 +1322,18 @@ def dev_activate():
 @app.route("/api/agencies")
 @login_required
 def get_agencies():
-    db = get_db()
-    rows = db.execute(
-        """SELECT id, name, abbreviation, foia_officer_title, foia_email,
-                  foia_address, foia_phone, foia_fax, response_days, portal_url
-           FROM federal_agencies WHERE name NOT LIKE '%DO NOT USE%' ORDER BY name"""
-    ).fetchall()
-    db.close()
-    return jsonify([dict(r) for r in rows])
+    try:
+        db = get_db()
+        rows = db.execute(
+            """SELECT id, name, abbreviation, foia_officer_title, foia_email,
+                      foia_address, foia_phone, foia_fax, response_days, portal_url
+               FROM federal_agencies WHERE name NOT LIKE ? ORDER BY name""",
+            ('%DO NOT USE%',)
+        ).fetchall()
+        db.close()
+        return jsonify([dict(r) for r in rows])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/agencies/<int:agency_id>")
