@@ -4107,7 +4107,7 @@ async function loadLawEnforcementResults() {
          onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
       <div style="font-weight:500;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` — ${escapeHtml(a.agency_unit)}` : ''}</div>
       <div style="font-size:.8rem;color:var(--text-dim);margin-top:3px;">
-        ${a.agency_type || 'Unknown Type'} • ${a.state_abbr}${a.county_name ? ` • ${a.county_name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())} County` : ''} • <span style="font-family:monospace;">ORI: ${escapeHtml(a.ori)}</span>
+        ${a.agency_type || 'Unknown Type'} • ${a.state_abbr}${a.city_name ? ` • ${escapeHtml(a.city_name)}` : ''}${a.county_name ? ` • ${a.county_name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())} County` : ''}${a.ori ? ` • <span style="font-family:monospace;">ORI: ${escapeHtml(a.ori)}</span>` : ''}
       </div>
       <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;">📍 ${a.foia_address ? escapeHtml(a.foia_address) : '<span style="font-style:italic;">Call agency for mailing address</span>'}</div>
       ${a.foia_phone ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">📞 ${escapeHtml(a.foia_phone)}</div>` : ''}

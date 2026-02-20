@@ -1415,11 +1415,9 @@ def get_le_agencies():
         f"""
         SELECT
             id, ori, agency_name, agency_unit, state_abbr,
-            county_name, agency_type, population_group, population,
-            division_name, region_name, officer_ct, civilian_ct,
-            total_pe_ct, data_year,
+            county_name, city_name, agency_type, population,
             foia_officer, foia_email, foia_phone, foia_address, foia_portal_url,
-            notes
+            website, notes
         FROM state_local_agencies
         {where}
         ORDER BY state_abbr, agency_name
