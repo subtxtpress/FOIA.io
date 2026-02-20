@@ -1324,7 +1324,7 @@ def dev_activate():
 def get_agencies():
     db = get_db()
     rows = db.execute(
-        "SELECT id, name, abbreviation FROM federal_agencies WHERE name NOT LIKE '%DO NOT USE%' ORDER BY name"
+        "SELECT * FROM federal_agencies WHERE name NOT LIKE '%DO NOT USE%' ORDER BY name"
     ).fetchall()
     db.close()
     return jsonify([dict(r) for r in rows])

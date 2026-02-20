@@ -3143,12 +3143,10 @@ async function loadAgencies() {
 
 async function loadAgencyDir() {
   const tbody = document.getElementById('agencyDirBody');
-  if (agenciesData.length === 0) await loadAgencies();
-  // Fetch full detail for each
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-dim);">Loading…</td></tr>';
   const { data: agencies } = await api('GET', '/api/agencies');
   tbody.innerHTML = '';
-  for (const a of agencies) {
-    const { data: full } = await api('GET', `/api/agencies/${a.id}`);
+  for (const full of agencies) {
     const tr = document.createElement('tr');
     const email = full.foia_email || '';
     tr.innerHTML = `
