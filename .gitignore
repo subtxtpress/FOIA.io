@@ -9,3 +9,6 @@ dist/
 build/
 node_modules/
 *.db
+*.db-shm
+*.db-wal
+SQLite format 3*
