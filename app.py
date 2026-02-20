@@ -1327,11 +1327,11 @@ def get_agencies():
         rows = db.execute(
             """SELECT id, name, abbreviation, foia_officer_title, foia_email,
                       foia_address, foia_phone, foia_fax, response_days, portal_url
-               FROM federal_agencies WHERE name NOT LIKE ? ORDER BY name""",
-            ('%DO NOT USE%',)
+               FROM federal_agencies ORDER BY name"""
         ).fetchall()
         db.close()
-        return jsonify([dict(r) for r in rows])
+        results = [dict(r) for r in rows if 'DO NOT USE' not in r.get('name', '').upper()]
+        return jsonify(results)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
