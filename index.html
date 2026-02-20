@@ -3156,7 +3156,7 @@ async function loadAgencyDir() {
       <td style="padding:8px 12px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
       <td style="padding:8px 12px;color:${full.foia_officer_title ? 'inherit' : 'var(--text-dim)'};">${esc(full.foia_officer_title||'Call agency for contact name')}</td>
       <td style="padding:8px 12px;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
-      <td style="padding:8px 12px;color:${full.foia_phone ? 'inherit' : 'var(--text-dim)'};">${esc(full.foia_phone||'Call agency for phone')}</td>
+      <td style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
       <td style="padding:8px 12px;">${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
     tbody.appendChild(tr);
   }
@@ -3313,7 +3313,7 @@ async function onAgencyChange() {
   const { data } = await api('GET', `/api/agencies/${id}`);
   document.getElementById('aipTitle').textContent   = data.foia_officer_title || 'Call agency for contact name';
   document.getElementById('aipEmail').textContent   = data.foia_email || 'Call agency for email address';
-  document.getElementById('aipPhone').textContent   = data.foia_phone || 'Call agency for phone number';
+  document.getElementById('aipPhone').textContent   = data.foia_phone || '—';
   document.getElementById('aipFax').textContent     = data.foia_fax || 'Call agency for fax number';
   document.getElementById('aipAddress').textContent = data.foia_address || 'Call agency for mailing address';
   // Portal link
@@ -4086,7 +4086,7 @@ async function loadLawEnforcementResults() {
         ${a.agency_type || 'Unknown Type'} • ${a.state_abbr}${a.county_name ? ` • ${a.county_name} County` : ''} • <span style="font-family:monospace;">ORI: ${escapeHtml(a.ori)}</span>
       </div>
       <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;">📍 ${a.foia_address ? escapeHtml(a.foia_address) : '<span style="font-style:italic;">Call agency for mailing address</span>'}</div>
-      <div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">📞 ${a.foia_phone ? escapeHtml(a.foia_phone) : '<span style="font-style:italic;">Call agency for phone number</span>'}</div>
+      ${a.foia_phone ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">📞 ${escapeHtml(a.foia_phone)}</div>` : ''}
       ${a.foia_portal_url ? `<div style="margin-top:4px;" onclick="event.stopPropagation()"><a href="${escapeHtml(a.foia_portal_url)}" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--cyan);">🔗 Records Portal</a></div>` : ''}
     </div>
   `).join('');
