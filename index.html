@@ -4002,17 +4002,31 @@ document.addEventListener('keydown', e => {
 window.scrollTo(0, 0);
 
 // ── Overflow diagnostic ──────────────────────────────────────
-window.__findOverflow = function() {
-  const vw = document.documentElement.clientWidth;
-  const results = [];
-  document.querySelectorAll('*').forEach(el => {
-    const r = el.getBoundingClientRect();
-    if (r.right > vw + 1) {
-      results.push(el.tagName + (el.id?'#'+el.id:'') + ' right=' + Math.round(r.right) + ' overflow=+' + Math.round(r.right-vw) + 'px');
-    }
-  });
-  return results.join('\n') || 'No overflow';
-};
+(function() {
+  function showOverflow() {
+    const vw = document.documentElement.clientWidth;
+    const sw = document.documentElement.scrollWidth;
+    const results = [];
+    document.querySelectorAll('*').forEach(function(el) {
+      try {
+        var r = el.getBoundingClientRect();
+        if (r.right > vw + 1) {
+          var name = el.tagName + (el.id ? '#'+el.id : '');
+          results.push(name + ' >' + Math.round(r.right - vw) + 'px');
+        }
+      } catch(e) {}
+    });
+    var old = document.getElementById('__diag');
+    if (old) old.remove();
+    var div = document.createElement('div');
+    div.id = '__diag';
+    div.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#c00;color:#fff;font-size:12px;padding:10px;z-index:99999;word-break:break-all;white-space:pre-wrap;max-height:50vh;overflow-y:auto;font-family:monospace;';
+    div.textContent = 'vw='+vw+' scrollW='+sw+'\n'+(results.join('\n')||'NO OVERFLOW DETECTED');
+    document.body.appendChild(div);
+  }
+  setTimeout(showOverflow, 300);
+  setTimeout(showOverflow, 1500);
+})();
 
 // ── Law Enforcement Modal ────────────────────────────────────
 let leCurrentOffset = 0;
