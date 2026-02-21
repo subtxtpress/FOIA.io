@@ -28,9 +28,10 @@
 <meta name="description" content="FOIA Request Manager — track, generate, and appeal public records requests">
 <meta name="robots" content="noindex, nofollow">
 <!-- Favicon -->
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json">
 <!-- Security Headers -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
@@ -107,6 +108,7 @@ body {
   color: var(--text);
   font-family: var(--font);
   height: 100vh;
+  height: 100dvh;
   line-height: 1.6;
   transition: background .25s, color .25s;
 }
@@ -114,6 +116,7 @@ body {
 #app {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   align-items: stretch;
   width: 100vw;
   overflow-x: hidden;
@@ -619,6 +622,9 @@ textarea:focus {
   background: var(--bg2);
   box-shadow: 0 0 0 3px rgba(255,255,255,.05);
 }
+select {
+  padding-right: 32px;
+}
 select option {
   background: var(--bg3);
 }
@@ -781,6 +787,7 @@ textarea {
   width: 100%;
   max-width: 720px;
   max-height: 90vh;
+  max-height: 90dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -821,6 +828,9 @@ textarea {
 .modal-body {
   padding: 24px 28px;
   overflow-y: auto;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
   flex: 1;
   min-height: 0;
 }
@@ -1300,7 +1310,8 @@ textarea {
   }
   .modal {
     max-width: 100%;
-    max-height: 92vh;
+    max-height: 88vh;
+    max-height: 88dvh;
     border-radius: 12px 12px 0 0;
     width: 100vw;
     box-sizing: border-box;
@@ -1310,20 +1321,20 @@ textarea {
     padding: 0;
   }
   .modal-header {
-    padding: 16px 20px 12px;
+    padding: 12px 16px 10px;
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
   }
   .modal-header h2 {
-    font-size: .95rem;
+    font-size: .88rem;
   }
   .modal-header .request-letter-modal,
   .modal-header #appealModalSub {
     font-size: .72rem;
   }
   .modal-body {
-    padding: 16px 20px;
+    padding: 12px 16px;
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
@@ -1341,6 +1352,14 @@ textarea {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+  }
+  .filter-row input,
+  .filter-row select {
+    padding: 8px 10px;
+    font-size: .82rem;
+  }
+  .filter-row select {
+    padding-right: 28px;
   }
   .form-group {
     width: 100%;
@@ -1760,14 +1779,34 @@ textarea {
     font-size: .82rem;
     padding: 10px 10px;
   }
+  .filter-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-row select {
+    flex: 1;
+    width: auto;
+  }
   .modal {
     border-radius: 8px 8px 0 0;
+    max-height: 92dvh;
   }
   .modal-body {
-    padding: 14px 16px;
+    padding: 10px 14px;
   }
   .modal-header {
-    padding: 14px 16px 10px;
+    padding: 10px 14px 8px;
+  }
+  .sidebar-footer {
+    padding: 8px 10px;
+  }
+  .user-pill {
+    padding: 7px 9px;
+  }
+  #btnLogout {
+    padding: 5px;
+    font-size: .72rem;
+    margin-top: 6px;
   }
   .discard-save,
   .modal-body > .form-actions:last-child {
@@ -3165,12 +3204,12 @@ async function loadAgencyDir() {
     const email = full.foia_email || '';
     if (isMobile) {
       tr.innerHTML = `
-        <td colspan="6" style="padding:8px 12px;border-bottom:1px solid var(--border);">
-          <div style="font-weight:600;font-size:.75rem;margin-bottom:3px;">${esc(full.name)}</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="badge badge-active">${esc(full.abbreviation||'—')}</span>
-            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);font-size:.7rem;">${esc(email)}</a>
-            <button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>`
+        <td colspan="6" style="padding:10px 12px;border-bottom:1px solid var(--border);">
+          <div style="font-weight:600;font-size:.78rem;margin-bottom:5px;">${esc(full.name)}</div>
+          <div style="margin-bottom:4px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);font-size:.7rem;word-break:break-all;">${esc(email)}</a>
+            <button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email" style="flex-shrink:0;">⎘</button>`
             : `<span style="color:var(--text-dim);font-style:italic;font-size:.7rem;">Call agency for email</span>`}
           </div>
         </td>`;
@@ -3178,7 +3217,7 @@ async function loadAgencyDir() {
       tr.innerHTML = `
         <td style="font-weight:600;padding:8px 12px;">${esc(full.name)}</td>
         <td style="padding:8px 12px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
-        <td style="padding:8px 12px;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
+        <td style="padding:8px 12px;word-break:break-all;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
         <td class="hide-mobile" style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
         <td style="padding:8px 12px;">${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
     }
@@ -4109,15 +4148,15 @@ async function loadLawEnforcementResults() {
   // Render results
   const html = data.results.map(a => `
     <div onclick="selectLEAgency(${JSON.stringify(a).replace(/"/g, '&quot;')})"
-         style="padding:12px 4px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;"
+         style="padding:12px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;"
          onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
-      <div style="font-weight:500;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` — ${escapeHtml(a.agency_unit)}` : ''}</div>
-      <div style="font-size:.8rem;color:var(--text-dim);margin-top:3px;">
+      <div style="font-weight:500;word-break:break-word;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` — ${escapeHtml(a.agency_unit)}` : ''}</div>
+      <div style="font-size:.8rem;color:var(--text-dim);margin-top:3px;word-break:break-word;">
         ${a.agency_type || 'Unknown Type'} • ${a.state_abbr}${a.city_name ? ` • ${escapeHtml(a.city_name)}` : ''}${a.county_name ? ` • ${a.county_name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())} County` : ''}${a.ori ? ` • <span style="font-family:monospace;">ORI: ${escapeHtml(a.ori)}</span>` : ''}
       </div>
-      <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;">📍 ${a.foia_address ? escapeHtml(a.foia_address) : '<span style="font-style:italic;">Call agency for mailing address</span>'}</div>
+      <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;word-break:break-word;">📍 ${a.foia_address ? escapeHtml(a.foia_address) : '<span style="font-style:italic;">Call agency for mailing address</span>'}</div>
       ${a.foia_phone ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">📞 ${escapeHtml(a.foia_phone)}</div>` : ''}
-      ${a.foia_portal_url ? `<div style="margin-top:4px;" onclick="event.stopPropagation()"><a href="${escapeHtml(a.foia_portal_url)}" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--cyan);">🔗 Records Portal</a></div>` : ''}
+      ${a.foia_portal_url ? `<div style="margin-top:4px;" onclick="event.stopPropagation()"><a href="${escapeHtml(a.foia_portal_url)}" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--cyan);word-break:break-all;">🔗 Records Portal</a></div>` : ''}
     </div>
   `).join('');
   
@@ -4164,7 +4203,7 @@ function escapeHtml(text) {
       <input id="agencyDirSearch" type="text" placeholder="Search agencies..."
         oninput="filterAgencyDir()"
         style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
-      <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
+      <div class="table-wrap" style="max-height:55dvh;overflow-y:auto;">
         <table style="font-size:.7rem;">
           <thead><tr><th>Agency</th><th>Code</th><th>Email</th><th class="hide-mobile">Phone</th><th></th></tr></thead>
           <tbody id="agencyDirBody"></tbody>
@@ -4186,20 +4225,22 @@ function escapeHtml(text) {
       <button class="modal-close" onclick="closeLawEnforcementModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <input id="leSearch" type="text" placeholder="Search by name or county..." 
-               style="flex:1;min-width:200px;" onkeyup="searchLawEnforcement()">
-        <select id="leStateFilter" onchange="searchLawEnforcement()" style="min-width:120px;">
-          <option value="">All States</option>
-        </select>
-        <select id="leTypeFilter" onchange="searchLawEnforcement()" style="min-width:150px;">
-          <option value="">All Types</option>
-        </select>
+      <div class="filter-row" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        <input id="leSearch" type="text" placeholder="Search by name or county..."
+               style="width:100%;" onkeyup="searchLawEnforcement()">
+        <div style="display:flex;gap:8px;">
+          <select id="leStateFilter" onchange="searchLawEnforcement()" style="flex:1;min-width:0;">
+            <option value="">All States</option>
+          </select>
+          <select id="leTypeFilter" onchange="searchLawEnforcement()" style="flex:1;min-width:0;">
+            <option value="">All Types</option>
+          </select>
+        </div>
       </div>
       
       <div id="leStats" style="font-size:.85rem;color:var(--text-dim);margin-bottom:12px;"></div>
       
-      <div id="leResults" style="max-height:500px;overflow-y:auto;">
+      <div id="leResults" style="max-height:45dvh;overflow-y:auto;">
         <div style="text-align:center;padding:40px;color:var(--text-dim);">
           Enter search criteria or select filters
         </div>
@@ -4228,7 +4269,7 @@ function escapeHtml(text) {
       <input id="stateLawsSearch" type="text" placeholder="Search states..."
         oninput="filterStateLaws()"
         style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
-      <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
+      <div class="table-wrap" style="max-height:55dvh;overflow-y:auto;">
         <table>
           <thead><tr><th>State</th><th>Code</th><th>Law Name</th><th>Citation</th><th>Response Days</th><th>Appeal Days</th><th>Notes</th><th></th></tr></thead>
           <tbody id="stateLawsBody"></tbody>

@@ -186,6 +186,44 @@ def init_db():
     except Exception:
         pass  # column already exists
 
+    # Ensure state_local_agencies table exists (created by seed scripts, but
+    # we define it here so fresh installs have the correct schema before seeding)
+    try:
+        pk_sla = "SERIAL PRIMARY KEY" if db.is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"
+        db.execute(f"""
+            CREATE TABLE IF NOT EXISTS state_local_agencies (
+                id              {pk_sla},
+                ori             TEXT UNIQUE,
+                agency_name     TEXT NOT NULL,
+                agency_unit     TEXT,
+                state_abbr      TEXT NOT NULL,
+                county_name     TEXT,
+                city_name       TEXT,
+                agency_type     TEXT,
+                population      INTEGER,
+                foia_officer    TEXT,
+                foia_email      TEXT,
+                foia_phone      TEXT,
+                foia_address    TEXT,
+                foia_portal_url TEXT,
+                website         TEXT,
+                notes           TEXT,
+                created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        db.commit()
+    except Exception:
+        pass
+
+    # Add city_name and website columns to existing state_local_agencies tables
+    for col, col_type in [("city_name", "TEXT"), ("website", "TEXT")]:
+        try:
+            db.execute(f"ALTER TABLE state_local_agencies ADD COLUMN {col} {col_type}")
+            db.commit()
+        except Exception:
+            pass  # column already exists
+
     db.commit()
     db.close()
     _seed_agencies()
