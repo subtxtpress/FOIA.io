@@ -828,6 +828,9 @@ textarea {
 .modal-body {
   padding: 24px 28px;
   overflow-y: auto;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
   flex: 1;
   min-height: 0;
 }
@@ -3214,7 +3217,7 @@ async function loadAgencyDir() {
       tr.innerHTML = `
         <td style="font-weight:600;padding:8px 12px;">${esc(full.name)}</td>
         <td style="padding:8px 12px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
-        <td style="padding:8px 12px;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
+        <td style="padding:8px 12px;word-break:break-all;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
         <td class="hide-mobile" style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
         <td style="padding:8px 12px;">${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
     }
@@ -4147,13 +4150,13 @@ async function loadLawEnforcementResults() {
     <div onclick="selectLEAgency(${JSON.stringify(a).replace(/"/g, '&quot;')})"
          style="padding:12px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;"
          onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
-      <div style="font-weight:500;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` — ${escapeHtml(a.agency_unit)}` : ''}</div>
-      <div style="font-size:.8rem;color:var(--text-dim);margin-top:3px;">
+      <div style="font-weight:500;word-break:break-word;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` — ${escapeHtml(a.agency_unit)}` : ''}</div>
+      <div style="font-size:.8rem;color:var(--text-dim);margin-top:3px;word-break:break-word;">
         ${a.agency_type || 'Unknown Type'} • ${a.state_abbr}${a.city_name ? ` • ${escapeHtml(a.city_name)}` : ''}${a.county_name ? ` • ${a.county_name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())} County` : ''}${a.ori ? ` • <span style="font-family:monospace;">ORI: ${escapeHtml(a.ori)}</span>` : ''}
       </div>
-      <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;">📍 ${a.foia_address ? escapeHtml(a.foia_address) : '<span style="font-style:italic;">Call agency for mailing address</span>'}</div>
+      <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;word-break:break-word;">📍 ${a.foia_address ? escapeHtml(a.foia_address) : '<span style="font-style:italic;">Call agency for mailing address</span>'}</div>
       ${a.foia_phone ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">📞 ${escapeHtml(a.foia_phone)}</div>` : ''}
-      ${a.foia_portal_url ? `<div style="margin-top:4px;" onclick="event.stopPropagation()"><a href="${escapeHtml(a.foia_portal_url)}" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--cyan);">🔗 Records Portal</a></div>` : ''}
+      ${a.foia_portal_url ? `<div style="margin-top:4px;" onclick="event.stopPropagation()"><a href="${escapeHtml(a.foia_portal_url)}" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--cyan);word-break:break-all;">🔗 Records Portal</a></div>` : ''}
     </div>
   `).join('');
   
