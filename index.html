@@ -1346,6 +1346,14 @@ textarea {
     max-width: 100%;
     box-sizing: border-box;
   }
+  .filter-row input,
+  .filter-row select {
+    padding: 8px 10px;
+    font-size: .82rem;
+  }
+  .filter-row select {
+    padding-right: 28px;
+  }
   .form-group {
     width: 100%;
     max-width: 100%;
@@ -1763,6 +1771,14 @@ textarea {
   select, input, textarea {
     font-size: .82rem;
     padding: 10px 10px;
+  }
+  .filter-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-row select {
+    flex: 1;
+    width: auto;
   }
   .modal {
     border-radius: 8px 8px 0 0;
@@ -3169,12 +3185,12 @@ async function loadAgencyDir() {
     const email = full.foia_email || '';
     if (isMobile) {
       tr.innerHTML = `
-        <td colspan="6" style="padding:8px 12px;border-bottom:1px solid var(--border);">
-          <div style="font-weight:600;font-size:.75rem;margin-bottom:3px;">${esc(full.name)}</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="badge badge-active">${esc(full.abbreviation||'—')}</span>
-            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);font-size:.7rem;">${esc(email)}</a>
-            <button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>`
+        <td colspan="6" style="padding:10px 12px;border-bottom:1px solid var(--border);">
+          <div style="font-weight:600;font-size:.78rem;margin-bottom:5px;">${esc(full.name)}</div>
+          <div style="margin-bottom:4px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);font-size:.7rem;word-break:break-all;">${esc(email)}</a>
+            <button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email" style="flex-shrink:0;">⎘</button>`
             : `<span style="color:var(--text-dim);font-style:italic;font-size:.7rem;">Call agency for email</span>`}
           </div>
         </td>`;
@@ -4113,7 +4129,7 @@ async function loadLawEnforcementResults() {
   // Render results
   const html = data.results.map(a => `
     <div onclick="selectLEAgency(${JSON.stringify(a).replace(/"/g, '&quot;')})"
-         style="padding:12px 4px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;"
+         style="padding:12px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;"
          onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
       <div style="font-weight:500;">${escapeHtml(a.agency_name)}${a.agency_unit ? ` — ${escapeHtml(a.agency_unit)}` : ''}</div>
       <div style="font-size:.8rem;color:var(--text-dim);margin-top:3px;">
@@ -4190,20 +4206,20 @@ function escapeHtml(text) {
       <button class="modal-close" onclick="closeLawEnforcementModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <input id="leSearch" type="text" placeholder="Search by name or county..." 
-               style="flex:1;min-width:200px;" onkeyup="searchLawEnforcement()">
-        <select id="leStateFilter" onchange="searchLawEnforcement()" style="width:auto;min-width:120px;">
+      <div class="filter-row" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <input id="leSearch" type="text" placeholder="Search by name or county..."
+               style="flex:1;min-width:0;" onkeyup="searchLawEnforcement()">
+        <select id="leStateFilter" onchange="searchLawEnforcement()" style="width:auto;min-width:110px;">
           <option value="">All States</option>
         </select>
-        <select id="leTypeFilter" onchange="searchLawEnforcement()" style="width:auto;min-width:150px;">
+        <select id="leTypeFilter" onchange="searchLawEnforcement()" style="width:auto;min-width:130px;">
           <option value="">All Types</option>
         </select>
       </div>
       
       <div id="leStats" style="font-size:.85rem;color:var(--text-dim);margin-bottom:12px;"></div>
       
-      <div id="leResults" style="max-height:500px;overflow-y:auto;">
+      <div id="leResults" style="max-height:52vh;overflow-y:auto;">
         <div style="text-align:center;padding:40px;color:var(--text-dim);">
           Enter search criteria or select filters
         </div>
