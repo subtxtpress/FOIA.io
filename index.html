@@ -108,6 +108,7 @@ body {
   color: var(--text);
   font-family: var(--font);
   height: 100vh;
+  height: 100dvh;
   line-height: 1.6;
   transition: background .25s, color .25s;
 }
@@ -115,6 +116,7 @@ body {
 #app {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   align-items: stretch;
   width: 100vw;
   overflow-x: hidden;
@@ -785,6 +787,7 @@ textarea {
   width: 100%;
   max-width: 720px;
   max-height: 90vh;
+  max-height: 90dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1304,7 +1307,8 @@ textarea {
   }
   .modal {
     max-width: 100%;
-    max-height: 92vh;
+    max-height: 88vh;
+    max-height: 88dvh;
     border-radius: 12px 12px 0 0;
     width: 100vw;
     box-sizing: border-box;
@@ -1314,20 +1318,20 @@ textarea {
     padding: 0;
   }
   .modal-header {
-    padding: 16px 20px 12px;
+    padding: 12px 16px 10px;
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
   }
   .modal-header h2 {
-    font-size: .95rem;
+    font-size: .88rem;
   }
   .modal-header .request-letter-modal,
   .modal-header #appealModalSub {
     font-size: .72rem;
   }
   .modal-body {
-    padding: 16px 20px;
+    padding: 12px 16px;
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
@@ -1782,12 +1786,24 @@ textarea {
   }
   .modal {
     border-radius: 8px 8px 0 0;
+    max-height: 92dvh;
   }
   .modal-body {
-    padding: 14px 16px;
+    padding: 10px 14px;
   }
   .modal-header {
-    padding: 14px 16px 10px;
+    padding: 10px 14px 8px;
+  }
+  .sidebar-footer {
+    padding: 8px 10px;
+  }
+  .user-pill {
+    padding: 7px 9px;
+  }
+  #btnLogout {
+    padding: 5px;
+    font-size: .72rem;
+    margin-top: 6px;
   }
   .discard-save,
   .modal-body > .form-actions:last-child {
@@ -4184,7 +4200,7 @@ function escapeHtml(text) {
       <input id="agencyDirSearch" type="text" placeholder="Search agencies..."
         oninput="filterAgencyDir()"
         style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
-      <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
+      <div class="table-wrap" style="max-height:55dvh;overflow-y:auto;">
         <table style="font-size:.7rem;">
           <thead><tr><th>Agency</th><th>Code</th><th>Email</th><th class="hide-mobile">Phone</th><th></th></tr></thead>
           <tbody id="agencyDirBody"></tbody>
@@ -4219,7 +4235,7 @@ function escapeHtml(text) {
       
       <div id="leStats" style="font-size:.85rem;color:var(--text-dim);margin-bottom:12px;"></div>
       
-      <div id="leResults" style="max-height:52vh;overflow-y:auto;">
+      <div id="leResults" style="max-height:45dvh;overflow-y:auto;">
         <div style="text-align:center;padding:40px;color:var(--text-dim);">
           Enter search criteria or select filters
         </div>
@@ -4248,7 +4264,7 @@ function escapeHtml(text) {
       <input id="stateLawsSearch" type="text" placeholder="Search states..."
         oninput="filterStateLaws()"
         style="width:100%;padding:8px 12px;margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.9rem;box-sizing:border-box;">
-      <div class="table-wrap" style="max-height:55vh;overflow-y:auto;">
+      <div class="table-wrap" style="max-height:55dvh;overflow-y:auto;">
         <table>
           <thead><tr><th>State</th><th>Code</th><th>Law Name</th><th>Citation</th><th>Response Days</th><th>Appeal Days</th><th>Notes</th><th></th></tr></thead>
           <tbody id="stateLawsBody"></tbody>
