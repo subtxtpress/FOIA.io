@@ -4225,15 +4225,17 @@ function escapeHtml(text) {
       <button class="modal-close" onclick="closeLawEnforcementModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="filter-row" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <div class="filter-row" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
         <input id="leSearch" type="text" placeholder="Search by name or county..."
-               style="flex:1;min-width:0;" onkeyup="searchLawEnforcement()">
-        <select id="leStateFilter" onchange="searchLawEnforcement()" style="width:auto;min-width:110px;">
-          <option value="">All States</option>
-        </select>
-        <select id="leTypeFilter" onchange="searchLawEnforcement()" style="width:auto;min-width:130px;">
-          <option value="">All Types</option>
-        </select>
+               style="width:100%;" onkeyup="searchLawEnforcement()">
+        <div style="display:flex;gap:8px;">
+          <select id="leStateFilter" onchange="searchLawEnforcement()" style="flex:1;min-width:0;">
+            <option value="">All States</option>
+          </select>
+          <select id="leTypeFilter" onchange="searchLawEnforcement()" style="flex:1;min-width:0;">
+            <option value="">All Types</option>
+          </select>
+        </div>
       </div>
       
       <div id="leStats" style="font-size:.85rem;color:var(--text-dim);margin-bottom:12px;"></div>
