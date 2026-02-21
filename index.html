@@ -157,11 +157,30 @@ body {
   letter-spacing: 0.3px;
   font-weight: 500;
 }
+.sidebar-nav-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+.sidebar-nav-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: linear-gradient(to bottom, transparent, var(--bg2));
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity .25s;
+}
+.sidebar-nav-wrap.at-bottom::after {
+  opacity: 0;
+}
 .sidebar-nav {
-    padding: 16px 12px;
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
+  padding: 16px 12px;
+  height: 100%;
+  overflow-y: auto;
 }
 .nav-label {
   font-size: .65rem;
@@ -1512,7 +1531,6 @@ textarea {
   .sidebar-nav {
     padding: 12px 8px;
     overflow-y: auto;
-    min-height: 0;
   }
   .nav-label {
     padding: 6px 6px 3px;
@@ -1941,7 +1959,8 @@ textarea {
       <h1>FOIA.io</h1>
       <p>Request Manager</p>
     </div>
-    <div class="sidebar-nav">
+    <div class="sidebar-nav-wrap">
+    <div class="sidebar-nav" id="sidebarNav">
       <div class="nav-label">Overview</div>
       <button class="nav-item active" data-page="dashboard" onclick="nav('dashboard')">
         <span class="icon">△</span> Dashboard
@@ -1980,6 +1999,7 @@ textarea {
         <span class="icon">✭</span> State & Local Agencies
       </button>
     </div>
+    </div><!-- /.sidebar-nav-wrap -->
     <div class="sidebar-footer">
       <button id="btnTheme" onclick="toggleTheme()">
         <span id="themeIcon">☼</span>
@@ -3051,6 +3071,21 @@ function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').style.display = 'none';
 }
+
+// Sidebar nav scroll fade
+(function() {
+  const nav = document.getElementById('sidebarNav');
+  const wrap = nav && nav.parentElement;
+  if (!nav || !wrap) return;
+  function updateFade() {
+    const atBottom = nav.scrollTop + nav.clientHeight >= nav.scrollHeight - 4;
+    wrap.classList.toggle('at-bottom', atBottom);
+  }
+  nav.addEventListener('scroll', updateFade, { passive: true });
+  // Re-check whenever sidebar opens (content may have changed)
+  document.getElementById('sidebar').addEventListener('transitionend', updateFade);
+  updateFade();
+})();
 
 // ─────────────────────────────────────────────────────────────
 // Data loaders
