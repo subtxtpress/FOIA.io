@@ -1747,7 +1747,7 @@ def list_requests():
                FROM requests r
                LEFT JOIN federal_agencies fa ON r.agency_id = fa.id
                WHERE r.user_id=? AND r.status=?
-               ORDER BY r.created_at DESC""",
+               ORDER BY r.created_date DESC""",
             (session["user_id"], status_filter)
         ).fetchall()
     else:
@@ -1756,7 +1756,7 @@ def list_requests():
                FROM requests r
                LEFT JOIN federal_agencies fa ON r.agency_id = fa.id
                WHERE r.user_id=?
-               ORDER BY r.created_at DESC""",
+               ORDER BY r.created_date DESC""",
             (session["user_id"],)
         ).fetchall()
     db.close()
