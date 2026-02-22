@@ -4,40 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FOIA.io — Public records, professionally managed.</title>
-  <meta name="description" content="Track, draft, and follow up on FOIA requests — from first submission to final appeal. Free plan available.">
+  <meta name="description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers, and anyone who needs answers from government agencies.">
   <meta name="robots" content="index, follow">
 
   <!-- Open Graph -->
   <meta property="og:title" content="FOIA.io — Public records, professionally managed.">
-  <meta property="og:description" content="Track, draft, and follow up on FOIA requests — from first submission to final appeal.">
+  <meta property="og:description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers, and anyone who needs answers.">
   <meta property="og:image" content="https://foiaio-production.up.railway.app/img/og-image.png">
-  <meta property="og:url" content="https://foiaio-production.up.railway.app">
+  <meta property="og:url" content="https://foia.io">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FOIA.io">
+
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FOIA.io — Public records, professionally managed.">
-  <meta name="twitter:description" content="Track, draft, and follow up on FOIA requests — from first submission to final appeal.">
+  <meta name="twitter:description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers, and anyone who needs answers.">
   <meta name="twitter:image" content="https://foiaio-production.up.railway.app/img/og-image.png">
 
   <style>
-    /* ─── Design Tokens ─────────────────────────────────────── */
+    /* ─── Design Tokens ─────────────────────────────────────────── */
     :root {
       --bg:        #121212;
       --bg2:       #1e1e1e;
       --bg3:       #2a2a2a;
       --border:    #3a3a3a;
       --cyan:      #03DAC6;
-      --cyan-dim:  rgba(3, 218, 198, 0.12);
-      --cyan-glow: rgba(3, 218, 198, 0.25);
+      --cyan-dim:  rgba(3, 218, 198, 0.10);
+      --cyan-glow: rgba(3, 218, 198, 0.22);
       --text:      #FFFFFF;
       --text-dim:  #B3B3B3;
-      --error:     #CF6679;
+      --red:       #CF6679;
       --radius:    6px;
       --shadow:    0 2px 8px rgba(0,0,0,0.4);
       --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
       --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
     }
 
-    /* ─── Reset ─────────────────────────────────────────────── */
+    /* ─── Reset ──────────────────────────────────────────────────── */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -64,7 +67,23 @@
       text-decoration: none;
     }
 
-    /* ─── Utility ────────────────────────────────────────────── */
+    /* ─── Scrollbar ──────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb {
+      background: var(--cyan);
+      border-radius: 3px;
+      opacity: 0.7;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: #00f0d8; }
+
+    /* ─── Selection ──────────────────────────────────────────────── */
+    ::selection {
+      background: rgba(3, 218, 198, 0.25);
+      color: var(--text);
+    }
+
+    /* ─── Utility ─────────────────────────────────────────────────── */
     .container {
       width: 100%;
       max-width: 1100px;
@@ -84,21 +103,23 @@
       font-weight: 500;
       cursor: pointer;
       border: 1px solid transparent;
-      transition: all 0.18s ease;
+      transition: background 0.17s ease, border-color 0.17s ease, box-shadow 0.17s ease, transform 0.17s ease, color 0.17s ease;
       white-space: nowrap;
       letter-spacing: -0.01em;
+      text-decoration: none;
     }
 
     .btn-primary {
       background: var(--cyan);
       color: #000;
       border-color: var(--cyan);
+      font-weight: 600;
     }
 
     .btn-primary:hover {
       background: #00f0d8;
       border-color: #00f0d8;
-      box-shadow: 0 0 24px var(--cyan-glow);
+      box-shadow: 0 0 28px var(--cyan-glow);
       transform: translateY(-1px);
     }
 
@@ -116,16 +137,16 @@
     }
 
     .btn-lg {
-      padding: 14px 28px;
+      padding: 14px 30px;
       font-size: 1rem;
     }
 
-    /* ─── Nav ────────────────────────────────────────────────── */
+    /* ─── Nav ─────────────────────────────────────────────────────── */
     nav {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(18, 18, 18, 0.72);
+      background: rgba(18, 18, 18, 0.85);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(58, 58, 58, 0.6);
@@ -135,27 +156,35 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 60px;
+      height: 62px;
     }
 
     .nav-logo {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: -0.03em;
-      color: var(--text);
+      text-decoration: none;
+      flex-shrink: 0;
     }
 
     .nav-logo img {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      display: block;
     }
 
-    .nav-logo span {
-      color: var(--cyan);
+    .nav-wordmark {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .nav-wordmark span {
+      font-weight: 400;
+      color: var(--text-dim);
     }
 
     .nav-actions {
@@ -164,184 +193,180 @@
       gap: 10px;
     }
 
-    .nav-actions .btn {
-      padding: 8px 18px;
-      font-size: 0.875rem;
+    .nav-signin {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      transition: color 0.15s ease, background 0.15s ease;
     }
 
-    /* ─── Hero ───────────────────────────────────────────────── */
+    .nav-signin:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* ─── Hero ─────────────────────────────────────────────────────── */
     .hero {
       position: relative;
-      min-height: 92vh;
+      min-height: 90vh;
       display: flex;
       align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 100px;
       overflow: hidden;
-      padding: 80px 0 100px;
     }
 
-    /* Animated gradient orb */
+    /* Gradient orbs */
     .hero-orb {
       position: absolute;
-      top: -10%;
-      right: -5%;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-orb-1 {
       width: 700px;
       height: 700px;
-      border-radius: 50%;
-      background: radial-gradient(circle at center,
-        rgba(3, 218, 198, 0.18) 0%,
-        rgba(3, 218, 198, 0.06) 35%,
-        transparent 70%
-      );
-      filter: blur(60px);
-      animation: orbDrift 14s ease-in-out infinite alternate;
-      pointer-events: none;
+      top: -180px;
+      left: -200px;
+      background: radial-gradient(circle, rgba(3, 218, 198, 0.18) 0%, transparent 70%);
+      filter: blur(80px);
+      opacity: 0.9;
+      animation: orbFloat1 10s ease-in-out infinite alternate;
     }
 
     .hero-orb-2 {
-      position: absolute;
-      bottom: -15%;
-      left: -8%;
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      background: radial-gradient(circle at center,
-        rgba(3, 218, 198, 0.09) 0%,
-        rgba(3, 218, 198, 0.03) 40%,
-        transparent 70%
-      );
+      width: 600px;
+      height: 600px;
+      bottom: -120px;
+      right: -160px;
+      background: radial-gradient(circle, rgba(98, 71, 170, 0.22) 0%, transparent 70%);
       filter: blur(80px);
-      animation: orbDrift2 18s ease-in-out infinite alternate;
-      pointer-events: none;
+      opacity: 0.9;
+      animation: orbFloat2 12s ease-in-out infinite alternate;
     }
 
-    @keyframes orbDrift {
-      0%   { transform: translate(0, 0) scale(1); opacity: 0.8; }
-      33%  { transform: translate(-40px, 30px) scale(1.05); opacity: 1; }
-      66%  { transform: translate(20px, -40px) scale(0.97); opacity: 0.85; }
-      100% { transform: translate(-20px, 20px) scale(1.03); opacity: 0.9; }
+    @keyframes orbFloat1 {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(40px, 30px); }
     }
 
-    @keyframes orbDrift2 {
-      0%   { transform: translate(0, 0) scale(1); opacity: 0.6; }
-      50%  { transform: translate(50px, -30px) scale(1.08); opacity: 0.9; }
-      100% { transform: translate(-20px, 40px) scale(0.95); opacity: 0.7; }
-    }
-
-    /* Subtle grid overlay */
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(58,58,58,0.2) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(58,58,58,0.2) 1px, transparent 1px);
-      background-size: 60px 60px;
-      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%);
-      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%);
-      pointer-events: none;
+    @keyframes orbFloat2 {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(-35px, -25px); }
     }
 
     .hero-content {
       position: relative;
-      z-index: 2;
-      max-width: 720px;
+      z-index: 1;
+      max-width: 760px;
     }
 
+    /* Eyebrow badge */
     .hero-eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--cyan-dim);
-      border: 1px solid rgba(3, 218, 198, 0.25);
+      padding: 6px 14px;
+      background: rgba(3, 218, 198, 0.08);
+      border: 1px solid rgba(3, 218, 198, 0.2);
       border-radius: 100px;
-      padding: 5px 14px;
-      font-size: 0.8125rem;
-      font-weight: 500;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       color: var(--cyan);
-      letter-spacing: 0.02em;
       margin-bottom: 28px;
     }
 
-    .hero-eyebrow::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+    .hero-eyebrow-dot {
+      width: 7px;
+      height: 7px;
       background: var(--cyan);
+      border-radius: 50%;
       animation: pulse 2s ease-in-out infinite;
+      flex-shrink: 0;
     }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.5; transform: scale(0.8); }
+      50%       { opacity: 0.4; transform: scale(0.75); }
     }
 
-    .hero h1 {
-      font-size: clamp(2.25rem, 5.5vw, 4rem);
+    .hero-headline {
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
       font-weight: 700;
+      line-height: 1.1;
       letter-spacing: -0.04em;
-      line-height: 1.08;
+      color: var(--text);
       margin-bottom: 22px;
+    }
+
+    .hero-headline-accent {
+      position: relative;
+      display: inline-block;
       color: var(--text);
     }
 
-    .hero h1 em {
-      font-style: normal;
-      color: var(--cyan);
+    .hero-headline-accent::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan) 0%, rgba(3,218,198,0.3) 100%);
+      border-radius: 2px;
     }
 
     .hero-sub {
-      font-size: clamp(1rem, 2vw, 1.175rem);
+      font-size: 1.08rem;
       color: var(--text-dim);
-      max-width: 560px;
-      margin-bottom: 40px;
       line-height: 1.65;
+      max-width: 560px;
+      margin: 0 auto 36px;
     }
 
-    .hero-ctas {
+    .hero-cta {
       display: flex;
       align-items: center;
-      gap: 14px;
+      justify-content: center;
+      gap: 12px;
       flex-wrap: wrap;
       margin-bottom: 28px;
     }
 
-    .trust-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8125rem;
-      color: var(--text-dim);
+    .hero-trust {
+      font-size: 0.82rem;
+      color: #6a6a6a;
+      letter-spacing: 0.01em;
     }
 
-    .trust-badge span {
-      opacity: 0.5;
-    }
-
-    /* ─── Section Common ─────────────────────────────────────── */
-    section {
+    /* ─── Section shared ─────────────────────────────────────────── */
+    .section {
       padding: 100px 0;
     }
 
     .section-label {
-      font-size: 0.8125rem;
-      font-weight: 600;
+      font-size: 0.72rem;
+      font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--cyan);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
       margin-bottom: 14px;
     }
 
-    .section-heading {
-      font-size: clamp(1.75rem, 3vw, 2.5rem);
-      font-weight: 700;
-      letter-spacing: -0.035em;
-      line-height: 1.15;
-      margin-bottom: 16px;
-    }
-
     .section-sub {
-      font-size: 1.0625rem;
+      font-size: 1rem;
       color: var(--text-dim);
       max-width: 520px;
       line-height: 1.65;
@@ -351,389 +376,408 @@
       margin-bottom: 60px;
     }
 
-    /* ─── Features ───────────────────────────────────────────── */
-    #features {
-      background: var(--bg);
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2px;
-    }
-
-    .feature-card {
+    /* ─── How It Works ───────────────────────────────────────────── */
+    .how {
       background: var(--bg2);
-      padding: 40px 36px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .how-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .steps {
       position: relative;
-      transition: background 0.2s ease;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
     }
 
-    .feature-card:first-child {
-      border-radius: var(--radius) 0 0 0;
-    }
-    .feature-card:nth-child(2) {
-      border-radius: 0 var(--radius) 0 0;
-    }
-    .feature-card:nth-child(3) {
-      border-radius: 0 0 0 var(--radius);
-    }
-    .feature-card:last-child {
-      border-radius: 0 0 var(--radius) 0;
-    }
-
-    .feature-card:hover {
-      background: var(--bg3);
-    }
-
-    .feature-card::after {
+    /* Dashed connector between step numbers — desktop only */
+    .steps::before {
       content: '';
       position: absolute;
-      inset: 0;
-      border: 1px solid var(--border);
-      border-radius: inherit;
+      top: 26px; /* vertically centered on the step number */
+      left: calc(33.333% / 2 + 28px);
+      right: calc(33.333% / 2 + 28px);
+      height: 1px;
+      border-top: 2px dashed rgba(3, 218, 198, 0.25);
+      z-index: 0;
       pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s ease;
     }
 
-    .feature-card:hover::after {
-      opacity: 1;
+    .step {
+      position: relative;
+      z-index: 1;
+      padding: 0 32px;
+      text-align: center;
     }
 
-    .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      display: block;
-      line-height: 1;
+    .step:first-child { padding-left: 0; }
+    .step:last-child  { padding-right: 0; }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid rgba(3, 218, 198, 0.3);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.03em;
+      margin-bottom: 24px;
+      position: relative;
     }
 
-    .feature-title {
-      font-size: 1.0625rem;
+    .step-title {
+      font-size: 1.05rem;
       font-weight: 600;
       letter-spacing: -0.02em;
       margin-bottom: 10px;
-      color: var(--text);
     }
 
-    .feature-desc {
-      font-size: 0.9375rem;
+    .step-desc {
+      font-size: 0.9rem;
       color: var(--text-dim);
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
-    /* Features outer wrapper to provide unified border */
-    .features-wrapper {
+    /* ─── Features ───────────────────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .feat-card {
+      background: var(--bg2);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
+      border-radius: calc(var(--radius) + 4px);
+      padding: 32px;
+      transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      cursor: default;
     }
 
-    /* ─── Pricing ────────────────────────────────────────────── */
-    #pricing {
-      background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    .feat-card:hover {
+      background: var(--bg3);
+      border-color: rgba(3, 218, 198, 0.25);
+      box-shadow: 0 0 0 1px rgba(3, 218, 198, 0.08), var(--shadow);
+    }
+
+    .feat-emoji {
+      font-size: 1.6rem;
+      margin-bottom: 16px;
+      line-height: 1;
+      display: block;
+    }
+
+    .feat-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .feat-desc {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+
+    /* ─── Pricing ────────────────────────────────────────────────── */
+    .pricing {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pricing-header {
+      text-align: center;
+      margin-bottom: 56px;
     }
 
     .pricing-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      align-items: start;
+      gap: 20px;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
-    .pricing-card {
-      background: var(--bg2);
+    .price-card {
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: calc(var(--radius) + 4px);
       padding: 36px 32px;
       position: relative;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .pricing-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg);
+    .price-card-pro {
+      background: linear-gradient(160deg, rgba(3, 218, 198, 0.05) 0%, var(--bg) 60%);
+      border-color: rgba(3, 218, 198, 0.3);
+      box-shadow: 0 -3px 0 0 var(--cyan), var(--shadow-lg);
     }
 
-    .pricing-card.featured {
-      border-color: var(--cyan);
-      background: linear-gradient(135deg, #1a2825 0%, var(--bg2) 100%);
-      box-shadow: 0 0 0 1px var(--cyan), 0 10px 40px rgba(3, 218, 198, 0.12);
-    }
-
-    .pricing-card.featured:hover {
-      box-shadow: 0 0 0 1px var(--cyan), 0 16px 50px rgba(3, 218, 198, 0.2);
-    }
-
-    .badge {
+    .price-badge {
       display: inline-block;
-      background: var(--cyan);
-      color: #000;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
       padding: 3px 10px;
       border-radius: 100px;
-      margin-bottom: 20px;
-    }
-
-    .badge-ghost {
-      background: transparent;
-      color: var(--text-dim);
-      border: 1px solid var(--border);
-      font-weight: 500;
-      letter-spacing: 0.03em;
-    }
-
-    .pricing-name {
-      font-size: 1.125rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      letter-spacing: -0.02em;
-      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
     }
 
-    .pricing-price {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
+    .price-badge-free {
+      background: rgba(255,255,255,0.07);
+      color: var(--text-dim);
+    }
+
+    .price-badge-pro {
+      background: rgba(3, 218, 198, 0.15);
+      color: var(--cyan);
+    }
+
+    .price-name {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
       margin-bottom: 6px;
     }
 
     .price-amount {
-      font-size: 2.75rem;
+      font-size: 2.6rem;
       font-weight: 700;
-      letter-spacing: -0.05em;
-      line-height: 1;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 6px;
     }
 
-    .price-period {
-      font-size: 0.9375rem;
-      color: var(--text-dim);
+    .price-amount span {
+      font-size: 1rem;
       font-weight: 400;
+      color: var(--text-dim);
+      letter-spacing: 0;
     }
 
-    .pricing-tagline {
-      font-size: 0.875rem;
+    .price-period-note {
+      font-size: 0.82rem;
       color: var(--text-dim);
       margin-bottom: 28px;
-      min-height: 20px;
     }
 
-    .pricing-divider {
+    .price-divider {
       height: 1px;
       background: var(--border);
-      margin: 28px 0;
+      margin-bottom: 24px;
     }
 
-    .pricing-features {
+    .price-features {
       list-style: none;
       margin-bottom: 32px;
     }
 
-    .pricing-features li {
+    .price-features li {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      font-size: 0.9375rem;
+      font-size: 0.9rem;
       color: var(--text-dim);
-      padding: 7px 0;
-      line-height: 1.4;
+      margin-bottom: 12px;
+      line-height: 1.5;
     }
 
-    .pricing-features li::before {
-      content: '✓';
+    .price-features li .check {
       color: var(--cyan);
       font-weight: 700;
-      font-size: 0.875rem;
+      font-size: 0.95rem;
       flex-shrink: 0;
       margin-top: 1px;
     }
 
-    .pricing-features li.highlight {
-      color: var(--text);
-    }
-
-    .pricing-cta {
+    .price-cta {
       display: block;
       width: 100%;
       text-align: center;
-      padding: 13px 20px;
+      padding: 13px 24px;
       border-radius: var(--radius);
-      font-size: 0.9375rem;
-      font-weight: 500;
-      transition: all 0.18s ease;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.17s ease;
       border: 1px solid transparent;
       cursor: pointer;
-      letter-spacing: -0.01em;
     }
 
-    .cta-filled {
+    .price-cta-free {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-dim);
+    }
+
+    .price-cta-free:hover {
+      border-color: #555;
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .price-cta-pro {
       background: var(--cyan);
       color: #000;
       border-color: var(--cyan);
     }
 
-    .cta-filled:hover {
+    .price-cta-pro:hover {
       background: #00f0d8;
-      box-shadow: 0 0 24px var(--cyan-glow);
+      border-color: #00f0d8;
+      box-shadow: 0 0 28px var(--cyan-glow);
       transform: translateY(-1px);
     }
 
-    .cta-outline {
-      background: transparent;
-      color: var(--text);
-      border-color: var(--border);
+    /* ─── FAQ ────────────────────────────────────────────────────── */
+    .faq-wrap {
+      max-width: 700px;
+      margin: 0 auto;
     }
 
-    .cta-outline:hover {
-      border-color: #555;
-      background: rgba(255,255,255,0.04);
-      transform: translateY(-1px);
-    }
-
-    /* ─── FAQ ────────────────────────────────────────────────── */
-    #faq {
-      background: var(--bg);
+    .faq-header {
+      text-align: center;
+      margin-bottom: 48px;
     }
 
     .faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      background: var(--bg2);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: calc(var(--radius) + 4px);
       overflow: hidden;
     }
 
-    details.faq-item {
-      background: var(--bg2);
-    }
-
-    details.faq-item + details.faq-item {
+    details {
       border-top: 1px solid var(--border);
     }
 
-    details.faq-item summary {
+    details:first-child {
+      border-top: none;
+    }
+
+    summary {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 22px 28px;
-      font-size: 0.9375rem;
-      font-weight: 500;
-      color: var(--text);
-      cursor: pointer;
-      list-style: none;
       gap: 16px;
-      transition: background 0.15s ease;
+      padding: 20px 24px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      list-style: none;
       user-select: none;
+      transition: color 0.15s ease;
     }
 
-    details.faq-item summary::-webkit-details-marker {
-      display: none;
-    }
+    summary::-webkit-details-marker { display: none; }
 
-    details.faq-item summary::marker {
-      display: none;
-    }
-
-    details.faq-item summary:hover {
-      background: var(--bg3);
-    }
-
-    .faq-chevron {
-      flex-shrink: 0;
-      width: 20px;
-      height: 20px;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      transition: transform 0.22s ease, background 0.15s ease, border-color 0.15s ease;
-      line-height: 1;
-    }
-
-    details[open] .faq-chevron {
-      transform: rotate(180deg);
-      background: var(--cyan-dim);
-      border-color: rgba(3, 218, 198, 0.3);
+    summary:hover {
       color: var(--cyan);
     }
 
-    .faq-answer {
-      padding: 0 28px 24px;
-      font-size: 0.9375rem;
+    .chevron {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: var(--text-dim);
+      transition: transform 0.22s ease, color 0.15s ease;
+    }
+
+    details[open] summary .chevron {
+      transform: rotate(180deg);
+      color: var(--cyan);
+    }
+
+    details[open] summary {
+      color: var(--cyan);
+    }
+
+    .faq-body {
+      padding: 0 24px 20px;
+      font-size: 0.9rem;
       color: var(--text-dim);
       line-height: 1.7;
-      border-top: 1px solid var(--border);
-      margin: 0 28px;
-      padding-top: 20px;
     }
 
-    /* Animation for FAQ open */
-    details.faq-item[open] summary {
-      color: var(--text);
-    }
-
-    /* ─── Footer ─────────────────────────────────────────────── */
+    /* ─── Footer ─────────────────────────────────────────────────── */
     footer {
-      background: var(--bg2);
       border-top: 1px solid var(--border);
-      padding: 60px 0 40px;
-    }
-
-    .footer-inner {
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
+      padding: 60px 0 0;
     }
 
     .footer-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 40px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 48px;
+      padding-bottom: 48px;
     }
 
-    .footer-brand {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .footer-brand {}
 
     .footer-logo {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: -0.03em;
+      margin-bottom: 14px;
+      text-decoration: none;
     }
 
     .footer-logo img {
-      width: 24px;
-      height: 24px;
-      border-radius: 5px;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: block;
+    }
+
+    .footer-logo-text {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .footer-logo-text span {
+      font-weight: 400;
+      color: var(--text-dim);
     }
 
     .footer-tagline {
       font-size: 0.875rem;
       color: var(--text-dim);
-      max-width: 240px;
-      line-height: 1.5;
+      line-height: 1.6;
+      max-width: 220px;
+    }
+
+    .footer-col-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
     }
 
     .footer-links {
+      list-style: none;
       display: flex;
-      gap: 28px;
-      align-items: center;
+      flex-direction: column;
+      gap: 11px;
     }
 
     .footer-links a {
-      font-size: 0.875rem;
+      font-size: 0.9rem;
       color: var(--text-dim);
       transition: color 0.15s ease;
     }
@@ -743,359 +787,397 @@
     }
 
     .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding: 20px 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding-top: 28px;
-      border-top: 1px solid var(--border);
       flex-wrap: wrap;
     }
 
-    .footer-copy {
-      font-size: 0.8125rem;
-      color: #666;
-    }
-
-    .footer-disclaimer {
-      font-size: 0.8125rem;
+    .footer-bottom-left {
+      font-size: 0.8rem;
       color: #555;
-      font-style: italic;
     }
 
-    /* ─── Responsive ─────────────────────────────────────────── */
+    .footer-bottom-right {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-bottom-right a {
+      font-size: 0.8rem;
+      color: #555;
+      transition: color 0.15s ease;
+    }
+
+    .footer-bottom-right a:hover {
+      color: var(--text-dim);
+    }
+
+    /* ─── Responsive — 768px ─────────────────────────────────────── */
     @media (max-width: 768px) {
-      section {
-        padding: 72px 0;
-      }
+      .section { padding: 72px 0; }
 
-      .hero {
-        min-height: 80vh;
-        padding: 60px 0 80px;
-        align-items: flex-start;
-        padding-top: 80px;
-      }
+      /* Nav */
+      .nav-signin { display: none; }
 
-      .hero-orb {
-        width: 400px;
-        height: 400px;
-        top: -5%;
-        right: -20%;
-      }
+      /* Hero */
+      .hero { padding: 60px 24px 80px; min-height: 80vh; }
 
-      .hero-orb-2 {
-        width: 300px;
-        height: 300px;
-      }
-
-      .hero-ctas {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .hero-ctas .btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .features-grid {
+      /* Steps — hide connector line, go vertical */
+      .steps {
         grid-template-columns: 1fr;
+        gap: 40px;
       }
 
-      .feature-card:first-child  { border-radius: var(--radius) var(--radius) 0 0; }
-      .feature-card:nth-child(2) { border-radius: 0; }
-      .feature-card:nth-child(3) { border-radius: 0; }
-      .feature-card:last-child   { border-radius: 0 0 var(--radius) var(--radius); }
+      .steps::before { display: none; }
 
-      .pricing-grid {
-        grid-template-columns: 1fr;
+      .step {
+        text-align: left;
+        padding: 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
       }
 
+      .step-num {
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+
+      .step-body { flex: 1; }
+
+      /* Features */
+      .features-grid { grid-template-columns: 1fr; }
+
+      /* Pricing */
+      .pricing-grid { grid-template-columns: 1fr; }
+
+      /* Footer */
       .footer-top {
-        flex-direction: column;
-        gap: 28px;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
       }
 
-      .footer-links {
-        flex-wrap: wrap;
-        gap: 16px;
+      .footer-brand {
+        grid-column: 1 / -1;
       }
+    }
 
+    /* ─── Responsive — 480px ─────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .hero-headline { letter-spacing: -0.03em; }
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .hero-cta .btn { text-align: center; }
+      .btn-lg { padding: 14px 20px; }
+      .section { padding: 56px 0; }
+
+      .footer-top { grid-template-columns: 1fr; }
       .footer-bottom {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 12px;
       }
-
-      .nav-actions .btn-ghost {
-        display: none;
-      }
-
-      .faq-answer {
-        margin: 0 16px;
-        padding: 16px 12px 20px;
-      }
-
-      details.faq-item summary {
-        padding: 18px 20px;
-      }
-
-      .section-header {
-        margin-bottom: 40px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 0 16px;
-      }
-
-      .feature-card {
-        padding: 28px 24px;
-      }
-
-      .pricing-card {
-        padding: 28px 24px;
-      }
-    }
-
-    /* ─── Scrollbar ──────────────────────────────────────────── */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--bg);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-
-    /* ─── Selection ──────────────────────────────────────────── */
-    ::selection {
-      background: rgba(3, 218, 198, 0.25);
-      color: var(--text);
     }
   </style>
 </head>
 <body>
 
-  <!-- ═══ NAV ════════════════════════════════════════════════ -->
+  <!-- ─── NAV ─────────────────────────────────────────────────────── -->
   <nav>
-    <div class="container">
-      <div class="nav-inner">
-        <a href="/" class="nav-logo">
-          <img src="/icons/icon-180.png" alt="FOIA.io logo">
-          FOIA<span>.</span>io
-        </a>
-        <div class="nav-actions">
-          <a href="https://foiaio-production.up.railway.app/login" class="btn btn-ghost">Sign In</a>
-          <a href="https://foiaio-production.up.railway.app/register" class="btn btn-primary">Get Started</a>
-        </div>
+    <div class="container nav-inner">
+      <a href="#" class="nav-logo">
+        <img src="https://foiaio-production.up.railway.app/icons/icon-180.png"
+             alt="FOIA.io logo"
+             width="32" height="32">
+        <span class="nav-wordmark">FOIA<span>.io</span></span>
+      </a>
+      <div class="nav-actions">
+        <a href="https://foiaio-production.up.railway.app/login" class="nav-signin">Sign In</a>
+        <a href="https://foiaio-production.up.railway.app/register" class="btn btn-primary">Get Started →</a>
       </div>
     </div>
   </nav>
 
-  <!-- ═══ HERO ════════════════════════════════════════════════ -->
-  <section class="hero" aria-label="Hero">
-    <div class="hero-orb" aria-hidden="true"></div>
-    <div class="hero-orb-2" aria-hidden="true"></div>
+  <!-- ─── HERO ─────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        BETA · Free to start
+      </div>
+
+      <h1 class="hero-headline">
+        Public records,<br>
+        <span class="hero-headline-accent">professionally</span> managed.
+      </h1>
+
+      <p class="hero-sub">
+        Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers, and anyone who needs answers.
+      </p>
+
+      <div class="hero-cta">
+        <a href="https://foiaio-production.up.railway.app/register" class="btn btn-primary btn-lg">
+          Get Started Free
+        </a>
+        <a href="#features" class="btn btn-ghost btn-lg">See how it works ↓</a>
+      </div>
+
+      <p class="hero-trust">🔒 No credit card required &nbsp;·&nbsp; Free plan available &nbsp;·&nbsp; Works for federal &amp; state requests</p>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ──────────────────────────────────────────────── -->
+  <section class="section how" id="how-it-works">
     <div class="container">
-      <div class="hero-content">
-        <div class="hero-eyebrow">FOIA Request Management</div>
-        <h1>Public records,<br><em>professionally managed.</em></h1>
-        <p class="hero-sub">Track, draft, and follow up on FOIA requests — from first submission to final appeal.</p>
-        <div class="hero-ctas">
-          <a href="https://foiaio-production.up.railway.app/register" class="btn btn-primary btn-lg">Get Started Free</a>
-          <a href="#features" class="btn btn-ghost btn-lg">See How It Works</a>
+      <div class="how-header">
+        <p class="section-label">How it works</p>
+        <h2 class="section-title">Three steps from question to answer</h2>
+        <p class="section-sub" style="margin: 0 auto;">FOIA.io handles the complexity so you can focus on what matters — getting the records.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-body">
+            <h3 class="step-title">File your request</h3>
+            <p class="step-desc">Search our directory of 18,000+ agencies. We generate a professional request letter tailored to the agency's requirements.</p>
+          </div>
         </div>
-        <div class="trust-badge">
-          🔒 No credit card required <span>·</span> Free plan available
+
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-body">
+            <h3 class="step-title">Track the response</h3>
+            <p class="step-desc">FOIA.io monitors deadlines, flags overdue responses, and logs every communication automatically.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-body">
+            <h3 class="step-title">Appeal if needed</h3>
+            <p class="step-desc">If denied or delayed, generate a legally-grounded appeal letter in seconds — and know exactly when to escalate.</p>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══ FEATURES ════════════════════════════════════════════ -->
-  <section id="features" aria-label="Features">
+  <!-- ─── FEATURES ─────────────────────────────────────────────────── -->
+  <section class="section" id="features">
     <div class="container">
       <div class="section-header">
         <p class="section-label">Features</p>
-        <h2 class="section-heading">Everything you need to<br>file with confidence.</h2>
-        <p class="section-sub">From your first request to a final appeal, FOIA.io handles the complexity so you can focus on the story.</p>
+        <h2 class="section-title">Everything you need, nothing you don't.</h2>
+        <p class="section-sub">A purpose-built toolkit for public records work — not a generic project manager with FOIA bolted on.</p>
       </div>
-      <div class="features-wrapper">
-        <div class="features-grid">
 
-          <div class="feature-card">
-            <span class="feature-icon" aria-hidden="true">📋</span>
-            <h3 class="feature-title">Track every request</h3>
-            <p class="feature-desc">One dashboard for all your open, active, and closed requests. Never lose track of a deadline again.</p>
-          </div>
+      <div class="features-grid">
+        <div class="feat-card">
+          <span class="feat-emoji">📋</span>
+          <h3 class="feat-title">One dashboard for everything</h3>
+          <p class="feat-desc">Track open, active, and closed requests in a single view. Deadline indicators, status badges, and notes — organized the way you work.</p>
+        </div>
 
-          <div class="feature-card">
-            <span class="feature-icon" aria-hidden="true">✍️</span>
-            <h3 class="feature-title">AI-drafted letters</h3>
-            <p class="feature-desc">Generate professional FOIA request letters and appeal letters in seconds — tailored to the agency.</p>
-          </div>
+        <div class="feat-card">
+          <span class="feat-emoji">✍️</span>
+          <h3 class="feat-title">AI-generated letters</h3>
+          <p class="feat-desc">Generate a professional FOIA request or appeal letter in seconds. Our AI knows each agency's preferences and formats letters accordingly.</p>
+        </div>
 
-          <div class="feature-card">
-            <span class="feature-icon" aria-hidden="true">⏰</span>
-            <h3 class="feature-title">Deadline reminders</h3>
-            <p class="feature-desc">Know exactly where you stand. Automatic deadline tracking based on federal and state response windows.</p>
-          </div>
+        <div class="feat-card">
+          <span class="feat-emoji">🏛️</span>
+          <h3 class="feat-title">18,000+ agency directory</h3>
+          <p class="feat-desc">Search federal, state, and local agencies by name, state, or type. Every entry includes contact info, FOIA email, and portal links.</p>
+        </div>
 
-          <div class="feature-card">
-            <span class="feature-icon" aria-hidden="true">🏛️</span>
-            <h3 class="feature-title">Agency directory</h3>
-            <p class="feature-desc">Search 18,000+ federal, state, and local agencies — with contact info, FOIA emails, and portal links.</p>
-          </div>
-
+        <div class="feat-card">
+          <span class="feat-emoji">⏱️</span>
+          <h3 class="feat-title">Deadline intelligence</h3>
+          <p class="feat-desc">Federal law gives agencies 20 business days to respond. FOIA.io tracks it for you — and tells you exactly when to follow up or escalate.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══ PRICING ═════════════════════════════════════════════ -->
-  <section id="pricing" aria-label="Pricing">
+  <!-- ─── PRICING ───────────────────────────────────────────────────── -->
+  <section class="section pricing" id="pricing">
     <div class="container">
-      <div class="section-header">
+      <div class="pricing-header">
         <p class="section-label">Pricing</p>
-        <h2 class="section-heading">Simple, transparent pricing.</h2>
-        <p class="section-sub">Start free. Upgrade when you need more. No surprise charges.</p>
+        <h2 class="section-title">Start free. Go further when you need to.</h2>
+        <p class="section-sub" style="margin: 0 auto;">No paywalls on the core workflow. Upgrade when your volume demands it.</p>
       </div>
-      <div class="pricing-grid">
 
+      <div class="pricing-grid">
         <!-- Free -->
-        <div class="pricing-card">
-          <div class="badge badge-ghost">Free forever</div>
-          <p class="pricing-name">Free</p>
-          <div class="pricing-price">
-            <span class="price-amount">$0</span>
-            <span class="price-period">/ month</span>
-          </div>
-          <p class="pricing-tagline">Get started with no commitment.</p>
-          <div class="pricing-divider"></div>
-          <ul class="pricing-features">
-            <li>Up to 3 active requests</li>
-            <li>AI letter drafting</li>
-            <li>Agency directory access</li>
-            <li>Basic deadline tracking</li>
+        <div class="price-card">
+          <div class="price-badge price-badge-free">Forever free</div>
+          <div class="price-name">Free</div>
+          <div class="price-amount">$0<span> / month</span></div>
+          <p class="price-period-note">No credit card required</p>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Up to 3 active requests</li>
+            <li><span class="check">✓</span> AI request letter drafting</li>
+            <li><span class="check">✓</span> Agency directory (18,000+ agencies)</li>
+            <li><span class="check">✓</span> Deadline tracking</li>
+            <li><span class="check">✓</span> Request notes &amp; file uploads</li>
           </ul>
-          <a href="https://foiaio-production.up.railway.app/register" class="pricing-cta cta-outline">Start Free</a>
+          <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-free">Start for free →</a>
         </div>
 
         <!-- Pro -->
-        <div class="pricing-card featured">
-          <div class="badge">Most Popular</div>
-          <p class="pricing-name">Pro</p>
-          <div class="pricing-price">
-            <span class="price-amount">$9</span>
-            <span class="price-period">/ month</span>
-          </div>
-          <p class="pricing-tagline">For journalists, attorneys, and power users.</p>
-          <div class="pricing-divider"></div>
-          <ul class="pricing-features">
-            <li class="highlight">Everything in Free, plus:</li>
-            <li>Unlimited requests</li>
-            <li>Priority AI generation</li>
-            <li>Export to PDF</li>
-            <li>Early access to new features</li>
+        <div class="price-card price-card-pro">
+          <div class="price-badge price-badge-pro">Most Popular</div>
+          <div class="price-name">Pro</div>
+          <div class="price-amount">$9<span> / month</span></div>
+          <p class="price-period-note">or $90 / year — save 2 months</p>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Everything in Free</li>
+            <li><span class="check">✓</span> Unlimited active requests</li>
+            <li><span class="check">✓</span> PDF export</li>
+            <li><span class="check">✓</span> Priority AI generation</li>
+            <li><span class="check">✓</span> Early access to new features</li>
           </ul>
-          <a href="https://foiaio-production.up.railway.app/register" class="pricing-cta cta-filled">Upgrade to Pro</a>
+          <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-pro">Get Pro →</a>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- ═══ FAQ ══════════════════════════════════════════════════ -->
-  <section id="faq" aria-label="Frequently asked questions">
+  <!-- ─── FAQ ───────────────────────────────────────────────────────── -->
+  <section class="section" id="faq">
     <div class="container">
-      <div class="section-header">
+      <div class="faq-header">
         <p class="section-label">FAQ</p>
-        <h2 class="section-heading">Common questions.</h2>
+        <h2 class="section-title">Common questions</h2>
       </div>
-      <div class="faq-list" role="list">
 
-        <details class="faq-item">
-          <summary>
-            What is a FOIA request?
-            <span class="faq-chevron" aria-hidden="true">▾</span>
-          </summary>
-          <div class="faq-answer">
-            The Freedom of Information Act (FOIA) gives the public the right to request records from federal agencies. Many states have similar laws for state and local agencies.
-          </div>
-        </details>
+      <div class="faq-wrap">
+        <div class="faq-list">
 
-        <details class="faq-item">
-          <summary>
-            Do I need an account to use FOIA.io?
-            <span class="faq-chevron" aria-hidden="true">▾</span>
-          </summary>
-          <div class="faq-answer">
-            Yes, a free account is required to track and manage requests. Sign up takes under a minute.
-          </div>
-        </details>
+          <details>
+            <summary>
+              What is a FOIA request?
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div class="faq-body">
+              The Freedom of Information Act gives the public the right to request records from federal agencies. Most states have equivalent laws for state and local agencies — often called open records laws or sunshine laws.
+            </div>
+          </details>
 
-        <details class="faq-item">
-          <summary>
-            Is my data private?
-            <span class="faq-chevron" aria-hidden="true">▾</span>
-          </summary>
-          <div class="faq-answer">
-            Yes. Your requests and documents are visible only to you. We do not share your data with third parties.
-          </div>
-        </details>
+          <details>
+            <summary>
+              Is FOIA.io affiliated with the government?
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div class="faq-body">
+              No. FOIA.io is an independent tool to help you manage your own requests. It is not affiliated with any federal or state agency.
+            </div>
+          </details>
 
-        <details class="faq-item">
-          <summary>
-            What's the difference between the free and Pro plans?
-            <span class="faq-chevron" aria-hidden="true">▾</span>
-          </summary>
-          <div class="faq-answer">
-            The free plan supports up to 3 active requests. Pro removes that limit and adds PDF export and priority AI generation.
-          </div>
-        </details>
+          <details>
+            <summary>
+              What types of agencies can I request from?
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div class="faq-body">
+              Federal agencies (covered by FOIA), and state and local agencies covered by state open records laws. Our directory includes 18,000+ agencies across all 50 states.
+            </div>
+          </details>
 
-        <details class="faq-item">
-          <summary>
-            Can I use this for state and local FOIA requests?
-            <span class="faq-chevron" aria-hidden="true">▾</span>
-          </summary>
-          <div class="faq-answer">
-            Yes. FOIA.io supports federal requests and state/local public records requests (often called "sunshine laws" or open records requests).
-          </div>
-        </details>
+          <details>
+            <summary>
+              What happens if my request is denied?
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div class="faq-body">
+              FOIA.io can help you draft an administrative appeal. Many denials are successfully overturned on appeal — the tool generates a legally-grounded appeal letter tailored to the specific reason for denial.
+            </div>
+          </details>
 
+          <details>
+            <summary>
+              Is my account data private?
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div class="faq-body">
+              Yes. Your requests, letters, and documents are visible only to you and are not shared with any third party.
+            </div>
+          </details>
+
+          <details>
+            <summary>
+              How is the free plan limited?
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div class="faq-body">
+              The free plan allows up to 3 active requests at a time. All core features — AI letter drafting, the agency directory, deadline tracking, and notes — are included. Upgrading to Pro removes the request limit and adds PDF export and priority AI generation.
+            </div>
+          </details>
+
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══ FOOTER ═══════════════════════════════════════════════ -->
+  <!-- ─── FOOTER ────────────────────────────────────────────────────── -->
   <footer>
     <div class="container">
-      <div class="footer-inner">
-        <div class="footer-top">
-          <div class="footer-brand">
-            <a href="/" class="footer-logo">
-              <img src="/icons/icon-180.png" alt="FOIA.io logo">
-              FOIA.io
-            </a>
-            <p class="footer-tagline">Public records, professionally managed.</p>
-          </div>
-          <nav class="footer-links" aria-label="Footer navigation">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Contact</a>
-          </nav>
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="footer-logo">
+            <img src="https://foiaio-production.up.railway.app/icons/icon-180.png"
+                 alt="FOIA.io logo"
+                 width="28" height="28">
+            <span class="footer-logo-text">FOIA<span>.io</span></span>
+          </a>
+          <p class="footer-tagline">Public records, professionally managed.</p>
         </div>
-        <div class="footer-bottom">
-          <p class="footer-copy">© 2026 FOIA.io. All rights reserved.</p>
-          <p class="footer-disclaimer">Not affiliated with any government agency.</p>
+
+        <div>
+          <p class="footer-col-title">Product</p>
+          <ul class="footer-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="footer-col-title">Account</p>
+          <ul class="footer-links">
+            <li><a href="https://foiaio-production.up.railway.app/login">Sign In</a></li>
+            <li><a href="https://foiaio-production.up.railway.app/register">Register</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-bottom-left">© 2026 FOIA.io &nbsp;·&nbsp; Not affiliated with any government agency.</p>
+        <div class="footer-bottom-right">
+          <a href="https://foiaio-production.up.railway.app/privacy">Privacy Policy</a>
+          <a href="https://foiaio-production.up.railway.app/terms">Terms of Service</a>
         </div>
       </div>
     </div>
