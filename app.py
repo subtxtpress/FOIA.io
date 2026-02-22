@@ -176,12 +176,69 @@ def init_db():
         )
     """)
 
+    # ── Organizations (Newsroom tier) ──────────────────────────────────────
+    db.execute(f"""
+        CREATE TABLE IF NOT EXISTS organizations (
+            id              {pk},
+            name            TEXT NOT NULL,
+            slug            TEXT NOT NULL UNIQUE,
+            stripe_customer_id  TEXT,
+            stripe_sub_id       TEXT,
+            subscription_status TEXT DEFAULT 'inactive',
+            created_by      INTEGER REFERENCES users(id),
+            created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # ── Org membership ──────────────────────────────────────────────────────
+    db.execute(f"""
+        CREATE TABLE IF NOT EXISTS org_members (
+            id          {pk},
+            org_id      INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+            user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            role        TEXT NOT NULL DEFAULT 'editor',  -- owner | editor | viewer
+            invited_by  INTEGER REFERENCES users(id),
+            joined_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(org_id, user_id)
+        )
+    """)
+
+    # ── Org invitations ─────────────────────────────────────────────────────
+    db.execute(f"""
+        CREATE TABLE IF NOT EXISTS org_invitations (
+            id          {pk},
+            org_id      INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+            email       TEXT NOT NULL,
+            token       TEXT NOT NULL UNIQUE,
+            role        TEXT NOT NULL DEFAULT 'editor',
+            invited_by  INTEGER NOT NULL REFERENCES users(id),
+            expires_at  TIMESTAMP NOT NULL,
+            accepted_at TIMESTAMP,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     # Commit all CREATE TABLE statements before seeding
     db.commit()
 
     # ── Migrations (safe to run on existing DBs) ───────────────────────────
     try:
         db.execute("ALTER TABLE users ADD COLUMN lifetime_free INTEGER DEFAULT 0")
+        db.commit()
+    except Exception:
+        pass  # column already exists
+
+    # Newsroom: add org_id and assigned_to to requests
+    for col, col_type in [("org_id", "INTEGER"), ("assigned_to", "INTEGER")]:
+        try:
+            db.execute(f"ALTER TABLE requests ADD COLUMN {col} {col_type}")
+            db.commit()
+        except Exception:
+            pass  # column already exists
+
+    # Newsroom: add org_id to users (active org context)
+    try:
+        db.execute("ALTER TABLE users ADD COLUMN active_org_id INTEGER")
         db.commit()
     except Exception:
         pass  # column already exists
@@ -1262,11 +1319,23 @@ def me():
         return jsonify({"authenticated": False})
     db = get_db()
     user = db.execute(
-        "SELECT id, username, email, subscription_status FROM users WHERE id=?",
+        "SELECT id, username, email, subscription_status, active_org_id FROM users WHERE id=?",
         (session["user_id"],)
     ).fetchone()
+    # Load org memberships
+    orgs = db.execute("""
+        SELECT o.id, o.name, o.slug, m.role
+        FROM organizations o
+        JOIN org_members m ON m.org_id = o.id
+        WHERE m.user_id = ?
+        ORDER BY o.name
+    """, (session["user_id"],)).fetchall()
     db.close()
-    return jsonify({"authenticated": True, **dict(user)})
+    return jsonify({
+        "authenticated": True,
+        **dict(user),
+        "orgs": [dict(o) for o in orgs]
+    })
 
 
 # ─────────────────────────────────────────────
@@ -1775,8 +1844,14 @@ def list_requests():
 def get_request(req_id):
     db = get_db()
     row = db.execute(
-        "SELECT * FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
+        "SELECT r.*, u.username as filed_by, a.username as assigned_to_username "
+        "FROM requests r "
+        "JOIN users u ON u.id = r.user_id "
+        "LEFT JOIN users a ON a.id = r.assigned_to "
+        "WHERE r.id=? AND (r.user_id=? OR r.org_id IN ("
+        "  SELECT org_id FROM org_members WHERE user_id=?"
+        "))",
+        (req_id, session["user_id"], session["user_id"])
     ).fetchone()
     db.close()
     if not row:
@@ -1784,7 +1859,7 @@ def get_request(req_id):
     d = dict(row)
     if d.get("deadline_date"):
         d["days_since_deadline"] = days_since(d["deadline_date"])
-    return jsonify(d)
+    return jsonify({"request": d})
 
 
 @app.route("/api/requests/<int:req_id>", methods=["DELETE"])
@@ -2264,8 +2339,10 @@ def delete_attachment(att_id):
 def get_action_log(req_id):
     db = get_db()
     row = db.execute(
-        "SELECT id FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
+        "SELECT id FROM requests WHERE id=? AND (user_id=? OR org_id IN ("
+        "  SELECT org_id FROM org_members WHERE user_id=?"
+        "))",
+        (req_id, session["user_id"], session["user_id"])
     ).fetchone()
     if not row:
         db.close()
@@ -2334,6 +2411,362 @@ def download_docx(req_id):
         as_attachment=True,
         download_name=f"{row['foia_number']}.docx"
     )
+
+
+# ─────────────────────────────────────────────
+# Newsroom / Organization routes
+# ─────────────────────────────────────────────
+
+def _slug_from_name(name):
+    """Generate a URL-safe slug from an org name."""
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    return slug or "org"
+
+
+def _user_org_role(db, user_id, org_id):
+    """Return the user's role in the org, or None if not a member."""
+    row = db.execute(
+        "SELECT role FROM org_members WHERE org_id=? AND user_id=?",
+        (org_id, user_id)
+    ).fetchone()
+    return row["role"] if row else None
+
+
+def _assert_org_member(db, user_id, org_id, min_role=None):
+    """Return role or raise 403. min_role='owner' enforces ownership."""
+    role = _user_org_role(db, user_id, org_id)
+    if not role:
+        db.close()
+        abort(403)
+    if min_role == "owner" and role != "owner":
+        db.close()
+        abort(403)
+    return role
+
+
+@app.route("/api/org/create", methods=["POST"])
+@login_required
+def org_create():
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip()
+    if not name:
+        return jsonify({"error": "Organization name is required"}), 400
+    if len(name) > 80:
+        return jsonify({"error": "Name must be 80 characters or fewer"}), 400
+
+    base_slug = _slug_from_name(name)
+    db = get_db()
+
+    # Ensure unique slug
+    slug = base_slug
+    suffix = 2
+    while db.execute("SELECT id FROM organizations WHERE slug=?", (slug,)).fetchone():
+        slug = f"{base_slug}-{suffix}"
+        suffix += 1
+
+    db.execute(
+        "INSERT INTO organizations (name, slug, created_by, subscription_status) VALUES (?,?,?,?)",
+        (name, slug, session["user_id"], "active")
+    )
+    db.commit()
+    org = db.execute("SELECT id FROM organizations WHERE slug=?", (slug,)).fetchone()
+    org_id = org["id"]
+
+    db.execute(
+        "INSERT INTO org_members (org_id, user_id, role) VALUES (?,?,?)",
+        (org_id, session["user_id"], "owner")
+    )
+    # Set as user's active org
+    db.execute("UPDATE users SET active_org_id=? WHERE id=?", (org_id, session["user_id"]))
+    db.commit()
+    db.close()
+    return jsonify({"ok": True, "org": {"id": org_id, "name": name, "slug": slug, "role": "owner"}})
+
+
+@app.route("/api/org/list", methods=["GET"])
+@login_required
+def org_list():
+    db = get_db()
+    rows = db.execute("""
+        SELECT o.id, o.name, o.slug, m.role
+        FROM organizations o
+        JOIN org_members m ON m.org_id = o.id
+        WHERE m.user_id = ?
+        ORDER BY o.name
+    """, (session["user_id"],)).fetchall()
+    db.close()
+    return jsonify({"orgs": [dict(r) for r in rows]})
+
+
+@app.route("/api/org/<int:org_id>", methods=["GET"])
+@login_required
+def org_get(org_id):
+    db = get_db()
+    _assert_org_member(db, session["user_id"], org_id)
+    org = db.execute("SELECT id, name, slug, subscription_status FROM organizations WHERE id=?", (org_id,)).fetchone()
+    if not org:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+    members = db.execute("""
+        SELECT u.id, u.username, u.email, m.role, m.joined_at
+        FROM org_members m
+        JOIN users u ON u.id = m.user_id
+        WHERE m.org_id = ?
+        ORDER BY m.role DESC, u.username
+    """, (org_id,)).fetchall()
+    db.close()
+    return jsonify({"org": dict(org), "members": [dict(m) for m in members]})
+
+
+@app.route("/api/org/<int:org_id>/switch", methods=["POST"])
+@login_required
+def org_switch(org_id):
+    """Set the user's active org context (or null to go personal)."""
+    db = get_db()
+    if org_id != 0:
+        _assert_org_member(db, session["user_id"], org_id)
+    db.execute("UPDATE users SET active_org_id=? WHERE id=?",
+               (org_id if org_id != 0 else None, session["user_id"]))
+    db.commit()
+    db.close()
+    return jsonify({"ok": True, "active_org_id": org_id or None})
+
+
+@app.route("/api/org/<int:org_id>/invite", methods=["POST"])
+@login_required
+def org_invite(org_id):
+    data = request.get_json() or {}
+    email = (data.get("email") or "").strip().lower()
+    role = data.get("role", "editor")
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+    if role not in ("owner", "editor", "viewer"):
+        return jsonify({"error": "Invalid role"}), 400
+
+    db = get_db()
+    _assert_org_member(db, session["user_id"], org_id, min_role="owner")
+
+    # Check if already a member
+    existing_user = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
+    if existing_user:
+        already = db.execute(
+            "SELECT id FROM org_members WHERE org_id=? AND user_id=?",
+            (org_id, existing_user["id"])
+        ).fetchone()
+        if already:
+            db.close()
+            return jsonify({"error": "User is already a member"}), 409
+
+    # Expire old pending invites for same email+org
+    db.execute(
+        "DELETE FROM org_invitations WHERE org_id=? AND email=? AND accepted_at IS NULL",
+        (org_id, email)
+    )
+
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.utcnow() + timedelta(days=7)
+    db.execute(
+        "INSERT INTO org_invitations (org_id, email, token, role, invited_by, expires_at) VALUES (?,?,?,?,?,?)",
+        (org_id, email, token, role, session["user_id"], expires_at.isoformat())
+    )
+    db.commit()
+
+    org = db.execute("SELECT name FROM organizations WHERE id=?", (org_id,)).fetchone()
+    db.close()
+
+    invite_url = f"{request.host_url}join?token={token}"
+    return jsonify({"ok": True, "invite_url": invite_url, "org_name": org["name"]})
+
+
+@app.route("/api/org/join", methods=["POST"])
+@login_required
+def org_join():
+    """Accept an org invitation via token."""
+    data = request.get_json() or {}
+    token = (data.get("token") or "").strip()
+    if not token:
+        return jsonify({"error": "Token is required"}), 400
+
+    db = get_db()
+    inv = db.execute("""
+        SELECT i.*, o.name as org_name
+        FROM org_invitations i
+        JOIN organizations o ON o.id = i.org_id
+        WHERE i.token=? AND i.accepted_at IS NULL AND i.expires_at > ?
+    """, (token, datetime.utcnow().isoformat())).fetchone()
+
+    if not inv:
+        db.close()
+        return jsonify({"error": "Invitation is invalid or has expired"}), 400
+
+    user = db.execute("SELECT email FROM users WHERE id=?", (session["user_id"],)).fetchone()
+    if user["email"].lower() != inv["email"].lower():
+        db.close()
+        return jsonify({"error": "This invitation was sent to a different email address"}), 403
+
+    # Check not already a member
+    already = db.execute(
+        "SELECT id FROM org_members WHERE org_id=? AND user_id=?",
+        (inv["org_id"], session["user_id"])
+    ).fetchone()
+    if already:
+        db.close()
+        return jsonify({"error": "You are already a member of this organization"}), 409
+
+    db.execute(
+        "INSERT INTO org_members (org_id, user_id, role, invited_by) VALUES (?,?,?,?)",
+        (inv["org_id"], session["user_id"], inv["role"], inv["invited_by"])
+    )
+    db.execute(
+        "UPDATE org_invitations SET accepted_at=? WHERE id=?",
+        (datetime.utcnow().isoformat(), inv["id"])
+    )
+    db.execute("UPDATE users SET active_org_id=? WHERE id=?", (inv["org_id"], session["user_id"]))
+    db.commit()
+    db.close()
+    return jsonify({"ok": True, "org_name": inv["org_name"], "org_id": inv["org_id"], "role": inv["role"]})
+
+
+@app.route("/api/org/<int:org_id>/requests", methods=["GET"])
+@login_required
+def org_requests(org_id):
+    """Shared request dashboard — all requests filed under this org."""
+    db = get_db()
+    _assert_org_member(db, session["user_id"], org_id)
+
+    status_filter = request.args.get("status")
+    params = [org_id]
+    where = "WHERE r.org_id=?"
+    if status_filter:
+        where += " AND r.status=?"
+        params.append(status_filter)
+
+    rows = db.execute(f"""
+        SELECT r.*,
+               u.username as filed_by,
+               a.username as assigned_to_username
+        FROM requests r
+        JOIN users u ON u.id = r.user_id
+        LEFT JOIN users a ON a.id = r.assigned_to
+        {where}
+        ORDER BY r.updated_at DESC
+    """, params).fetchall()
+    db.close()
+    return jsonify({"requests": [dict(r) for r in rows]})
+
+
+@app.route("/api/requests/<int:req_id>/assign", methods=["PATCH"])
+@login_required
+def request_assign(req_id):
+    """Assign a request to a team member (org context required)."""
+    data = request.get_json() or {}
+    assignee_id = data.get("assigned_to")  # None to unassign
+
+    db = get_db()
+    row = db.execute("SELECT org_id, user_id FROM requests WHERE id=?", (req_id,)).fetchone()
+    if not row:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+
+    if not row["org_id"]:
+        db.close()
+        return jsonify({"error": "This request is not part of an organization"}), 400
+
+    _assert_org_member(db, session["user_id"], row["org_id"])
+
+    if assignee_id is not None:
+        # Verify assignee is a member of the same org
+        member = db.execute(
+            "SELECT id FROM org_members WHERE org_id=? AND user_id=?",
+            (row["org_id"], assignee_id)
+        ).fetchone()
+        if not member:
+            db.close()
+            return jsonify({"error": "Assignee is not a member of this organization"}), 400
+
+    db.execute(
+        "UPDATE requests SET assigned_to=?, updated_at=? WHERE id=?",
+        (assignee_id, datetime.utcnow().isoformat(), req_id)
+    )
+    db.commit()
+    db.close()
+    note = f"Assigned to user #{assignee_id}" if assignee_id else "Assignment cleared"
+    log_action(req_id, session["user_id"], note)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/org/<int:org_id>/members/<int:user_id>", methods=["PATCH"])
+@login_required
+def org_member_update(org_id, user_id):
+    """Change a member's role."""
+    data = request.get_json() or {}
+    role = data.get("role")
+    if role not in ("owner", "editor", "viewer"):
+        return jsonify({"error": "Invalid role"}), 400
+
+    db = get_db()
+    _assert_org_member(db, session["user_id"], org_id, min_role="owner")
+
+    if user_id == session["user_id"]:
+        db.close()
+        return jsonify({"error": "Cannot change your own role"}), 400
+
+    db.execute(
+        "UPDATE org_members SET role=? WHERE org_id=? AND user_id=?",
+        (role, org_id, user_id)
+    )
+    db.commit()
+    db.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/org/<int:org_id>/members/<int:user_id>", methods=["DELETE"])
+@login_required
+def org_member_remove(org_id, user_id):
+    """Remove a member from the org."""
+    db = get_db()
+    caller_role = _assert_org_member(db, session["user_id"], org_id)
+
+    # Owners can remove anyone (except themselves). Members can remove themselves.
+    if user_id != session["user_id"] and caller_role != "owner":
+        db.close()
+        abort(403)
+
+    db.execute("DELETE FROM org_members WHERE org_id=? AND user_id=?", (org_id, user_id))
+    # Clear active org if the removed user had this set
+    db.execute(
+        "UPDATE users SET active_org_id=NULL WHERE id=? AND active_org_id=?",
+        (user_id, org_id)
+    )
+    db.commit()
+    db.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/org/invite-info", methods=["GET"])
+def org_invite_info():
+    """Return public info about a pending invite (for the join page)."""
+    token = (request.args.get("token") or "").strip()
+    if not token:
+        return jsonify({"error": "Token is required"}), 400
+
+    db = get_db()
+    inv = db.execute("""
+        SELECT i.email, i.role, i.expires_at, i.accepted_at, o.name as org_name
+        FROM org_invitations i
+        JOIN organizations o ON o.id = i.org_id
+        WHERE i.token=?
+    """, (token,)).fetchone()
+    db.close()
+
+    if not inv:
+        return jsonify({"error": "Invitation not found"}), 404
+    if inv["accepted_at"]:
+        return jsonify({"error": "Invitation already accepted"}), 410
+    if inv["expires_at"] < datetime.utcnow().isoformat():
+        return jsonify({"error": "Invitation has expired"}), 410
+
+    return jsonify({"org_name": inv["org_name"], "email": inv["email"], "role": inv["role"]})
 
 
 # ─────────────────────────────────────────────

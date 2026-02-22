@@ -1094,11 +1094,11 @@ textarea {
 /* ── Pricing page ──────────────────────────────────────────── */
 .pricing-tiers {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 360px));
   gap: 16px;
   margin-bottom: 32px;
 }
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .pricing-tiers {
     grid-template-columns: 1fr;
   }
@@ -1996,6 +1996,15 @@ textarea {
       <h1>FOIA.io</h1>
       <p>Request Manager</p>
     </div>
+
+    <!-- Org switcher -->
+    <div id="orgSwitcher" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border);">
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:4px;">Workspace</div>
+      <select id="orgSelect" onchange="switchOrg(this.value)"
+        style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:.8rem;padding:5px 8px;border-radius:6px;cursor:pointer;">
+      </select>
+    </div>
+
     <div class="sidebar-nav-wrap">
     <div class="sidebar-nav" id="sidebarNav">
       <div class="nav-label">Overview</div>
@@ -2018,6 +2027,15 @@ textarea {
       <button class="nav-item" data-page="closed-requests" onclick="nav('closed-requests')">
         <span class="icon">☑︎</span> Closed Requests
         <span class="nav-badge" id="badgeClosed" style="background:var(--bg3);color:var(--text-dim);">0</span>
+      </button>
+
+      <!-- Newsroom section (shown when user belongs to an org) -->
+      <div class="nav-label" id="newsroomNavSection" style="display:none;">Newsroom</div>
+      <button class="nav-item" id="sharedDashNavBtn" data-page="shared-dashboard" onclick="nav('shared-dashboard')" style="display:none;">
+        <span class="icon">⊞</span> Shared Dashboard
+      </button>
+      <button class="nav-item" id="teamNavBtn" data-page="team" onclick="nav('team')" style="display:none;">
+        <span class="icon">◎</span> Team
       </button>
 
       <div class="nav-label" id="adminNavSection" style="display:none;">Admin</div>
@@ -2376,12 +2394,73 @@ textarea {
         </div>
       </div>
 
+      <!-- ── Shared Dashboard (Newsroom) ──────────────────────── -->
+      <div id="page-shared-dashboard" class="page">
+        <div style="max-width:1100px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+            <div>
+              <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:2px;" id="sharedDashTitle">Shared Dashboard</h2>
+              <p style="font-size:.82rem;color:var(--text-dim);">All requests filed under this organization.</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select id="sharedStatusFilter" onchange="loadSharedDashboard()"
+                style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:.8rem;padding:5px 8px;border-radius:6px;">
+                <option value="">All statuses</option>
+                <option value="new">New</option>
+                <option value="active">Active</option>
+                <option value="appealed">Appealed</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+          </div>
+          <div id="sharedDashContent">
+            <div style="color:var(--text-dim);font-size:.9rem;padding:40px;text-align:center;">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Team Settings (Newsroom) ──────────────────────────── -->
+      <div id="page-team" class="page">
+        <div style="max-width:700px;">
+          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Team</h2>
+          <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">Manage your organization's members and invitations.</p>
+
+          <!-- Create org prompt (shown when user has no orgs) -->
+          <div id="teamNoOrg" class="card" style="display:none;">
+            <h3 style="font-size:.95rem;font-weight:700;margin-bottom:8px;">Create a Newsroom</h3>
+            <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:16px;">Set up a shared workspace so your team can collaborate on FOIA requests.</p>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Organization Name</label>
+              <input type="text" id="newOrgName" placeholder="e.g. The Daily Sentinel Investigations" maxlength="80">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="createOrg()">Create Organization</button>
+          </div>
+
+          <!-- Members panel (shown when user belongs to an org) -->
+          <div id="teamOrgPanel" style="display:none;">
+            <div class="card" style="margin-bottom:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                <div class="card-title" style="margin:0;">Members</div>
+                <button class="btn btn-primary btn-sm" id="inviteBtn" onclick="openInviteModal()" style="display:none;">+ Invite</button>
+              </div>
+              <div id="teamMemberList">
+                <div style="color:var(--text-dim);font-size:.85rem;">Loading…</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Pending Invitations</div>
+              <div id="teamInviteInfo" style="font-size:.82rem;color:var(--text-dim);">No pending invitations.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── Plans & Pricing ───────────────────────────────────── -->
       <div id="page-pricing" class="page">
-        <div style="max-width:900px;">
 
           <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Plans &amp; Pricing</h2>
-          <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:28px;">Built for the full spectrum — from solo freelancers to institutional investigative teams.</p>
+          <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:28px;">No paywalls on the core workflow. Upgrade when your volume demands it.</p>
 
           <!-- Tier cards -->
           <div class="pricing-tiers">
@@ -2390,15 +2469,15 @@ textarea {
             <div class="card" style="position:relative;display:flex;flex-direction:column;">
               <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Tier 1</div>
               <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Core</h3>
-              <p style="font-size:.82rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;">The baseline every reporter needs. A clean, reliable FOIA workspace that eliminates deadline anxiety.</p>
+              <div style="font-size:1.6rem;font-weight:800;margin-bottom:2px;">$0<span style="font-size:.85rem;font-weight:400;color:var(--text-dim);">/month</span></div>
+              <p style="font-size:.75rem;color:var(--text-dim);margin-bottom:12px;">No credit card required</p>
               <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
                 <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Unlimited FOIA requests</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Deadline + appeal-window tracking</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Notes, timelines, communication logs</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Basic CSV export</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Email support</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Automatic deadline tracking</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Notes and file attachments</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Full action history on every request</li>
               </ul>
-              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Best for: freelancers, students, early-stage investigations.</div>
+              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Everything you need to file and track your requests.</div>
             </div>
 
             <!-- Pro -->
@@ -2406,65 +2485,35 @@ textarea {
               <div style="position:absolute;top:-1px;right:16px;background:var(--cyan);color:#000;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 10px;border-radius:0 0 6px 6px;">Most Popular</div>
               <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px;">Tier 2</div>
               <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Pro</h3>
-              <p style="font-size:.82rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;">The real workhorse. For reporters managing multiple beats, chronic offenders, and long-running investigations.</p>
-              <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:10px;font-style:italic;">Everything in Core, plus:</div>
+              <div style="font-size:1.6rem;font-weight:800;margin-bottom:2px;">$5<span style="font-size:.85rem;font-weight:400;color:var(--text-dim);">/month</span></div>
+              <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:12px;font-style:italic;">Everything in Core, plus:</div>
               <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Multi-agency portfolio analytics</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Delay + denial pattern detection</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Rolling production tracking</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Advanced search + filters</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Bulk editing + batch updates</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Priority support</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Professional appeal letters</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Priority email support</li>
                 <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Early access to new features</li>
               </ul>
-              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Best for: investigative reporters, nonprofit researchers, anyone juggling dozens of active requests.</div>
+              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">For when an agency ignores, delays, or denies your request.</div>
             </div>
 
             <!-- Newsroom -->
-            <div class="card" style="position:relative;display:flex;flex-direction:column;">
+            <div class="card" style="position:relative;display:flex;flex-direction:column;opacity:.7;">
+              <div style="position:absolute;top:-1px;right:16px;background:var(--text-dim);color:#000;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 10px;border-radius:0 0 6px 6px;">Coming soon</div>
               <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Tier 3</div>
               <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Newsroom</h3>
-              <p style="font-size:.82rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;">Built for teams that need shared visibility, accountability, and continuity across beats and staff turnover.</p>
-              <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:10px;font-style:italic;">Everything in Pro, plus:</div>
+              <div style="font-size:1.6rem;font-weight:800;margin-bottom:2px;">$15<span style="font-size:.85rem;font-weight:400;color:var(--text-dim);">/month</span></div>
+              <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:12px;font-style:italic;">Everything in Pro, plus:</div>
               <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
                 <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Multi-user accounts</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Shared dashboards + team visibility</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Request ownership + handoff workflows</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Internal notes + editorial flags</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Organization-level analytics</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Custom exports + audit bundles</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Dedicated support channel</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Shared request dashboard</li>
+                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Team notes and handoff tools</li>
               </ul>
-              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Best for: newsrooms, legal teams, transparency orgs, multi-reporter investigative units.</div>
+              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Built for newsrooms managing requests across beats.</div>
             </div>
 
-          </div>
-
-          <!-- Add-ons -->
-          <div class="card" style="margin-bottom:32px;">
-            <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:14px;">Optional Add-Ons</h3>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
-              <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;">
-                <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">Secure Document Vault</div>
-                <div style="font-size:.78rem;color:var(--text-dim);">Encrypted storage for productions and agency responses.</div>
-              </div>
-              <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;">
-                <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">Agency Contact Database</div>
-                <div style="font-size:.78rem;color:var(--text-dim);">Preloaded and maintained directory of FOIA contacts.</div>
-              </div>
-              <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;">
-                <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">Appeals Toolkit Integration</div>
-                <div style="font-size:.78rem;color:var(--text-dim);">Auto-generate appeal drafts directly from denial logs.</div>
-              </div>
-              <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;">
-                <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">API Access</div>
-                <div style="font-size:.78rem;color:var(--text-dim);">For custom dashboards, pipelines, or integrations.</div>
-              </div>
-            </div>
           </div>
 
           <!-- Feature comparison table -->
-          <div class="card">
+          <div class="card" style="max-width:860px;">
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:16px;">Feature Comparison</h3>
             <div class="table-wrap">
               <table style="width:100%;font-size:.82rem;">
@@ -2478,32 +2527,22 @@ textarea {
                 </thead>
                 <tbody>
                   <tr><td>Unlimited FOIA Requests</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Deadline Tracking</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Appeal Window Tracking</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Notes + Communication Logs</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>CSV Export</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Automatic Deadline Tracking</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Notes and File Attachments</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Full Action History</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
                   <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="4">Pro &amp; Above</td></tr>
-                  <tr><td>Portfolio Analytics</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Delay/Denial Pattern Detection</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Rolling Production Tracking</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Advanced Search + Filters</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Bulk Editing</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Priority Support</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Professional Appeal Letters</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Priority Email Support</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
                   <tr><td>Early Feature Access</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
                   <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="4">Newsroom Only</td></tr>
                   <tr><td>Multi-User Accounts</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Shared Dashboards</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Request Ownership + Handoff</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Internal Notes + Editorial Flags</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Organization-Level Analytics</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Custom Exports + Audit Bundles</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Dedicated Support Channel</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Shared Request Dashboard</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Team Notes and Handoff Tools</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-        </div>
       </div>
 
       <!-- ── Help (About / Getting Started / Support) ─────────── -->
@@ -2728,6 +2767,61 @@ textarea {
   </div><!-- /main -->
 </div><!-- /app -->
 
+<!-- ── Invite Member Modal ───────────────────────────────────── -->
+<div class="modal-overlay" id="inviteModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header">
+      <div class="modal-title">Invite Team Member</div>
+      <button class="modal-close" onclick="document.getElementById('inviteModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="inviteEmail" placeholder="colleague@newsroom.com" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="inviteRole" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;width:100%;">
+          <option value="editor">Editor — can file and edit requests</option>
+          <option value="viewer">Viewer — read-only access</option>
+          <option value="owner">Owner — full admin access</option>
+        </select>
+      </div>
+      <div id="inviteResult" style="display:none;" class="card" style="background:var(--bg3);padding:10px;border-radius:6px;margin-top:4px;">
+        <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:4px;">Invite link (send this to your colleague):</div>
+        <div id="inviteLinkText" style="font-size:.78rem;word-break:break-all;color:var(--cyan);"></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="copyInviteLink()">Copy Link</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('inviteModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="sendInvite()">Generate Invite Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Assign Request Modal ──────────────────────────────────── -->
+<div class="modal-overlay" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <div class="modal-title">Assign Request</div>
+      <button class="modal-close" onclick="document.getElementById('assignModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Assign to</label>
+        <select id="assignSelect" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;width:100%;">
+          <option value="">— Unassigned —</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('assignModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmAssign()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Beta Notice Modal ─────────────────────────────────────── -->
 <div class="modal-overlay" id="betaModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal" style="max-width:480px;">
@@ -2911,6 +3005,13 @@ let agenciesData = [];
 let pendingLetterId = null;
 let pendingUpdateId = null;
 
+// Newsroom state
+let currentOrgs = [];       // [{id, name, slug, role}]
+let activeOrgId = null;     // null = personal workspace
+let orgMembers = [];        // members of the active org (for assign modal)
+let pendingAssignReqId = null;
+let pendingInviteLink = '';
+
 // ─────────────────────────────────────────────────────────────
 // API helper
 // ─────────────────────────────────────────────────────────────
@@ -2954,7 +3055,7 @@ async function doLogin() {
     showAuthError(data.error || 'Login failed');
     return;
   }
-  bootApp(data.username, data.subscription_status);
+  await bootFromSession();
 }
 
 async function doRegister() {
@@ -2967,7 +3068,14 @@ async function doRegister() {
     showAuthError(data.error || 'Registration failed');
     return;
   }
-  bootApp(data.username, data.subscription_status || 'active');
+  await bootFromSession();
+}
+
+async function bootFromSession() {
+  const { data } = await api('GET', '/api/auth/me');
+  if (data.authenticated) {
+    bootApp(data.username, data.subscription_status, data.orgs || [], data.active_org_id || null);
+  }
 }
 
 async function doLogout() {
@@ -3007,13 +3115,18 @@ function toggleTheme() {
   applyTheme(current === 'dark' ? 'light' : 'dark');
 }
 
-async function bootApp(username, subStatus) {
+async function bootApp(username, subStatus, orgs, activeOrgIdFromServer) {
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   window.scrollTo(0, 0);
   document.getElementById('userName').textContent = username;
   document.getElementById('userAvatar').textContent = username[0].toUpperCase();
   initTheme();
+
+  // Newsroom: load orgs into sidebar
+  currentOrgs = orgs || [];
+  activeOrgId = activeOrgIdFromServer || null;
+  renderOrgSwitcher();
 
   // ── TEST MODE: subscription gate disabled ──────────────────
   await loadAgencies();
@@ -3049,19 +3162,249 @@ async function devActivate() {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Newsroom
+// ─────────────────────────────────────────────────────────────
+
+function renderOrgSwitcher() {
+  const switcher = document.getElementById('orgSwitcher');
+  const select   = document.getElementById('orgSelect');
+  const newsroomSection = document.getElementById('newsroomNavSection');
+  const sharedBtn = document.getElementById('sharedDashNavBtn');
+  const teamBtn   = document.getElementById('teamNavBtn');
+
+  if (!currentOrgs.length) {
+    switcher.style.display = 'none';
+    newsroomSection.style.display = 'none';
+    sharedBtn.style.display = 'none';
+    teamBtn.style.display = 'none';
+    return;
+  }
+
+  // Build select options
+  select.innerHTML = '<option value="0">Personal workspace</option>' +
+    currentOrgs.map(o => `<option value="${o.id}" ${o.id === activeOrgId ? 'selected' : ''}>${esc(o.name)}</option>`).join('');
+
+  switcher.style.display = '';
+  newsroomSection.style.display = '';
+  sharedBtn.style.display = activeOrgId ? '' : 'none';
+  teamBtn.style.display = '';
+}
+
+async function switchOrg(orgIdStr) {
+  const orgId = parseInt(orgIdStr) || 0;
+  const { status } = await api('POST', `/api/org/${orgId}/switch`, {});
+  if (status !== 200) { toast('Could not switch workspace', 'error'); return; }
+  activeOrgId = orgId || null;
+  renderOrgSwitcher();
+  await refreshAllData();
+  if (activeOrgId && currentPage === 'dashboard') await loadSharedDashboard().then(() => nav('shared-dashboard'));
+  else nav('dashboard');
+}
+
+async function loadSharedDashboard() {
+  if (!activeOrgId) return;
+  const org = currentOrgs.find(o => o.id === activeOrgId);
+  if (org) document.getElementById('sharedDashTitle').textContent = org.name + ' — Requests';
+
+  const statusFilter = document.getElementById('sharedStatusFilter')?.value || '';
+  const params = statusFilter ? `?status=${statusFilter}` : '';
+  const { status, data } = await api('GET', `/api/org/${activeOrgId}/requests${params}`);
+  const el = document.getElementById('sharedDashContent');
+  if (status !== 200) { el.innerHTML = `<p style="color:var(--red)">Could not load requests.</p>`; return; }
+  const reqs = data.requests || [];
+  if (!reqs.length) {
+    el.innerHTML = `<div class="card" style="text-align:center;padding:40px;color:var(--text-dim);">No requests yet in this workspace.</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table style="width:100%;font-size:.82rem;">
+    <thead><tr>
+      <th style="text-align:left;">Request #</th>
+      <th style="text-align:left;">Subject</th>
+      <th style="text-align:left;">Agency</th>
+      <th style="text-align:left;">Status</th>
+      <th style="text-align:left;">Filed by</th>
+      <th style="text-align:left;">Assigned to</th>
+    </tr></thead>
+    <tbody>${reqs.map(r => `
+      <tr style="cursor:pointer;" onclick="openDetailById(${r.id})">
+        <td style="color:var(--cyan);font-weight:600;">${esc(r.foia_number)}</td>
+        <td>${esc(r.subject||'—')}</td>
+        <td>${esc(r.agency_name||'—')}</td>
+        <td>${statusBadge(r)}</td>
+        <td>${esc(r.filed_by||'—')}</td>
+        <td>${r.assigned_to_username ? esc(r.assigned_to_username) : '<span style="color:var(--text-dim)">—</span>'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+async function openDetailById(reqId) {
+  const r = allRequestsData.find(x => x.id === reqId);
+  if (r) { openDetail(r); return; }
+  // If not in personal data, fetch it
+  const { status, data } = await api('GET', `/api/requests/${reqId}`);
+  if (status === 200 && data.request) openDetail(data.request);
+}
+
+async function loadTeamPage() {
+  const noOrg   = document.getElementById('teamNoOrg');
+  const orgPanel = document.getElementById('teamOrgPanel');
+  const memberList = document.getElementById('teamMemberList');
+  const inviteBtn  = document.getElementById('inviteBtn');
+
+  if (!currentOrgs.length) {
+    noOrg.style.display = '';
+    orgPanel.style.display = 'none';
+    return;
+  }
+
+  noOrg.style.display = 'none';
+  orgPanel.style.display = '';
+
+  // Use activeOrgId or first org
+  const orgId = activeOrgId || currentOrgs[0].id;
+  const { status, data } = await api('GET', `/api/org/${orgId}`);
+  if (status !== 200) { memberList.innerHTML = '<p style="color:var(--red)">Could not load team.</p>'; return; }
+
+  orgMembers = data.members || [];
+  const userOrg = currentOrgs.find(o => o.id === orgId);
+  const isOwner = userOrg?.role === 'owner';
+  if (isOwner) inviteBtn.style.display = '';
+  else inviteBtn.style.display = 'none';
+
+  memberList.innerHTML = orgMembers.map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;">${esc(m.username[0].toUpperCase())}</div>
+        <div>
+          <div style="font-size:.88rem;font-weight:600;">${esc(m.username)}</div>
+          <div style="font-size:.75rem;color:var(--text-dim);">${esc(m.email)}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:4px;
+          background:${m.role==='owner'?'rgba(212,165,116,.18)':'var(--bg3)'};
+          color:${m.role==='owner'?'var(--accent)':'var(--text-dim)'};">${m.role}</span>
+        ${isOwner && m.role !== 'owner' ? `
+          <select onchange="changeMemberRole(${orgId}, ${m.id}, this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:.75rem;padding:3px 6px;border-radius:4px;">
+            <option value="editor" ${m.role==='editor'?'selected':''}>Editor</option>
+            <option value="viewer" ${m.role==='viewer'?'selected':''}>Viewer</option>
+            <option value="owner">Owner</option>
+          </select>
+          <button class="btn btn-danger btn-sm" style="font-size:.7rem;padding:3px 8px;" onclick="removeMember(${orgId}, ${m.id}, '${esc(m.username)}')">Remove</button>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function createOrg() {
+  const name = document.getElementById('newOrgName').value.trim();
+  if (!name) { toast('Enter an organization name', 'error'); return; }
+  const { status, data } = await api('POST', '/api/org/create', { name });
+  if (status !== 200) { toast(data.error || 'Could not create organization', 'error'); return; }
+  currentOrgs = [...currentOrgs, data.org];
+  activeOrgId = data.org.id;
+  renderOrgSwitcher();
+  toast(`${name} created!`, 'success');
+  await loadTeamPage();
+}
+
+function openInviteModal() {
+  document.getElementById('inviteEmail').value = '';
+  document.getElementById('inviteRole').value = 'editor';
+  document.getElementById('inviteResult').style.display = 'none';
+  document.getElementById('inviteModal').classList.add('open');
+}
+
+async function sendInvite() {
+  const email = document.getElementById('inviteEmail').value.trim();
+  const role  = document.getElementById('inviteRole').value;
+  if (!email) { toast('Enter an email address', 'error'); return; }
+  const orgId = activeOrgId || currentOrgs[0]?.id;
+  if (!orgId) return;
+  const { status, data } = await api('POST', `/api/org/${orgId}/invite`, { email, role });
+  if (status !== 200) { toast(data.error || 'Could not send invite', 'error'); return; }
+  pendingInviteLink = data.invite_url;
+  document.getElementById('inviteLinkText').textContent = data.invite_url;
+  document.getElementById('inviteResult').style.display = '';
+  toast('Invite link generated', 'success');
+}
+
+function copyInviteLink() {
+  navigator.clipboard.writeText(pendingInviteLink).then(() => toast('Copied to clipboard', 'success'));
+}
+
+async function changeMemberRole(orgId, userId, role) {
+  const { status, data } = await api('PATCH', `/api/org/${orgId}/members/${userId}`, { role });
+  if (status !== 200) { toast(data.error || 'Could not update role', 'error'); return; }
+  toast('Role updated', 'success');
+}
+
+async function removeMember(orgId, userId, username) {
+  if (!confirm(`Remove ${username} from the organization?`)) return;
+  const { status, data } = await api('DELETE', `/api/org/${orgId}/members/${userId}`);
+  if (status !== 200) { toast(data.error || 'Could not remove member', 'error'); return; }
+  toast(`${username} removed`, 'success');
+  await loadTeamPage();
+}
+
+async function openAssignModal(reqId) {
+  pendingAssignReqId = reqId;
+  const req = allRequestsData.find(r => r.id === reqId);
+  const orgId = req?.org_id || activeOrgId;
+  if (!orgId) return;
+
+  // Fetch org members if needed
+  if (!orgMembers.length) {
+    const { data } = await api('GET', `/api/org/${orgId}`);
+    orgMembers = data.members || [];
+  }
+
+  const select = document.getElementById('assignSelect');
+  select.innerHTML = '<option value="">— Unassigned —</option>' +
+    orgMembers.map(m => `<option value="${m.id}" ${m.id === req?.assigned_to ? 'selected' : ''}>${esc(m.username)}</option>`).join('');
+  document.getElementById('assignModal').classList.add('open');
+}
+
+async function confirmAssign() {
+  const assignedTo = document.getElementById('assignSelect').value || null;
+  const { status, data } = await api('PATCH', `/api/requests/${pendingAssignReqId}/assign`, {
+    assigned_to: assignedTo ? parseInt(assignedTo) : null
+  });
+  document.getElementById('assignModal').classList.remove('open');
+  if (status !== 200) { toast(data.error || 'Could not assign request', 'error'); return; }
+  toast('Assignment updated', 'success');
+  // Refresh detail if open
+  const req = allRequestsData.find(r => r.id === pendingAssignReqId);
+  if (req) {
+    req.assigned_to = assignedTo ? parseInt(assignedTo) : null;
+    const member = orgMembers.find(m => m.id === req.assigned_to);
+    req.assigned_to_username = member?.username || null;
+    // Update assign chip in detail view
+    const chip = document.getElementById(`assignChip-${pendingAssignReqId}`);
+    if (chip) {
+      const name = member ? esc(member.username) : `<span style="color:var(--text-dim)">Unassigned</span>`;
+      chip.innerHTML = `<strong>Assigned to:</strong> ${name} <button class="btn btn-ghost btn-sm" style="padding:1px 6px;font-size:.7rem;margin-left:4px;" onclick="openAssignModal(${pendingAssignReqId})">Change</button>`;
+    }
+  }
+  if (currentPage === 'shared-dashboard') await loadSharedDashboard();
+}
+
+// ─────────────────────────────────────────────────────────────
 // Navigation
 // ─────────────────────────────────────────────────────────────
 const PAGE_TITLES = {
-  'dashboard':       'Dashboard',
-  'new-request':     'New Request',
-  'all-requests':    'All Requests',
-  'active-requests': 'Active Requests',
-  'closed-requests': 'Closed Requests',
-  'agency-dir':      'Federal Agency Directory',
-  'state-laws':      'State Public Records Laws',
-  'detail':          'Request Detail',
-  'terms':           'Terms of Service',
-  'help':            'Help',
+  'dashboard':         'Dashboard',
+  'new-request':       'New Request',
+  'all-requests':      'All Requests',
+  'active-requests':   'Active Requests',
+  'closed-requests':   'Closed Requests',
+  'agency-dir':        'Federal Agency Directory',
+  'state-laws':        'State Public Records Laws',
+  'detail':            'Request Detail',
+  'terms':             'Terms of Service',
+  'help':              'Help',
+  'shared-dashboard':  'Shared Dashboard',
+  'team':              'Team',
   'pricing':         'Plans & Pricing',
   'admin':           'Admin',
 };
@@ -3084,14 +3427,16 @@ async function nav(page) {
   document.getElementById('topbarTitle').textContent = PAGE_TITLES[page] || page;
   closeSidebar();
 
-  if (page === 'dashboard')       await loadDashboard();
-  if (page === 'all-requests')    await loadAllRequests();
-  if (page === 'active-requests') await loadActiveRequests();
-  if (page === 'closed-requests') await loadClosedRequests();
-  if (page === 'new-request')     await initNewRequestForm();
-  if (page === 'agency-dir')      await loadAgencyDir();
-  if (page === 'state-laws')      await loadStateLaws();
-  if (page === 'admin')           adminLoadCodes();
+  if (page === 'dashboard')         await loadDashboard();
+  if (page === 'all-requests')      await loadAllRequests();
+  if (page === 'active-requests')   await loadActiveRequests();
+  if (page === 'closed-requests')   await loadClosedRequests();
+  if (page === 'new-request')       await initNewRequestForm();
+  if (page === 'agency-dir')        await loadAgencyDir();
+  if (page === 'state-laws')        await loadStateLaws();
+  if (page === 'admin')             adminLoadCodes();
+  if (page === 'shared-dashboard')  await loadSharedDashboard();
+  if (page === 'team')              await loadTeamPage();
 }
 
 function goBack() { nav(previousPage === 'detail' ? 'all-requests' : previousPage); }
@@ -3550,10 +3895,19 @@ function filterAll(f, btn) {
 // ─────────────────────────────────────────────────────────────
 // Request Detail
 // ─────────────────────────────────────────────────────────────
-async function openDetail(id) {
-  currentRequestId = id;
-  const { data: r } = await api('GET', `/api/requests/${id}`);
-  const { data: log } = await api('GET', `/api/requests/${id}/log`);
+async function openDetail(idOrObj) {
+  // Accept either a request object (from list) or a numeric id
+  let r, log;
+  if (typeof idOrObj === 'object' && idOrObj !== null) {
+    r = idOrObj;
+    currentRequestId = r.id;
+  } else {
+    currentRequestId = idOrObj;
+    const { data } = await api('GET', `/api/requests/${idOrObj}`);
+    r = data.request || data;
+  }
+  const { data: logData } = await api('GET', `/api/requests/${currentRequestId}/log`);
+  log = logData;
 
   previousPage = currentPage;
   currentPage = 'detail';
@@ -3606,6 +3960,8 @@ async function openDetail(id) {
           ${isActive ? `<div class="meta-chip"><strong>Turn:</strong> ${r.turn||'My Turn'}</div>` : ''}
           ${r.secondary_contact_name ? `<div class="meta-chip"><strong>2nd Contact:</strong> ${esc(r.secondary_contact_name)}</div>` : ''}
           ${r.last_action_date ? `<div class="meta-chip"><strong>Last Action:</strong> ${fmtDateTime(r.last_action_date)}</div>` : ''}
+          ${r.org_id ? `<div class="meta-chip"><strong>Filed by:</strong> ${esc(r.filed_by||'—')}</div>` : ''}
+          ${r.org_id ? `<div class="meta-chip" id="assignChip-${r.id}"><strong>Assigned to:</strong> ${r.assigned_to_username ? esc(r.assigned_to_username) : '<span style="color:var(--text-dim)">Unassigned</span>'} <button class="btn btn-ghost btn-sm" style="padding:1px 6px;font-size:.7rem;margin-left:4px;" onclick="openAssignModal(${r.id})">Change</button></div>` : ''}
         </div>
       </div>
       <div class="detail-actions" style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -4261,10 +4617,7 @@ function escapeHtml(text) {
 }
 
 (async () => {
-  const { data } = await api('GET', '/api/auth/me');
-  if (data.authenticated) {
-    bootApp(data.username, data.subscription_status);
-  }
+  await bootFromSession();
 })();
 </script>
 
