@@ -1094,17 +1094,27 @@ textarea {
 /* ── Pricing page ──────────────────────────────────────────── */
 .pricing-tiers {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 360px));
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 32px;
+  max-width: 960px;
+}
+.pricing-tiers .card {
+  margin-top: 0;  /* override card + card rule */
 }
 @media (max-width: 900px) {
   .pricing-tiers {
     grid-template-columns: 1fr;
+    max-width: 480px;
   }
   .hide-mobile {
     display: none;
   }
+}
+.price-badge-coming-soon {
+  background: var(--bg3);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
 }
 /* ── Subscribe page ────────────────────────────────────────── */
 .subscribe-card {
@@ -2460,60 +2470,57 @@ textarea {
       <div id="page-pricing" class="page">
 
           <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Plans &amp; Pricing</h2>
-          <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:28px;">No paywalls on the core workflow. Upgrade when your volume demands it.</p>
+          <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:24px;">No paywalls on the core workflow. Upgrade when your volume demands it.</p>
 
           <!-- Tier cards -->
           <div class="pricing-tiers">
 
             <!-- Core -->
-            <div class="card" style="position:relative;display:flex;flex-direction:column;">
-              <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Tier 1</div>
-              <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Core</h3>
-              <div style="font-size:1.6rem;font-weight:800;margin-bottom:2px;">$0<span style="font-size:.85rem;font-weight:400;color:var(--text-dim);">/month</span></div>
-              <p style="font-size:.75rem;color:var(--text-dim);margin-bottom:12px;">No credit card required</p>
-              <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Unlimited FOIA requests</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Automatic deadline tracking</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Notes and file attachments</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Full action history on every request</li>
+            <div class="card" style="position:relative;display:flex;flex-direction:column;gap:0;">
+              <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:10px;">Core</div>
+              <div style="font-size:2rem;font-weight:800;line-height:1;margin-bottom:2px;">$0<span style="font-size:.9rem;font-weight:400;color:var(--text-dim);">/mo</span></div>
+              <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:16px;">No credit card required</div>
+              <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px;flex:1;">
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Unlimited FOIA requests</li>
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Automatic deadline tracking</li>
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Notes and file attachments</li>
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Full action history on every request</li>
               </ul>
-              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Everything you need to file and track your requests.</div>
+              <div style="font-size:.73rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;line-height:1.5;">Everything you need to file and track your requests.</div>
             </div>
 
             <!-- Pro -->
-            <div class="card" style="position:relative;display:flex;flex-direction:column;border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan);">
-              <div style="position:absolute;top:-1px;right:16px;background:var(--cyan);color:#000;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 10px;border-radius:0 0 6px 6px;">Most Popular</div>
-              <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px;">Tier 2</div>
-              <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Pro</h3>
-              <div style="font-size:1.6rem;font-weight:800;margin-bottom:2px;">$5<span style="font-size:.85rem;font-weight:400;color:var(--text-dim);">/month</span></div>
-              <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:12px;font-style:italic;">Everything in Core, plus:</div>
-              <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Professional appeal letters</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Priority email support</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Early access to new features</li>
+            <div class="card" style="position:relative;display:flex;flex-direction:column;gap:0;border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan);">
+              <div style="position:absolute;top:-1px;right:16px;background:var(--cyan);color:#000;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 9px;border-radius:0 0 5px 5px;">Most Popular</div>
+              <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:10px;">Pro</div>
+              <div style="font-size:2rem;font-weight:800;line-height:1;margin-bottom:2px;">$5<span style="font-size:.9rem;font-weight:400;color:var(--text-dim);">/mo</span></div>
+              <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:16px;font-style:italic;">Everything in Core, plus:</div>
+              <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px;flex:1;">
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Professional appeal letters</li>
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Priority email support</li>
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Early access to new features</li>
               </ul>
-              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">For when an agency ignores, delays, or denies your request.</div>
+              <div style="font-size:.73rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;line-height:1.5;">For when an agency ignores, delays, or denies your request.</div>
             </div>
 
             <!-- Newsroom -->
-            <div class="card" style="position:relative;display:flex;flex-direction:column;opacity:.7;">
-              <div style="position:absolute;top:-1px;right:16px;background:var(--text-dim);color:#000;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 10px;border-radius:0 0 6px 6px;">Coming soon</div>
-              <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Tier 3</div>
-              <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Newsroom</h3>
-              <div style="font-size:1.6rem;font-weight:800;margin-bottom:2px;">$15<span style="font-size:.85rem;font-weight:400;color:var(--text-dim);">/month</span></div>
-              <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:12px;font-style:italic;">Everything in Pro, plus:</div>
-              <ul style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1;">
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Multi-user accounts</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Shared request dashboard</li>
-                <li style="font-size:.82rem;display:flex;gap:8px;"><span style="color:var(--green);font-weight:700;">✓</span> Team notes and handoff tools</li>
+            <div class="card" style="position:relative;display:flex;flex-direction:column;gap:0;opacity:.6;">
+              <div style="position:absolute;top:-1px;right:16px;background:var(--bg3);border:1px solid var(--border);border-top:none;color:var(--text-dim);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 9px;border-radius:0 0 5px 5px;">Coming soon</div>
+              <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:10px;">Newsroom</div>
+              <div style="font-size:2rem;font-weight:800;line-height:1;margin-bottom:2px;">$15<span style="font-size:.9rem;font-weight:400;color:var(--text-dim);">/mo</span></div>
+              <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:16px;font-style:italic;">Everything in Pro, plus:</div>
+              <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px;flex:1;">
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Multi-user accounts</li>
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Shared request dashboard</li>
+                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Team notes and handoff tools</li>
               </ul>
-              <div style="font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;">Built for newsrooms managing requests across beats.</div>
+              <div style="font-size:.73rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;line-height:1.5;">Built for newsrooms managing requests across beats.</div>
             </div>
 
           </div>
 
           <!-- Feature comparison table -->
-          <div class="card" style="max-width:860px;">
+          <div class="card" style="max-width:860px;margin-top:0;">
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:16px;">Feature Comparison</h3>
             <div class="table-wrap">
               <table style="width:100%;font-size:.82rem;">
