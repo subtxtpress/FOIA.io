@@ -526,6 +526,13 @@
       box-shadow: 0 -3px 0 0 var(--cyan), var(--shadow-lg);
     }
 
+    .price-card-soon {
+      opacity: 0.55;
+    }
+    .price-card-soon .price-cta {
+      cursor: default;
+    }
+
     .price-badge {
       display: inline-block;
       padding: 3px 10px;
@@ -1032,17 +1039,17 @@
         <div class="price-card">
           <div class="price-badge price-badge-free">Forever free</div>
           <div class="price-name">Core</div>
-          <div class="price-amount">$0<span> / month</span></div>
+          <div class="price-amount">$0<span>/month</span></div>
           <p class="price-period-note">No credit card required</p>
           <div class="price-divider"></div>
           <ul class="price-features">
             <li><span class="check">✓</span> Unlimited FOIA requests</li>
-            <li><span class="check">✓</span> Deadline + appeal-window tracking</li>
-            <li><span class="check">✓</span> Notes, timelines, communication logs</li>
-            <li><span class="check">✓</span> Basic CSV export</li>
-            <li><span class="check">✓</span> Email support</li>
+            <li><span class="check">✓</span> Automatic deadline tracking</li>
+            <li><span class="check">✓</span> Notes and file attachments</li>
+            <li><span class="check">✓</span> Full action history on every request</li>
+            <li><span class="check">✓</span> AI-generated request letters</li>
           </ul>
-          <p class="price-tagline">Best for: freelancers, students, early-stage investigations.</p>
+          <p class="price-tagline">Everything you need to file and track your requests.</p>
           <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-free">Start for free →</a>
         </div>
 
@@ -1050,40 +1057,32 @@
         <div class="price-card price-card-pro">
           <div class="price-badge price-badge-pro">Most Popular</div>
           <div class="price-name">Pro</div>
-          <div class="price-amount">$5<span> / month</span></div>
+          <div class="price-amount">$5<span>/month</span></div>
           <p class="price-period-note">Everything in Core, plus:</p>
           <div class="price-divider"></div>
           <ul class="price-features">
-            <li><span class="check">✓</span> Multi-agency portfolio analytics</li>
-            <li><span class="check">✓</span> Delay + denial pattern detection</li>
-            <li><span class="check">✓</span> Rolling production tracking</li>
-            <li><span class="check">✓</span> Advanced search + filters</li>
-            <li><span class="check">✓</span> Bulk editing + batch updates</li>
-            <li><span class="check">✓</span> Priority support</li>
+            <li><span class="check">✓</span> AI-generated appeal letters</li>
+            <li><span class="check">✓</span> Priority email support</li>
             <li><span class="check">✓</span> Early access to new features</li>
           </ul>
-          <p class="price-tagline">Best for: investigative reporters, nonprofit researchers.</p>
+          <p class="price-tagline">For when an agency ignores, delays, or denies your request.</p>
           <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-pro">Get Pro →</a>
         </div>
 
-        <!-- Newsroom -->
-        <div class="price-card">
-          <div class="price-badge price-badge-free">For teams</div>
+        <!-- Newsroom (coming soon) -->
+        <div class="price-card price-card-soon">
+          <div class="price-badge price-badge-free">Coming soon</div>
           <div class="price-name">Newsroom</div>
-          <div class="price-amount">$15<span> / month</span></div>
+          <div class="price-amount">$15<span>/month</span></div>
           <p class="price-period-note">Everything in Pro, plus:</p>
           <div class="price-divider"></div>
           <ul class="price-features">
             <li><span class="check">✓</span> Multi-user accounts</li>
-            <li><span class="check">✓</span> Shared dashboards + team visibility</li>
-            <li><span class="check">✓</span> Request ownership + handoff workflows</li>
-            <li><span class="check">✓</span> Internal notes + editorial flags</li>
-            <li><span class="check">✓</span> Organization-level analytics</li>
-            <li><span class="check">✓</span> Custom exports + audit bundles</li>
-            <li><span class="check">✓</span> Dedicated support channel</li>
+            <li><span class="check">✓</span> Shared request dashboard</li>
+            <li><span class="check">✓</span> Team notes and handoff tools</li>
           </ul>
-          <p class="price-tagline">Best for: newsrooms, legal teams, transparency orgs.</p>
-          <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-free">Get Newsroom →</a>
+          <p class="price-tagline">Built for newsrooms managing requests across beats.</p>
+          <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-free">Join waitlist →</a>
         </div>
       </div>
     </div>
