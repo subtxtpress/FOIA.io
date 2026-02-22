@@ -504,9 +504,9 @@
 
     .pricing-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
     }
 
@@ -516,6 +516,8 @@
       border-radius: calc(var(--radius) + 4px);
       padding: 36px 32px;
       position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     .price-card-pro {
@@ -573,6 +575,15 @@
       margin-bottom: 28px;
     }
 
+    .price-tagline {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-style: italic;
+      margin-top: auto;
+      padding-top: 14px;
+      margin-bottom: 16px;
+    }
+
     .price-divider {
       height: 1px;
       background: var(--border);
@@ -581,7 +592,8 @@
 
     .price-features {
       list-style: none;
-      margin-bottom: 32px;
+      margin-bottom: 0;
+      flex: 1;
     }
 
     .price-features li {
@@ -889,10 +901,10 @@
   <nav>
     <div class="container nav-inner">
       <a href="#" class="nav-logo">
-        <img src="https://foiaio-production.up.railway.app/icons/icon-180.png"
+       <!-- <img src="https://foiaio-production.up.railway.app/icons/icon-180.png"
              alt="FOIA.io logo"
-             width="32" height="32">
-        <span class="nav-wordmark">FOIA<span>.io</span></span>
+             width="32" height="32">-->
+        <span class="nav-wordmark">FOIA.io</span>
       </a>
       <div class="nav-actions">
         <a href="https://foiaio-production.up.railway.app/login" class="nav-signin">Sign In</a>
@@ -909,7 +921,7 @@
     <div class="hero-content">
       <div class="hero-eyebrow">
         <span class="hero-eyebrow-dot"></span>
-        BETA · Free to start
+          <span style="text-transform:none">FOIA.io</span> is operating in a controlled beta phase.
       </div>
 
       <h1 class="hero-headline">
@@ -918,7 +930,7 @@
       </h1>
 
       <p class="hero-sub">
-        Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers, and anyone who needs answers.
+        Draft, track, and appeal FOIA requests&mdash;all in one place. Built for journalists, researchers, and anyone who needs answers.
       </p>
 
       <div class="hero-cta">
@@ -928,7 +940,7 @@
         <a href="#features" class="btn btn-ghost btn-lg">See how it works ↓</a>
       </div>
 
-      <p class="hero-trust">🔒 No credit card required &nbsp;·&nbsp; Free plan available &nbsp;·&nbsp; Works for federal &amp; state requests</p>
+      <p class="hero-trust">🔒 No credit card required &nbsp;·&nbsp; 3 Tier Plans Available &nbsp;·&nbsp; Federal, State &amp; & Local Requests</p>
     </div>
   </section>
 
@@ -938,7 +950,7 @@
       <div class="how-header">
         <p class="section-label">How it works</p>
         <h2 class="section-title">Three steps from question to answer</h2>
-        <p class="section-sub" style="margin: 0 auto;">FOIA.io handles the complexity so you can focus on what matters — getting the records.</p>
+        <p class="section-sub" style="margin: 0 auto;">FOIA.io handles the complexity so you can focus on what matters&mdash;getting the records.</p>
       </div>
 
       <div class="steps">
@@ -946,7 +958,7 @@
           <div class="step-num">01</div>
           <div class="step-body">
             <h3 class="step-title">File your request</h3>
-            <p class="step-desc">Search our directory of 18,000+ agencies. We generate a professional request letter tailored to the agency's requirements.</p>
+            <p class="step-desc">Search our directory of 18,000+ agencies and generate a professional request letter tailored to the agency's requirements.</p>
           </div>
         </div>
 
@@ -962,7 +974,7 @@
           <div class="step-num">03</div>
           <div class="step-body">
             <h3 class="step-title">Appeal if needed</h3>
-            <p class="step-desc">If denied or delayed, generate a legally-grounded appeal letter in seconds — and know exactly when to escalate.</p>
+            <p class="step-desc">If denied or delayed, generate a legally-grounded appeal letter in seconds&mdash;and know exactly when to escalate.</p>
           </div>
         </div>
       </div>
@@ -974,8 +986,8 @@
     <div class="container">
       <div class="section-header">
         <p class="section-label">Features</p>
-        <h2 class="section-title">Everything you need, nothing you don't.</h2>
-        <p class="section-sub">A purpose-built toolkit for public records work — not a generic project manager with FOIA bolted on.</p>
+        <h2 class="section-title">Minimal input, maximum clarity.</h2>
+        <p class="section-sub">FOIA.io doesn't tell you how to report. It just removes the cognitive load so you can focus on the investigation instead of the paperwork.</p>
       </div>
 
       <div class="features-grid">
@@ -987,20 +999,20 @@
 
         <div class="feat-card">
           <span class="feat-emoji">✍️</span>
-          <h3 class="feat-title">AI-generated letters</h3>
-          <p class="feat-desc">Generate a professional FOIA request or appeal letter in seconds. Our AI knows each agency's preferences and formats letters accordingly.</p>
+          <h3 class="feat-title">Request &amp; appeal letter templates</h3>
+          <p class="feat-desc">Generate a professional FOIA request or appeal letter in seconds with each available agency's preferences and formats letters accordingly.</p>
         </div>
 
         <div class="feat-card">
           <span class="feat-emoji">🏛️</span>
           <h3 class="feat-title">18,000+ agency directory</h3>
-          <p class="feat-desc">Search federal, state, and local agencies by name, state, or type. Every entry includes contact info, FOIA email, and portal links.</p>
+          <p class="feat-desc">Search federal, state, and local agencies by name, state, or type and access the respective agency's contact info, FOIA email, and/or portal links.</p>
         </div>
 
         <div class="feat-card">
           <span class="feat-emoji">⏱️</span>
           <h3 class="feat-title">Deadline intelligence</h3>
-          <p class="feat-desc">Federal law gives agencies 20 business days to respond. FOIA.io tracks it for you — and tells you exactly when to follow up or escalate.</p>
+          <p class="feat-desc">Federal law gives agencies 20 business days to respond. FOIA.io tracks it for you&mdash;and tells you when to follow up or escalate.</p>
         </div>
       </div>
     </div>
@@ -1016,20 +1028,21 @@
       </div>
 
       <div class="pricing-grid">
-        <!-- Free -->
+        <!-- Core (Free) -->
         <div class="price-card">
           <div class="price-badge price-badge-free">Forever free</div>
-          <div class="price-name">Free</div>
+          <div class="price-name">Core</div>
           <div class="price-amount">$0<span> / month</span></div>
           <p class="price-period-note">No credit card required</p>
           <div class="price-divider"></div>
           <ul class="price-features">
-            <li><span class="check">✓</span> Up to 3 active requests</li>
-            <li><span class="check">✓</span> AI request letter drafting</li>
-            <li><span class="check">✓</span> Agency directory (18,000+ agencies)</li>
-            <li><span class="check">✓</span> Deadline tracking</li>
-            <li><span class="check">✓</span> Request notes &amp; file uploads</li>
+            <li><span class="check">✓</span> Unlimited FOIA requests</li>
+            <li><span class="check">✓</span> Deadline + appeal-window tracking</li>
+            <li><span class="check">✓</span> Notes, timelines, communication logs</li>
+            <li><span class="check">✓</span> Basic CSV export</li>
+            <li><span class="check">✓</span> Email support</li>
           </ul>
+          <p class="price-tagline">Best for: freelancers, students, early-stage investigations.</p>
           <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-free">Start for free →</a>
         </div>
 
@@ -1037,17 +1050,40 @@
         <div class="price-card price-card-pro">
           <div class="price-badge price-badge-pro">Most Popular</div>
           <div class="price-name">Pro</div>
-          <div class="price-amount">$9<span> / month</span></div>
-          <p class="price-period-note">or $90 / year — save 2 months</p>
+          <div class="price-amount">$5<span> / month</span></div>
+          <p class="price-period-note">Everything in Core, plus:</p>
           <div class="price-divider"></div>
           <ul class="price-features">
-            <li><span class="check">✓</span> Everything in Free</li>
-            <li><span class="check">✓</span> Unlimited active requests</li>
-            <li><span class="check">✓</span> PDF export</li>
-            <li><span class="check">✓</span> Priority AI generation</li>
+            <li><span class="check">✓</span> Multi-agency portfolio analytics</li>
+            <li><span class="check">✓</span> Delay + denial pattern detection</li>
+            <li><span class="check">✓</span> Rolling production tracking</li>
+            <li><span class="check">✓</span> Advanced search + filters</li>
+            <li><span class="check">✓</span> Bulk editing + batch updates</li>
+            <li><span class="check">✓</span> Priority support</li>
             <li><span class="check">✓</span> Early access to new features</li>
           </ul>
+          <p class="price-tagline">Best for: investigative reporters, nonprofit researchers.</p>
           <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-pro">Get Pro →</a>
+        </div>
+
+        <!-- Newsroom -->
+        <div class="price-card">
+          <div class="price-badge price-badge-free">For teams</div>
+          <div class="price-name">Newsroom</div>
+          <div class="price-amount">$15<span> / month</span></div>
+          <p class="price-period-note">Everything in Pro, plus:</p>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li><span class="check">✓</span> Multi-user accounts</li>
+            <li><span class="check">✓</span> Shared dashboards + team visibility</li>
+            <li><span class="check">✓</span> Request ownership + handoff workflows</li>
+            <li><span class="check">✓</span> Internal notes + editorial flags</li>
+            <li><span class="check">✓</span> Organization-level analytics</li>
+            <li><span class="check">✓</span> Custom exports + audit bundles</li>
+            <li><span class="check">✓</span> Dedicated support channel</li>
+          </ul>
+          <p class="price-tagline">Best for: newsrooms, legal teams, transparency orgs.</p>
+          <a href="https://foiaio-production.up.railway.app/register" class="price-cta price-cta-free">Get Newsroom →</a>
         </div>
       </div>
     </div>
@@ -1072,19 +1108,7 @@
               </svg>
             </summary>
             <div class="faq-body">
-              The Freedom of Information Act gives the public the right to request records from federal agencies. Most states have equivalent laws for state and local agencies — often called open records laws or sunshine laws.
-            </div>
-          </details>
-
-          <details>
-            <summary>
-              Is FOIA.io affiliated with the government?
-              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </summary>
-            <div class="faq-body">
-              No. FOIA.io is an independent tool to help you manage your own requests. It is not affiliated with any federal or state agency.
+              The Freedom of Information Act gives the public the right to request records from federal agencies. Most states have equivalent laws for state and local agencies&mdash;often called open records laws or sunshine laws.
             </div>
           </details>
 
@@ -1096,7 +1120,7 @@
               </svg>
             </summary>
             <div class="faq-body">
-              Federal agencies (covered by FOIA), and state and local agencies covered by state open records laws. Our directory includes 18,000+ agencies across all 50 states.
+              Federal agencies (covered by FOIA), and state and local agencies covered by state open records laws. Our directory includes 18,000+ agencies across all 50 states as well as state universities.
             </div>
           </details>
 
@@ -1108,7 +1132,7 @@
               </svg>
             </summary>
             <div class="faq-body">
-              FOIA.io can help you draft an administrative appeal. Many denials are successfully overturned on appeal — the tool generates a legally-grounded appeal letter tailored to the specific reason for denial.
+              FOIA.io can help you draft a legally-grounded administrativeappeal letter tailored to the specific reason for denial.
             </div>
           </details>
 
@@ -1132,7 +1156,7 @@
               </svg>
             </summary>
             <div class="faq-body">
-              The free plan allows up to 3 active requests at a time. All core features — AI letter drafting, the agency directory, deadline tracking, and notes — are included. Upgrading to Pro removes the request limit and adds PDF export and priority AI generation.
+              The free plan allows up to 5 active requests at a time. All core features&mdash;letter drafting, the agency directory, deadline tracking, and notes&mdash;are included. Upgrading to Pro removes the request limit and adds PDF export and priority request & appeal letter generation.
             </div>
           </details>
 
@@ -1174,7 +1198,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p class="footer-bottom-left">© 2026 FOIA.io &nbsp;·&nbsp; Not affiliated with any government agency.</p>
+        <p class="footer-bottom-left">© 2026 FOIA.io &nbsp;·&nbsp;</p>
         <div class="footer-bottom-right">
           <a href="https://foiaio-production.up.railway.app/privacy">Privacy Policy</a>
           <a href="https://foiaio-production.up.railway.app/terms">Terms of Service</a>
