@@ -1998,6 +1998,19 @@ textarea {
   </div>
 </div>
 
+<!-- ── Join Org Screen ──────────────────────────────────────── -->
+<div id="joinWrap" style="display:none;">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <h1>FOIA.io</h1>
+      <p>Team Invitation</p>
+    </div>
+    <div id="joinContent">
+      <!-- Filled dynamically -->
+    </div>
+  </div>
+</div>
+
 <!-- ── Main App ────────────────────────────────────────────── -->
 <div id="app" style="display:none;">
 
@@ -3066,7 +3079,7 @@ async function doLogin() {
     showAuthError(data.error || 'Login failed');
     return;
   }
-  await bootFromSession();
+  await bootAfterAuth();
 }
 
 async function doRegister() {
@@ -3079,13 +3092,106 @@ async function doRegister() {
     showAuthError(data.error || 'Registration failed');
     return;
   }
+  await bootAfterAuth();
+}
+
+async function bootAfterAuth() {
+  // If there's a pending org invite, handle it now
+  if (window._pendingInviteToken) {
+    const token = window._pendingInviteToken;
+    window._pendingInviteToken = null;
+    await handleInviteToken(token);
+    return;
+  }
   await bootFromSession();
 }
 
 async function bootFromSession() {
+  // Check for org invite token in URL first
+  const urlParams = new URLSearchParams(window.location.search);
+  const inviteToken = urlParams.get('token');
+  if (inviteToken) {
+    await handleInviteToken(inviteToken);
+    return;
+  }
+
   const { data } = await api('GET', '/api/auth/me');
   if (data.authenticated) {
     bootApp(data.username, data.subscription_status, data.orgs || [], data.active_org_id || null);
+  }
+}
+
+async function handleInviteToken(token) {
+  // Fetch invite info (public endpoint — no login required)
+  const { status, data } = await api('GET', `/api/org/invite-info?token=${encodeURIComponent(token)}`);
+  const joinWrap    = document.getElementById('joinWrap');
+  const authWrap    = document.getElementById('authWrap');
+  const joinContent = document.getElementById('joinContent');
+
+  // Check if already logged in
+  const meRes = await api('GET', '/api/auth/me');
+  const isAuthed = meRes.data?.authenticated;
+
+  if (status !== 200) {
+    // Invalid or expired token — show error then fall through to normal app
+    joinWrap.style.display = '';
+    authWrap.style.display = 'none';
+    joinContent.innerHTML = `
+      <div style="text-align:center;padding:8px 0 24px;">
+        <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
+        <p style="font-size:.95rem;font-weight:600;margin-bottom:8px;">This invite link is invalid or has expired.</p>
+        <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">Ask your team admin to generate a new one.</p>
+        <button class="btn btn-ghost" onclick="window.location.href='/'">Go to FOIA.io</button>
+      </div>`;
+    return;
+  }
+
+  const { org_name, email, role } = data;
+
+  if (!isAuthed) {
+    // Not logged in — show login/register with context, then join after auth
+    authWrap.style.display = '';
+    // Prepend a banner to the auth box
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:rgba(97,218,251,.08);border:1px solid var(--cyan);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.84rem;line-height:1.55;';
+    banner.innerHTML = `<strong style="color:var(--cyan);">Team invitation</strong><br>You've been invited to join <strong>${esc(org_name)}</strong> as <strong>${esc(role)}</strong>.<br><span style="color:var(--text-dim);">Sign in or create an account to accept.</span>`;
+    const authBox = authWrap.querySelector('.auth-box');
+    authBox.insertBefore(banner, authBox.querySelector('.auth-tabs'));
+
+    // After login/register, intercept bootFromSession to complete join
+    window._pendingInviteToken = token;
+    return;
+  }
+
+  // Logged in — show accept screen
+  joinWrap.style.display = '';
+  authWrap.style.display = 'none';
+  joinContent.innerHTML = `
+    <div style="text-align:center;padding:8px 0;">
+      <div style="font-size:2rem;margin-bottom:12px;">🤝</div>
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px;">You're invited to join</p>
+      <p style="font-size:1.15rem;font-weight:800;color:var(--cyan);margin-bottom:6px;">${esc(org_name)}</p>
+      <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">as <strong>${esc(role)}</strong></p>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="joinOrg('${esc(token)}')">Accept Invitation</button>
+      <button class="btn btn-ghost" style="width:100%;" onclick="window.location.href='/'">Decline</button>
+      <div id="joinError" style="display:none;color:var(--red);font-size:.82rem;margin-top:12px;"></div>
+    </div>`;
+}
+
+async function joinOrg(token) {
+  const { status, data } = await api('POST', '/api/org/join', { token });
+  if (status !== 200) {
+    const el = document.getElementById('joinError');
+    if (el) { el.textContent = data.error || 'Could not join organization.'; el.style.display = ''; }
+    return;
+  }
+  // Success — clear URL params and boot into the app
+  toast(`Welcome to ${data.org_name}!`, 'success');
+  window.history.replaceState({}, '', '/');
+  document.getElementById('joinWrap').style.display = 'none';
+  const meRes = await api('GET', '/api/auth/me');
+  if (meRes.data?.authenticated) {
+    bootApp(meRes.data.username, meRes.data.subscription_status, meRes.data.orgs || [], meRes.data.active_org_id || null);
   }
 }
 
@@ -3317,6 +3423,7 @@ async function createOrg() {
   renderOrgSwitcher();
   toast(`${name} created!`, 'success');
   await loadTeamPage();
+  nav('team');
 }
 
 function openInviteModal() {

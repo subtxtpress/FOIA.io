@@ -1786,18 +1786,23 @@ def create_request():
         created_date = date.today().isoformat()
 
     db = get_db()
+
+    # Inherit the user's active org so the request appears in the shared dashboard
+    user_row = db.execute("SELECT active_org_id FROM users WHERE id=?", (session["user_id"],)).fetchone()
+    active_org_id = user_row["active_org_id"] if user_row else None
+
     req_id = db.insert("""
         INSERT INTO requests
         (user_id, foia_number, created_date, agency_type, agency_id, agency_name,
-         state_code, foia_officer_title, subject, notes, status)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?)
+         state_code, foia_officer_title, subject, notes, status, org_id)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
     """, (
         session["user_id"], foia_number, created_date,
         data.get("agency_type", "Federal"),
         agency_id, agency_name,
         state_code, foia_officer,
         data.get("subject", ""), data.get("notes", ""),
-        "new"
+        "new", active_org_id
     ))
     db.commit()
     db.close()
