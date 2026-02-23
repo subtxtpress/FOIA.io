@@ -1097,10 +1097,14 @@ textarea {
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 32px;
+  width: 100%;
   max-width: 960px;
+  align-items: stretch;
 }
 .pricing-tiers .card {
   margin-top: 0;  /* override card + card rule */
+  width: 100%;
+  box-sizing: border-box;
 }
 @media (max-width: 900px) {
   .pricing-tiers {
@@ -2520,7 +2524,7 @@ textarea {
           </div>
 
           <!-- Feature comparison table -->
-          <div class="card" style="max-width:860px;margin-top:0;">
+          <div class="card" style="width:100%;max-width:960px;margin-top:0;box-sizing:border-box;">
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:16px;">Feature Comparison</h3>
             <div class="table-wrap">
               <table style="width:100%;font-size:.82rem;">
