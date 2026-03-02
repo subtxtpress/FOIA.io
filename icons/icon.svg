@@ -6,7 +6,7 @@
       }
     </style>
   </defs>
-  <rect class="bg" width="512" height="512" rx="96" ry="96" fill="#03DAC6"/>
+  <rect class="bg" width="512" height="512" rx="96" ry="96" fill="#4DB6AC"/>
   <!-- F lettermark -->
   <path fill="#fff" d="M112 77h288v82H194v63h176v82H194v131h-82z"/>
 </svg>

@@ -30,7 +30,7 @@
   <link rel="manifest" href="/manifest.json">
 
   <!-- Mobile / PWA -->
-  <meta name="theme-color" content="#03DAC6" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#4DB6AC" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#00897B" media="(prefers-color-scheme: light)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -43,9 +43,9 @@
       --bg2:       #1e1e1e;
       --bg3:       #2a2a2a;
       --border:    #3a3a3a;
-      --cyan:      #03DAC6;
-      --cyan-dim:  rgba(3, 218, 198, 0.10);
-      --cyan-glow: rgba(3, 218, 198, 0.22);
+      --cyan:      #4DB6AC;
+      --cyan-dim:  rgba(77, 182, 172, 0.10);
+      --cyan-glow: rgba(77, 182, 172, 0.22);
       --text:      #FFFFFF;
       --text-dim:  #B3B3B3;
       --red:       #CF6679;
@@ -90,11 +90,11 @@
       border-radius: 3px;
       opacity: 0.7;
     }
-    ::-webkit-scrollbar-thumb:hover { background: #00f0d8; }
+    ::-webkit-scrollbar-thumb:hover { background: #5EC4BA; }
 
     /* ─── Selection ──────────────────────────────────────────────── */
     ::selection {
-      background: rgba(3, 218, 198, 0.25);
+      background: rgba(77, 182, 172, 0.25);
       color: var(--text);
     }
 
@@ -132,8 +132,8 @@
     }
 
     .btn-primary:hover {
-      background: #00f0d8;
-      border-color: #00f0d8;
+      background: #5EC4BA;
+      border-color: #5EC4BA;
       box-shadow: 0 0 28px var(--cyan-glow);
       transform: translateY(-1px);
     }
@@ -245,7 +245,7 @@
       height: 700px;
       top: -180px;
       left: -200px;
-      background: radial-gradient(circle, rgba(3, 218, 198, 0.18) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(77, 182, 172, 0.18) 0%, transparent 70%);
       filter: blur(80px);
       opacity: 0.9;
       animation: orbFloat1 10s ease-in-out infinite alternate;
@@ -284,8 +284,8 @@
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
-      background: rgba(3, 218, 198, 0.08);
-      border: 1px solid rgba(3, 218, 198, 0.2);
+      background: rgba(77, 182, 172, 0.08);
+      border: 1px solid rgba(77, 182, 172, 0.2);
       border-radius: 100px;
       font-size: 0.78rem;
       font-weight: 600;
@@ -331,7 +331,7 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, var(--cyan) 0%, rgba(3,218,198,0.3) 100%);
+      background: linear-gradient(90deg, var(--cyan) 0%, rgba(77,182,172,0.3) 100%);
       border-radius: 2px;
     }
 
@@ -418,7 +418,7 @@
       left: calc(33.333% / 2 + 28px);
       right: calc(33.333% / 2 + 28px);
       height: 1px;
-      border-top: 2px dashed rgba(3, 218, 198, 0.25);
+      border-top: 2px dashed rgba(77, 182, 172, 0.25);
       z-index: 0;
       pointer-events: none;
     }
@@ -441,7 +441,7 @@
       height: 52px;
       border-radius: 50%;
       background: var(--bg);
-      border: 1.5px solid rgba(3, 218, 198, 0.3);
+      border: 1.5px solid rgba(77, 182, 172, 0.3);
       font-size: 0.85rem;
       font-weight: 700;
       color: var(--cyan);
@@ -481,8 +481,8 @@
 
     .feat-card:hover {
       background: var(--bg3);
-      border-color: rgba(3, 218, 198, 0.25);
-      box-shadow: 0 0 0 1px rgba(3, 218, 198, 0.08), var(--shadow);
+      border-color: rgba(77, 182, 172, 0.25);
+      box-shadow: 0 0 0 1px rgba(77, 182, 172, 0.08), var(--shadow);
     }
 
     .feat-emoji {
@@ -536,8 +536,8 @@
     }
 
     .price-card-pro {
-      background: linear-gradient(160deg, rgba(3, 218, 198, 0.05) 0%, var(--bg) 60%);
-      border-color: rgba(3, 218, 198, 0.3);
+      background: linear-gradient(160deg, rgba(77, 182, 172, 0.05) 0%, var(--bg) 60%);
+      border-color: rgba(77, 182, 172, 0.3);
       box-shadow: 0 -3px 0 0 var(--cyan), var(--shadow-lg);
     }
 
@@ -558,7 +558,7 @@
     }
 
     .price-badge-pro {
-      background: rgba(3, 218, 198, 0.15);
+      background: rgba(77, 182, 172, 0.15);
       color: var(--cyan);
     }
 
@@ -661,8 +661,8 @@
     }
 
     .price-cta-pro:hover {
-      background: #00f0d8;
-      border-color: #00f0d8;
+      background: #5EC4BA;
+      border-color: #5EC4BA;
       box-shadow: 0 0 28px var(--cyan-glow);
       transform: translateY(-1px);
     }
