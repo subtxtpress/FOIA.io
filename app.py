@@ -1732,6 +1732,24 @@ def get_state(state_code):
 
 
 # ─────────────────────────────────────────────
+# Request access helper (org-aware)
+# ─────────────────────────────────────────────
+def _can_access_request(db, req_id, user_id):
+    """Return the request row if user owns it or is a member of its org. Otherwise None."""
+    row = db.execute(
+        "SELECT r.*, u.username as filed_by, a.username as assigned_to_username "
+        "FROM requests r "
+        "JOIN users u ON u.id = r.user_id "
+        "LEFT JOIN users a ON a.id = r.assigned_to "
+        "WHERE r.id=? AND (r.user_id=? OR r.org_id IN ("
+        "  SELECT org_id FROM org_members WHERE user_id=?"
+        "))",
+        (req_id, user_id, user_id)
+    ).fetchone()
+    return row
+
+
+# ─────────────────────────────────────────────
 # Routes: Requests — CRUD
 # ─────────────────────────────────────────────
 @app.route("/api/requests/new-number")
@@ -1751,6 +1769,25 @@ def preview_number():
 @app.route("/api/requests", methods=["POST"])
 @subscription_required
 def create_request():
+    # ── Free-plan limit: 5 active requests ─────────────────────
+    db = get_db()
+    user = db.execute(
+        "SELECT subscription_status, lifetime_free FROM users WHERE id=?",
+        (session["user_id"],)
+    ).fetchone()
+    is_paid = user and (user["lifetime_free"] or user["subscription_status"] == "active")
+    if not is_paid:
+        active_count = db.execute(
+            "SELECT COUNT(*) as cnt FROM requests WHERE user_id=? AND status != 'closed'",
+            (session["user_id"],)
+        ).fetchone()["cnt"]
+        if active_count >= 5:
+            db.close()
+            return jsonify({
+                "error": "Free plan limited to 5 active requests. Close existing requests or upgrade to Pro for unlimited."
+            }), 403
+    db.close()
+
     data = request.get_json()
     agency_id    = data.get("agency_id")
     agency_name  = data.get("agency_name", "")
@@ -1848,16 +1885,7 @@ def list_requests():
 @subscription_required
 def get_request(req_id):
     db = get_db()
-    row = db.execute(
-        "SELECT r.*, u.username as filed_by, a.username as assigned_to_username "
-        "FROM requests r "
-        "JOIN users u ON u.id = r.user_id "
-        "LEFT JOIN users a ON a.id = r.assigned_to "
-        "WHERE r.id=? AND (r.user_id=? OR r.org_id IN ("
-        "  SELECT org_id FROM org_members WHERE user_id=?"
-        "))",
-        (req_id, session["user_id"], session["user_id"])
-    ).fetchone()
+    row = _can_access_request(db, req_id, session["user_id"])
     db.close()
     if not row:
         return jsonify({"error": "Not found"}), 404
@@ -1871,10 +1899,7 @@ def get_request(req_id):
 @subscription_required
 def delete_request(req_id):
     db = get_db()
-    row = db.execute(
-        "SELECT id FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
-    ).fetchone()
+    row = _can_access_request(db, req_id, session["user_id"])
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
@@ -1895,10 +1920,7 @@ def save_letter(req_id):
     letter_text = data.get("letter_text", "")
 
     db = get_db()
-    row = db.execute(
-        "SELECT * FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
-    ).fetchone()
+    row = _can_access_request(db, req_id, session["user_id"])
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
@@ -1926,6 +1948,25 @@ def save_letter(req_id):
     return jsonify({"ok": True, "deadline_date": deadline.isoformat(), "response_days": rd})
 
 
+@app.route("/api/requests/<int:req_id>/close", methods=["POST"])
+@subscription_required
+def close_request(req_id):
+    db = get_db()
+    row = _can_access_request(db, req_id, session["user_id"])
+    if not row:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+    now = datetime.now().isoformat(sep=" ", timespec="seconds")
+    db.execute(
+        "UPDATE requests SET status='closed', closed_date=?, updated_at=? WHERE id=?",
+        (now, now, req_id)
+    )
+    db.commit()
+    db.close()
+    log_action(req_id, session["user_id"], "Request closed")
+    return jsonify({"ok": True})
+
+
 # ─────────────────────────────────────────────
 # Routes: Generate letter text
 # ─────────────────────────────────────────────
@@ -1933,11 +1974,15 @@ def save_letter(req_id):
 @subscription_required
 def generate_letter(req_id):
     db = get_db()
+    access = _can_access_request(db, req_id, session["user_id"])
+    if not access:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
     row = db.execute(
-        "SELECT r.*, fa.foia_officer_title FROM requests r "
+        "SELECT r.*, fa.foia_officer_title as fa_officer_title FROM requests r "
         "LEFT JOIN federal_agencies fa ON r.agency_id = fa.id "
-        "WHERE r.id=? AND r.user_id=?",
-        (req_id, session["user_id"])
+        "WHERE r.id=?",
+        (req_id,)
     ).fetchone()
 
     # For state requests, look up state law details
@@ -1979,10 +2024,7 @@ def generate_letter(req_id):
 def update_request(req_id):
     data = request.get_json()
     db = get_db()
-    row = db.execute(
-        "SELECT id FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
-    ).fetchone()
+    row = _can_access_request(db, req_id, session["user_id"])
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
@@ -2171,11 +2213,7 @@ def generate_appeal(req_id):
     exemption   = request.args.get("exemption", "")
 
     db = get_db()
-    row = db.execute(
-        "SELECT * FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
-    ).fetchone()
-
+    row = _can_access_request(db, req_id, session["user_id"])
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
@@ -2214,6 +2252,35 @@ def generate_appeal(req_id):
     )
     return jsonify({"appeal_text": text})
 
+
+@app.route("/api/requests/<int:req_id>/save-appeal", methods=["POST"])
+@subscription_required
+def save_appeal(req_id):
+    data = request.get_json() or {}
+    appeal_type = data.get("appeal_type", "")
+    appeal_text = data.get("appeal_text", "")
+    exemption   = data.get("exemption", "")
+
+    db = get_db()
+    row = _can_access_request(db, req_id, session["user_id"])
+    if not row:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+
+    now = datetime.now().isoformat(sep=" ", timespec="seconds")
+    db.execute("""
+        UPDATE requests SET
+            appeal_type=?, appeal_text=?, appeal_exemption=?,
+            appeal_saved_at=?, status='appealed', updated_at=?
+        WHERE id=?
+    """, (appeal_type, appeal_text, exemption, now, now, req_id))
+    db.commit()
+    db.close()
+    log_action(req_id, session["user_id"], "Appeal saved — marked as Appealed",
+               f"Type: {appeal_type}")
+    return jsonify({"ok": True})
+
+
 # ─────────────────────────────────────────────
 # Routes: Attachments
 # ─────────────────────────────────────────────
@@ -2221,10 +2288,7 @@ def generate_appeal(req_id):
 @subscription_required
 def list_attachments(req_id):
     db = get_db()
-    row = db.execute(
-        "SELECT id FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
-    ).fetchone()
+    row = _can_access_request(db, req_id, session["user_id"])
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
@@ -2240,10 +2304,7 @@ def list_attachments(req_id):
 @subscription_required
 def upload_attachment(req_id):
     db = get_db()
-    row = db.execute(
-        "SELECT id FROM requests WHERE id=? AND user_id=?",
-        (req_id, session["user_id"])
-    ).fetchone()
+    row = _can_access_request(db, req_id, session["user_id"])
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
@@ -2317,10 +2378,14 @@ def download_attachment(att_id):
 def delete_attachment(att_id):
     db = get_db()
     row = db.execute(
-        "SELECT * FROM request_attachments WHERE id=? AND user_id=?",
-        (att_id, session["user_id"])
+        "SELECT * FROM request_attachments WHERE id=?", (att_id,)
     ).fetchone()
     if not row:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+    # Check user can access the parent request
+    req = _can_access_request(db, row["request_id"], session["user_id"])
+    if not req:
         db.close()
         return jsonify({"error": "Not found"}), 404
 
@@ -2343,12 +2408,7 @@ def delete_attachment(att_id):
 @subscription_required
 def get_action_log(req_id):
     db = get_db()
-    row = db.execute(
-        "SELECT id FROM requests WHERE id=? AND (user_id=? OR org_id IN ("
-        "  SELECT org_id FROM org_members WHERE user_id=?"
-        "))",
-        (req_id, session["user_id"], session["user_id"])
-    ).fetchone()
+    row = _can_access_request(db, req_id, session["user_id"])
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
@@ -2370,15 +2430,17 @@ def download_docx(req_id):
     import subprocess, tempfile, json as _json
 
     db = get_db()
+    access = _can_access_request(db, req_id, session["user_id"])
+    if not access:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
     row = db.execute(
-        "SELECT r.*, fa.foia_officer_title FROM requests r "
+        "SELECT r.*, fa.foia_officer_title as fa_officer_title FROM requests r "
         "LEFT JOIN federal_agencies fa ON r.agency_id = fa.id "
-        "WHERE r.id=? AND r.user_id=?",
-        (req_id, session["user_id"])
+        "WHERE r.id=?",
+        (req_id,)
     ).fetchone()
     db.close()
-    if not row:
-        return jsonify({"error": "Not found"}), 404
 
     letter_text = row["letter_text"] or build_letter_text(
         row["agency_name"] or "Federal Agency",
@@ -2418,6 +2480,55 @@ def download_docx(req_id):
     )
 
 
+@app.route("/api/requests/<int:req_id>/download-pdf")
+@subscription_required
+def download_pdf(req_id):
+    """Generate and stream a PDF letter for a request."""
+    import tempfile
+    from fpdf import FPDF
+
+    db = get_db()
+    access = _can_access_request(db, req_id, session["user_id"])
+    if not access:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+    row = db.execute(
+        "SELECT r.*, fa.foia_officer_title as fa_officer_title FROM requests r "
+        "LEFT JOIN federal_agencies fa ON r.agency_id = fa.id "
+        "WHERE r.id=?",
+        (req_id,)
+    ).fetchone()
+    db.close()
+
+    letter_text = row["letter_text"] or build_letter_text(
+        row["agency_name"] or "Federal Agency",
+        row["foia_officer_title"] or "FOIA Officer",
+        row["subject"] or "[Subject]"
+    )
+
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=25)
+    pdf.add_page()
+    pdf.set_font("Times", size=12)
+    pdf.set_margins(25, 25, 25)
+
+    for line in letter_text.split("\n"):
+        pdf.multi_cell(0, 6, line)
+        pdf.ln(2)
+
+    tmpdir = tempfile.mkdtemp()
+    out_path = os.path.join(tmpdir, f"{row['foia_number']}.pdf")
+    pdf.output(out_path)
+
+    log_action(req_id, session["user_id"], "PDF downloaded")
+    return send_file(
+        out_path,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"{row['foia_number']}.pdf"
+    )
+
+
 # ─────────────────────────────────────────────
 # Newsroom / Organization routes
 # ─────────────────────────────────────────────
@@ -2438,13 +2549,12 @@ def _user_org_role(db, user_id, org_id):
 
 
 def _assert_org_member(db, user_id, org_id, min_role=None):
-    """Return role or raise 403. min_role='owner' enforces ownership."""
+    """Return role or raise 403. min_role='owner' enforces ownership.
+    NOTE: Callers must ensure db.close() is called (e.g. via try/finally)."""
     role = _user_org_role(db, user_id, org_id)
     if not role:
-        db.close()
         abort(403)
     if min_role == "owner" and role != "owner":
-        db.close()
         abort(403)
     return role
 
@@ -2507,20 +2617,21 @@ def org_list():
 @login_required
 def org_get(org_id):
     db = get_db()
-    _assert_org_member(db, session["user_id"], org_id)
-    org = db.execute("SELECT id, name, slug, subscription_status FROM organizations WHERE id=?", (org_id,)).fetchone()
-    if not org:
+    try:
+        _assert_org_member(db, session["user_id"], org_id)
+        org = db.execute("SELECT id, name, slug, subscription_status FROM organizations WHERE id=?", (org_id,)).fetchone()
+        if not org:
+            return jsonify({"error": "Not found"}), 404
+        members = db.execute("""
+            SELECT u.id, u.username, u.email, m.role, m.joined_at
+            FROM org_members m
+            JOIN users u ON u.id = m.user_id
+            WHERE m.org_id = ?
+            ORDER BY m.role DESC, u.username
+        """, (org_id,)).fetchall()
+        return jsonify({"org": dict(org), "members": [dict(m) for m in members]})
+    finally:
         db.close()
-        return jsonify({"error": "Not found"}), 404
-    members = db.execute("""
-        SELECT u.id, u.username, u.email, m.role, m.joined_at
-        FROM org_members m
-        JOIN users u ON u.id = m.user_id
-        WHERE m.org_id = ?
-        ORDER BY m.role DESC, u.username
-    """, (org_id,)).fetchall()
-    db.close()
-    return jsonify({"org": dict(org), "members": [dict(m) for m in members]})
 
 
 @app.route("/api/org/<int:org_id>/switch", methods=["POST"])
@@ -2528,13 +2639,15 @@ def org_get(org_id):
 def org_switch(org_id):
     """Set the user's active org context (or null to go personal)."""
     db = get_db()
-    if org_id != 0:
-        _assert_org_member(db, session["user_id"], org_id)
-    db.execute("UPDATE users SET active_org_id=? WHERE id=?",
-               (org_id if org_id != 0 else None, session["user_id"]))
-    db.commit()
-    db.close()
-    return jsonify({"ok": True, "active_org_id": org_id or None})
+    try:
+        if org_id != 0:
+            _assert_org_member(db, session["user_id"], org_id)
+        db.execute("UPDATE users SET active_org_id=? WHERE id=?",
+                   (org_id if org_id != 0 else None, session["user_id"]))
+        db.commit()
+        return jsonify({"ok": True, "active_org_id": org_id or None})
+    finally:
+        db.close()
 
 
 @app.route("/api/org/<int:org_id>/invite", methods=["POST"])
@@ -2549,38 +2662,39 @@ def org_invite(org_id):
         return jsonify({"error": "Invalid role"}), 400
 
     db = get_db()
-    _assert_org_member(db, session["user_id"], org_id, min_role="owner")
+    try:
+        _assert_org_member(db, session["user_id"], org_id, min_role="owner")
 
-    # Check if already a member
-    existing_user = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
-    if existing_user:
-        already = db.execute(
-            "SELECT id FROM org_members WHERE org_id=? AND user_id=?",
-            (org_id, existing_user["id"])
-        ).fetchone()
-        if already:
-            db.close()
-            return jsonify({"error": "User is already a member"}), 409
+        # Check if already a member
+        existing_user = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
+        if existing_user:
+            already = db.execute(
+                "SELECT id FROM org_members WHERE org_id=? AND user_id=?",
+                (org_id, existing_user["id"])
+            ).fetchone()
+            if already:
+                return jsonify({"error": "User is already a member"}), 409
 
-    # Expire old pending invites for same email+org
-    db.execute(
-        "DELETE FROM org_invitations WHERE org_id=? AND email=? AND accepted_at IS NULL",
-        (org_id, email)
-    )
+        # Expire old pending invites for same email+org
+        db.execute(
+            "DELETE FROM org_invitations WHERE org_id=? AND email=? AND accepted_at IS NULL",
+            (org_id, email)
+        )
 
-    token = secrets.token_urlsafe(32)
-    expires_at = datetime.utcnow() + timedelta(days=7)
-    db.execute(
-        "INSERT INTO org_invitations (org_id, email, token, role, invited_by, expires_at) VALUES (?,?,?,?,?,?)",
-        (org_id, email, token, role, session["user_id"], expires_at.isoformat())
-    )
-    db.commit()
+        token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(days=7)
+        db.execute(
+            "INSERT INTO org_invitations (org_id, email, token, role, invited_by, expires_at) VALUES (?,?,?,?,?,?)",
+            (org_id, email, token, role, session["user_id"], expires_at.isoformat())
+        )
+        db.commit()
 
-    org = db.execute("SELECT name FROM organizations WHERE id=?", (org_id,)).fetchone()
-    db.close()
+        org = db.execute("SELECT name FROM organizations WHERE id=?", (org_id,)).fetchone()
 
-    invite_url = f"{request.host_url}join?token={token}"
-    return jsonify({"ok": True, "invite_url": invite_url, "org_name": org["name"]})
+        invite_url = f"{request.host_url}join?token={token}"
+        return jsonify({"ok": True, "invite_url": invite_url, "org_name": org["name"]})
+    finally:
+        db.close()
 
 
 @app.route("/api/org/join", methods=["POST"])
@@ -2637,27 +2751,29 @@ def org_join():
 def org_requests(org_id):
     """Shared request dashboard — all requests filed under this org."""
     db = get_db()
-    _assert_org_member(db, session["user_id"], org_id)
+    try:
+        _assert_org_member(db, session["user_id"], org_id)
 
-    status_filter = request.args.get("status")
-    params = [org_id]
-    where = "WHERE r.org_id=?"
-    if status_filter:
-        where += " AND r.status=?"
-        params.append(status_filter)
+        status_filter = request.args.get("status")
+        params = [org_id]
+        where = "WHERE r.org_id=?"
+        if status_filter:
+            where += " AND r.status=?"
+            params.append(status_filter)
 
-    rows = db.execute(f"""
-        SELECT r.*,
-               u.username as filed_by,
-               a.username as assigned_to_username
-        FROM requests r
-        JOIN users u ON u.id = r.user_id
-        LEFT JOIN users a ON a.id = r.assigned_to
-        {where}
-        ORDER BY r.updated_at DESC
-    """, params).fetchall()
-    db.close()
-    return jsonify({"requests": [dict(r) for r in rows]})
+        rows = db.execute(f"""
+            SELECT r.*,
+                   u.username as filed_by,
+                   a.username as assigned_to_username
+            FROM requests r
+            JOIN users u ON u.id = r.user_id
+            LEFT JOIN users a ON a.id = r.assigned_to
+            {where}
+            ORDER BY r.updated_at DESC
+        """, params).fetchall()
+        return jsonify({"requests": [dict(r) for r in rows]})
+    finally:
+        db.close()
 
 
 @app.route("/api/requests/<int:req_id>/assign", methods=["PATCH"])
@@ -2668,33 +2784,32 @@ def request_assign(req_id):
     assignee_id = data.get("assigned_to")  # None to unassign
 
     db = get_db()
-    row = db.execute("SELECT org_id, user_id FROM requests WHERE id=?", (req_id,)).fetchone()
-    if not row:
+    try:
+        row = db.execute("SELECT org_id, user_id FROM requests WHERE id=?", (req_id,)).fetchone()
+        if not row:
+            return jsonify({"error": "Not found"}), 404
+
+        if not row["org_id"]:
+            return jsonify({"error": "This request is not part of an organization"}), 400
+
+        _assert_org_member(db, session["user_id"], row["org_id"])
+
+        if assignee_id is not None:
+            # Verify assignee is a member of the same org
+            member = db.execute(
+                "SELECT id FROM org_members WHERE org_id=? AND user_id=?",
+                (row["org_id"], assignee_id)
+            ).fetchone()
+            if not member:
+                return jsonify({"error": "Assignee is not a member of this organization"}), 400
+
+        db.execute(
+            "UPDATE requests SET assigned_to=?, updated_at=? WHERE id=?",
+            (assignee_id, datetime.utcnow().isoformat(), req_id)
+        )
+        db.commit()
+    finally:
         db.close()
-        return jsonify({"error": "Not found"}), 404
-
-    if not row["org_id"]:
-        db.close()
-        return jsonify({"error": "This request is not part of an organization"}), 400
-
-    _assert_org_member(db, session["user_id"], row["org_id"])
-
-    if assignee_id is not None:
-        # Verify assignee is a member of the same org
-        member = db.execute(
-            "SELECT id FROM org_members WHERE org_id=? AND user_id=?",
-            (row["org_id"], assignee_id)
-        ).fetchone()
-        if not member:
-            db.close()
-            return jsonify({"error": "Assignee is not a member of this organization"}), 400
-
-    db.execute(
-        "UPDATE requests SET assigned_to=?, updated_at=? WHERE id=?",
-        (assignee_id, datetime.utcnow().isoformat(), req_id)
-    )
-    db.commit()
-    db.close()
     note = f"Assigned to user #{assignee_id}" if assignee_id else "Assignment cleared"
     log_action(req_id, session["user_id"], note)
     return jsonify({"ok": True})
@@ -2710,19 +2825,20 @@ def org_member_update(org_id, user_id):
         return jsonify({"error": "Invalid role"}), 400
 
     db = get_db()
-    _assert_org_member(db, session["user_id"], org_id, min_role="owner")
+    try:
+        _assert_org_member(db, session["user_id"], org_id, min_role="owner")
 
-    if user_id == session["user_id"]:
+        if user_id == session["user_id"]:
+            return jsonify({"error": "Cannot change your own role"}), 400
+
+        db.execute(
+            "UPDATE org_members SET role=? WHERE org_id=? AND user_id=?",
+            (role, org_id, user_id)
+        )
+        db.commit()
+        return jsonify({"ok": True})
+    finally:
         db.close()
-        return jsonify({"error": "Cannot change your own role"}), 400
-
-    db.execute(
-        "UPDATE org_members SET role=? WHERE org_id=? AND user_id=?",
-        (role, org_id, user_id)
-    )
-    db.commit()
-    db.close()
-    return jsonify({"ok": True})
 
 
 @app.route("/api/org/<int:org_id>/members/<int:user_id>", methods=["DELETE"])
@@ -2730,21 +2846,22 @@ def org_member_update(org_id, user_id):
 def org_member_remove(org_id, user_id):
     """Remove a member from the org."""
     db = get_db()
-    caller_role = _assert_org_member(db, session["user_id"], org_id)
+    try:
+        caller_role = _assert_org_member(db, session["user_id"], org_id)
 
-    # Owners can remove anyone (except themselves). Members can remove themselves.
-    if user_id != session["user_id"] and caller_role != "owner":
+        # Owners can remove anyone (except themselves). Members can remove themselves.
+        if user_id != session["user_id"] and caller_role != "owner":
+            abort(403)
+
+        db.execute("DELETE FROM org_members WHERE org_id=? AND user_id=?", (org_id, user_id))
+        # Clear active org if the removed user had this set
+        db.execute(
+            "UPDATE users SET active_org_id=NULL WHERE id=? AND active_org_id=?",
+            (user_id, org_id)
+        )
+        db.commit()
+    finally:
         db.close()
-        abort(403)
-
-    db.execute("DELETE FROM org_members WHERE org_id=? AND user_id=?", (org_id, user_id))
-    # Clear active org if the removed user had this set
-    db.execute(
-        "UPDATE users SET active_org_id=NULL WHERE id=? AND active_org_id=?",
-        (user_id, org_id)
-    )
-    db.commit()
-    db.close()
     return jsonify({"ok": True})
 
 
@@ -2772,6 +2889,145 @@ def org_invite_info():
         return jsonify({"error": "Invitation has expired"}), 410
 
     return jsonify({"org_name": inv["org_name"], "email": inv["email"], "role": inv["role"]})
+
+
+@app.route("/api/org/<int:org_id>/activity", methods=["GET"])
+@login_required
+def org_activity(org_id):
+    """Activity feed — recent actions across all org requests."""
+    db = get_db()
+    try:
+        _assert_org_member(db, session["user_id"], org_id)
+        limit = min(int(request.args.get("limit", 50)), 200)
+        rows = db.execute("""
+            SELECT al.id, al.action, al.note, al.logged_at,
+                   u.username, r.foia_number, r.subject, r.id as request_id
+            FROM action_log al
+            JOIN requests r ON r.id = al.request_id
+            JOIN users u ON u.id = al.user_id
+            WHERE r.org_id = ?
+            ORDER BY al.logged_at DESC
+            LIMIT ?
+        """, (org_id, limit)).fetchall()
+        return jsonify({"activity": [dict(r) for r in rows]})
+    finally:
+        db.close()
+
+
+@app.route("/api/org/<int:org_id>/stats", methods=["GET"])
+@login_required
+def org_stats(org_id):
+    """Quick stats for an org's shared dashboard."""
+    db = get_db()
+    try:
+        _assert_org_member(db, session["user_id"], org_id)
+        total = db.execute("SELECT COUNT(*) as c FROM requests WHERE org_id=?", (org_id,)).fetchone()["c"]
+        active = db.execute("SELECT COUNT(*) as c FROM requests WHERE org_id=? AND status='active'", (org_id,)).fetchone()["c"]
+        new = db.execute("SELECT COUNT(*) as c FROM requests WHERE org_id=? AND status='new'", (org_id,)).fetchone()["c"]
+        closed = db.execute("SELECT COUNT(*) as c FROM requests WHERE org_id=? AND status='closed'", (org_id,)).fetchone()["c"]
+        appealed = db.execute("SELECT COUNT(*) as c FROM requests WHERE org_id=? AND status='appealed'", (org_id,)).fetchone()["c"]
+        members = db.execute("SELECT COUNT(*) as c FROM org_members WHERE org_id=?", (org_id,)).fetchone()["c"]
+        return jsonify({"stats": {"total": total, "new": new, "active": active, "appealed": appealed, "closed": closed, "members": members}})
+    finally:
+        db.close()
+
+
+@app.route("/api/org/<int:org_id>/invitations", methods=["GET"])
+@login_required
+def org_invitations_list(org_id):
+    """List pending invitations for this org."""
+    db = get_db()
+    try:
+        _assert_org_member(db, session["user_id"], org_id, min_role="owner")
+        rows = db.execute("""
+            SELECT i.id, i.email, i.role, i.created_at, i.expires_at,
+                   u.username as invited_by_name
+            FROM org_invitations i
+            LEFT JOIN users u ON u.id = i.invited_by
+            WHERE i.org_id = ? AND i.accepted_at IS NULL AND i.expires_at > ?
+            ORDER BY i.created_at DESC
+        """, (org_id, datetime.utcnow().isoformat())).fetchall()
+        return jsonify({"invitations": [dict(r) for r in rows]})
+    finally:
+        db.close()
+
+
+@app.route("/api/org/<int:org_id>/invitations/<int:invite_id>", methods=["DELETE"])
+@login_required
+def org_invitation_revoke(org_id, invite_id):
+    """Revoke a pending invitation."""
+    db = get_db()
+    try:
+        _assert_org_member(db, session["user_id"], org_id, min_role="owner")
+        inv = db.execute(
+            "SELECT id FROM org_invitations WHERE id=? AND org_id=? AND accepted_at IS NULL",
+            (invite_id, org_id)
+        ).fetchone()
+        if not inv:
+            return jsonify({"error": "Invitation not found"}), 404
+        db.execute("DELETE FROM org_invitations WHERE id=?", (invite_id,))
+        db.commit()
+        return jsonify({"ok": True})
+    finally:
+        db.close()
+
+
+@app.route("/api/org/<int:org_id>/leave", methods=["POST"])
+@login_required
+def org_leave(org_id):
+    """Leave an organization (non-owners only)."""
+    db = get_db()
+    try:
+        role = _assert_org_member(db, session["user_id"], org_id)
+        if role == "owner":
+            # Check if this is the only owner
+            owner_count = db.execute(
+                "SELECT COUNT(*) as c FROM org_members WHERE org_id=? AND role='owner'",
+                (org_id,)
+            ).fetchone()["c"]
+            if owner_count <= 1:
+                return jsonify({"error": "You are the only owner. Transfer ownership before leaving."}), 400
+        db.execute("DELETE FROM org_members WHERE org_id=? AND user_id=?", (org_id, session["user_id"]))
+        db.execute("UPDATE users SET active_org_id=NULL WHERE id=? AND active_org_id=?",
+                   (session["user_id"], org_id))
+        db.commit()
+        return jsonify({"ok": True})
+    finally:
+        db.close()
+
+
+@app.route("/api/org/<int:org_id>/settings", methods=["PATCH"])
+@login_required
+def org_settings_update(org_id):
+    """Update org settings (owner only)."""
+    data = request.get_json() or {}
+    db = get_db()
+    try:
+        _assert_org_member(db, session["user_id"], org_id, min_role="owner")
+        name = (data.get("name") or "").strip()
+        if not name:
+            return jsonify({"error": "Organization name is required"}), 400
+        if len(name) > 80:
+            return jsonify({"error": "Name must be 80 characters or fewer"}), 400
+        new_slug = _slug_from_name(name)
+        # Ensure slug doesn't collide
+        existing = db.execute(
+            "SELECT id FROM organizations WHERE slug=? AND id!=?",
+            (new_slug, org_id)
+        ).fetchone()
+        suffix = 2
+        while existing:
+            new_slug = f"{_slug_from_name(name)}-{suffix}"
+            existing = db.execute(
+                "SELECT id FROM organizations WHERE slug=? AND id!=?",
+                (new_slug, org_id)
+            ).fetchone()
+            suffix += 1
+        db.execute("UPDATE organizations SET name=?, slug=? WHERE id=?", (name, new_slug, org_id))
+        db.commit()
+        return jsonify({"ok": True, "name": name, "slug": new_slug})
+    finally:
+        db.close()
 
 
 # ─────────────────────────────────────────────

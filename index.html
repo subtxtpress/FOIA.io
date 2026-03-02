@@ -45,9 +45,9 @@
   --bg2:       #1e1e1e;
   --bg3:       #2a2a2a;
   --border:    #3a3a3a;
-  --accent:    /*#BB86FC;*/#03DAC6;
+  --accent:    #03DAC6;
   --accent-dim:#3700B3;
-  --primary:   /*#BB86FC;*/#cccccc;
+  --primary:   #cccccc;
   --secondary: #03DAC6;
   --error:     #CF6679;
   --text:      #FFFFFF;
@@ -58,10 +58,14 @@
   --avatar-text:#000000;
   --cyan:      #03DAC6;
   --red:       #CF6679;
+  --green:     #4CAF50;
+  --amber:     #FFC107;
   --radius:    6px;
   --shadow:    0 2px 8px rgba(0,0,0,0.4);
   --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
   --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+  --font-doc:  'Georgia', 'Times New Roman', serif;
+  --logo-grad: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
 }
 /* ── Light mode ────────────────────────────────────────────── */
 [data-theme="light"] {
@@ -69,10 +73,10 @@
   --bg2:       #F5F5F5;
   --bg3:       #EEEEEE;
   --border:    #E0E0E0;
-  --accent:    /*#BB86FC;*/#00897B;
+  --accent:    #00897B;
   --accent-dim:#3700B3;
-  --primary:   /*#BB86FC;*/#cccccc;
-  --secondary: /*#03DAC6;*/#00897B;
+  --primary:   #cccccc;
+  --secondary: #00897B;
   --error:     #B00020;
   --text:      #000000;
   --text-dim:  #757575;
@@ -82,8 +86,11 @@
   --avatar-text:#000000;
   --cyan:      #00897B;
   --red:       #B00020;
+  --green:     #2E7D32;
+  --amber:     #F57F17;
   --shadow:    0 1px 4px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --logo-grad: linear-gradient(90deg, #999 0%, #444 32.8%, #222 52.4%, #444 72.98%, #999 100%);
 }
 /* ── Reset & Variables ─────────────────────────────────────── */
 *,
@@ -218,10 +225,22 @@ body {
   padding-left: 9px;
 }
 .nav-item .icon {
-    font-size: 1.1rem;
     width: 20px;
-    text-align: center;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0.7;
+    flex-shrink: 0;
+}
+.nav-item .icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 .nav-item.active .icon {
     opacity: 1;
@@ -231,9 +250,9 @@ body {
 }
 .nav-badge {
   margin-left: auto;
-  background: var(--cyan);
-  color: var(--bg);
-  font-size: .65rem;
+  background: var(--bg3);
+  color: var(--text-dim);
+  font-size: .7rem;
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 20px;
@@ -275,7 +294,7 @@ body {
 }
 .user-status {
     font-size: .7rem;
-    color: /*var(--green);*/#00897B;
+    color: var(--green);
 }
 #btnLogout {
   display: block;
@@ -522,7 +541,7 @@ td {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: .72rem;
+  font-size: .75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .5px;
@@ -578,7 +597,7 @@ td {
   transition: all 0.2s;
 }
 .btn-primary:hover {
-  background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  background: var(--logo-grad);
   border-color: #d8d8d8;
   color: #000000;
   transform: translateY(-1px);
@@ -641,12 +660,19 @@ textarea {
   transition: all .2s;
   outline: none;
 }
-input:focus,
-select:focus,
-textarea:focus {
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--cyan);
+  background: var(--bg2);
+  box-shadow: 0 0 0 3px rgba(3,218,198,.2);
+  outline: none;
+}
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible) {
   border-color: var(--text-dim);
   background: var(--bg2);
-  box-shadow: 0 0 0 3px rgba(255,255,255,.05);
 }
 select {
   padding-right: 32px;
@@ -694,6 +720,17 @@ textarea {
   padding-top: 20px;
   border-top: 1px solid var(--border);
 }
+/* ── Focus ring (keyboard accessibility) ──────────────────── */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.modal-close:focus-visible {
+  outline-offset: 0;
+}
 /* ── Auth pages ────────────────────────────────────────────── */
 #authWrap {
   min-height: 100vh;
@@ -725,7 +762,7 @@ textarea {
   margin-bottom: 8px;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   display: inline-block;
-  background: linear-gradient(45deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  background: var(--logo-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -772,7 +809,7 @@ textarea {
   width: 100%;
   margin-top: 8px;
   justify-content: center;
-  background: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  background: var(--logo-grad);
   color: #000000;
   border: 1px solid #d8d8d8;
   font-weight: 600;
@@ -780,7 +817,7 @@ textarea {
   transition: all 0.2s;
 }
 .auth-submit:hover {
-  background: linear-gradient(90deg, #3d3d3d 0%, #c8c8c8 32.8%, #f0f0f0 52.4%, #c8c8c8 72.98%, #3d3d3d 100%);
+  background: var(--logo-grad);
   border-color: #c8c8c8;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(77,77,77,0.4);
@@ -881,14 +918,18 @@ textarea {
   border-radius: 8px;
   padding: 20px;
   white-space: pre-wrap;
-  font-family: 'Georgia', serif;
+  font-family: var(--font-doc);
   font-size: .88rem;
   line-height: 1.9;
   color: var(--text);
   min-height: 300px;
   outline: none;
 }
-.letter-pre:focus {
+.letter-pre:focus-visible {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(3,218,198,.2);
+}
+.letter-pre:focus:not(:focus-visible) {
   border-color: var(--cyan);
 }
 .copy-row {
@@ -1120,6 +1161,142 @@ textarea {
   color: var(--text-dim);
   border: 1px solid var(--border);
 }
+/* Pricing card utilities */
+.pricing-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pricing-tier-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+.pricing-tier-label.highlight { color: var(--cyan); }
+.pricing-price {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.pricing-price span {
+  font-size: .9rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+.pricing-subtitle {
+  font-size: .72rem;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+.pricing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.pricing-features li {
+  font-size: .83rem;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.pricing-check {
+  color: var(--green);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.pricing-footer {
+  font-size: .73rem;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: auto;
+  line-height: 1.5;
+}
+.pricing-popular {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 1px var(--cyan);
+}
+.pricing-badge {
+  position: absolute;
+  top: -1px;
+  right: 16px;
+  font-size: .6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  padding: 3px 9px;
+  border-radius: 0 0 5px 5px;
+}
+.pricing-badge.popular {
+  background: var(--cyan);
+  color: #000;
+}
+.pricing-badge.soon {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-top: none;
+  color: var(--text-dim);
+}
+.pricing-coming-soon { opacity: .6; }
+/* Comparison table checkmark */
+.td-check { text-align: center; color: var(--green); }
+.td-none  { text-align: center; color: var(--text-dim); }
+/* Sidebar footer links */
+.sidebar-links {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.sidebar-link {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: .72rem;
+  cursor: pointer;
+  padding: 0;
+}
+.sidebar-link.beta {
+  color: var(--cyan);
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+.sidebar-sep {
+  color: var(--border);
+  font-size: .72rem;
+}
+/* Org switcher */
+.org-switcher-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.org-switcher-select {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: .8rem;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 /* ── Subscribe page ────────────────────────────────────────── */
 .subscribe-card {
   max-width: 480px;
@@ -1180,9 +1357,15 @@ textarea {
   color: var(--text-dim);
 }
 .empty-state .e-icon {
-  font-size: 3rem;
   margin-bottom: 16px;
-  opacity: 0.3; font-weight: 300;
+  opacity: 0.4;
+}
+.empty-state .e-icon svg {
+  width: 48px;
+  height: 48px;
+  stroke: var(--text-dim);
+  stroke-width: 1.5;
+  fill: none;
 }
 .empty-state h3 {
   font-size: 1.1rem;
@@ -2026,9 +2209,8 @@ textarea {
 
     <!-- Org switcher -->
     <div id="orgSwitcher" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border);">
-      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:4px;">Workspace</div>
-      <select id="orgSelect" onchange="switchOrg(this.value)"
-        style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:.8rem;padding:5px 8px;border-radius:6px;cursor:pointer;">
+      <div class="org-switcher-label">Workspace</div>
+      <select id="orgSelect" onchange="switchOrg(this.value)" class="org-switcher-select" aria-label="Switch workspace">
       </select>
     </div>
 
@@ -2036,54 +2218,60 @@ textarea {
     <div class="sidebar-nav" id="sidebarNav">
       <div class="nav-label">Overview</div>
       <button class="nav-item active" data-page="dashboard" onclick="nav('dashboard')">
-        <span class="icon">△</span> Dashboard
+        <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> Dashboard
       </button>
 
       <div class="nav-label">Requests</div>
       <button class="nav-item" data-page="new-request" onclick="nav('new-request')">
-        <span class="icon">﹢</span> New Request
+        <span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> New Request
       </button>
       <button class="nav-item" data-page="all-requests" onclick="nav('all-requests')">
-        <span class="icon">≡</span> All Requests
-        <span class="nav-badge" id="badgeAll" style="background:var(--bg3);color:var(--text-dim);">0</span>
+        <span class="icon"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> All Requests
+        <span class="nav-badge" id="badgeAll">0</span>
       </button>
       <button class="nav-item" data-page="active-requests" onclick="nav('active-requests')">
-        <span class="icon">⍛</span> Active Requests
-        <span class="nav-badge" id="badgeActive" style="background:var(--bg3);color:var(--text-dim);">0</span>
+        <span class="icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span> Active Requests
+        <span class="nav-badge" id="badgeActive">0</span>
       </button>
       <button class="nav-item" data-page="closed-requests" onclick="nav('closed-requests')">
-        <span class="icon">☑︎</span> Closed Requests
-        <span class="nav-badge" id="badgeClosed" style="background:var(--bg3);color:var(--text-dim);">0</span>
+        <span class="icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span> Closed Requests
+        <span class="nav-badge" id="badgeClosed">0</span>
       </button>
 
       <!-- Newsroom section (shown when user belongs to an org) -->
       <div class="nav-label" id="newsroomNavSection" style="display:none;">Newsroom</div>
       <button class="nav-item" id="sharedDashNavBtn" data-page="shared-dashboard" onclick="nav('shared-dashboard')" style="display:none;">
-        <span class="icon">⊞</span> Shared Dashboard
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Shared Dashboard
+      </button>
+      <button class="nav-item" id="activityNavBtn" data-page="activity" onclick="nav('activity')" style="display:none;">
+        <span class="icon"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Activity
       </button>
       <button class="nav-item" id="teamNavBtn" data-page="team" onclick="nav('team')" style="display:none;">
-        <span class="icon">◎</span> Team
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span> Team
+      </button>
+      <button class="nav-item" id="orgSettingsNavBtn" data-page="org-settings" onclick="nav('org-settings')" style="display:none;">
+        <span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings
       </button>
 
       <div class="nav-label" id="adminNavSection" style="display:none;">Admin</div>
       <button class="nav-item" id="adminNavBtn" data-page="admin" onclick="nav('admin')" style="display:none;">
-        <span class="icon">⚙</span> Invite Codes
+        <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Invite Codes
       </button>
 
       <div class="nav-label">Reference</div>
       <button class="nav-item" onclick="openAgencyModal()">
-        <span class="icon">⚖︎</span> Federal Agencies
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M9 17h1"/></svg></span> Federal Agencies
       </button>
       <button class="nav-item" onclick="openStateLawsModal()">
-        <span class="icon">⚖︎</span> State Laws
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></span> State Laws
       </button>
       <button class="nav-item" onclick="openLawEnforcementModal()">
-        <span class="icon">✭</span> State & Local Agencies
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> State & Local Agencies
       </button>
     </div>
     </div><!-- /.sidebar-nav-wrap -->
     <div class="sidebar-footer">
-      <button id="btnTheme" onclick="toggleTheme()">
+      <button id="btnTheme" onclick="toggleTheme()" aria-label="Toggle color theme">
         <span id="themeIcon">☼</span>
         <span id="themeLabel">Light Mode</span>
       </button>
@@ -2094,23 +2282,23 @@ textarea {
           <div class="user-status" id="userStatus">● Active</div>
         </div>
       </div>
-      <button id="btnLogout" onclick="doLogout()">Sign Out</button>
-      <div style="display:flex;gap:8px;margin-top:4px;padding-top:4px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap;justify-content:center;">
-        <button onclick="nav('help')" style="background:none;border:none;color:var(--text-dim);font-size:.72rem;cursor:pointer;padding:0;">Help</button>
-        <span style="color:var(--border);font-size:.72rem;">·</span>
-        <button onclick="nav('terms')" style="background:none;border:none;color:var(--text-dim);font-size:.72rem;cursor:pointer;padding:0;">Terms</button>
-        <span style="color:var(--border);font-size:.72rem;">·</span>
-        <button onclick="nav('pricing')" style="background:none;border:none;color:var(--text-dim);font-size:.72rem;cursor:pointer;padding:0;">Plans</button>
-        <span style="color:var(--border);font-size:.72rem;">·</span>
-        <button onclick="document.getElementById('betaModal').classList.add('open')" style="background:none;border:none;color:var(--cyan);font-size:.72rem;cursor:pointer;padding:0;font-weight:600;letter-spacing:.3px;">BETA</button>
+      <button id="btnLogout" onclick="doLogout()" aria-label="Sign out of your account">Sign Out</button>
+      <div class="sidebar-links">
+        <button class="sidebar-link" onclick="nav('help')">Help</button>
+        <span class="sidebar-sep">·</span>
+        <button class="sidebar-link" onclick="nav('terms')">Terms</button>
+        <span class="sidebar-sep">·</span>
+        <button class="sidebar-link" onclick="nav('pricing')">Plans</button>
+        <span class="sidebar-sep">·</span>
+        <button class="sidebar-link beta" onclick="document.getElementById('betaModal').classList.add('open')">BETA</button>
       </div>
     </div>
   </nav>
 
   <!-- Main content -->
-  <div id="main">
+  <main id="main">
     <div class="topbar">
-      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Open navigation menu">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
       <button class="btn btn-primary btn-sm" id="topbar-btn" onclick="nav('new-request')">+ New Request</button>
     </div>
@@ -2328,7 +2516,7 @@ textarea {
             </table>
           </div>
           <div id="allEmpty" class="empty-state">
-            <div class="e-icon">—</div>
+            <div class="e-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
             <h3>No requests yet</h3>
             <p>Create your first FOIA request to get started.</p>
             <button class="btn btn-primary" onclick="nav('new-request')">+ New Request</button>
@@ -2353,7 +2541,7 @@ textarea {
             </table>
           </div>
           <div id="activeEmpty" class="empty-state">
-            <div class="e-icon">—</div>
+            <div class="e-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
             <h3>No active requests</h3>
             <p>Save a request letter to move a request into Active status.</p>
           </div>
@@ -2377,7 +2565,7 @@ textarea {
             </table>
           </div>
           <div id="closedEmpty" class="empty-state">
-            <div class="e-icon">—</div>
+            <div class="e-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
             <h3>No closed requests</h3>
             <p>Requests you close will appear here.</p>
           </div>
@@ -2440,6 +2628,7 @@ textarea {
               </select>
             </div>
           </div>
+          <div id="sharedDashStats"></div>
           <div id="sharedDashContent">
             <div style="color:var(--text-dim);font-size:.9rem;padding:40px;text-align:center;">Loading…</div>
           </div>
@@ -2475,9 +2664,53 @@ textarea {
               </div>
             </div>
 
-            <div class="card">
+            <div class="card" style="margin-bottom:16px;">
               <div class="card-title">Pending Invitations</div>
-              <div id="teamInviteInfo" style="font-size:.82rem;color:var(--text-dim);">No pending invitations.</div>
+              <div id="teamInviteList">
+                <div style="font-size:.82rem;color:var(--text-dim);">Loading…</div>
+              </div>
+            </div>
+
+            <div class="card" id="teamLeaveCard" style="display:none;">
+              <div class="card-title" style="color:var(--red);">Leave Organization</div>
+              <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:12px;">Remove yourself from this organization. You will lose access to all shared requests.</p>
+              <button class="btn btn-danger btn-sm" onclick="leaveOrg()">Leave Organization</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Activity Feed (Newsroom) ─────────────────────────── -->
+      <div id="page-activity" class="page">
+        <div style="max-width:800px;">
+          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Activity</h2>
+          <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:20px;">Recent actions across all organization requests.</p>
+          <div id="activityFeed">
+            <div style="color:var(--text-dim);font-size:.9rem;padding:40px;text-align:center;">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Org Settings (Newsroom) ──────────────────────────── -->
+      <div id="page-org-settings" class="page">
+        <div style="max-width:600px;">
+          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Organization Settings</h2>
+          <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">Manage your organization details.</p>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title">General</div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Organization Name</label>
+              <input type="text" id="orgSettingsName" maxlength="80">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="saveOrgSettings()">Save Changes</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Organization Info</div>
+            <div style="font-size:.82rem;color:var(--text-dim);">
+              <p style="margin-bottom:6px;"><strong>Slug:</strong> <span id="orgSettingsSlug">—</span></p>
+              <p><strong>Members:</strong> <span id="orgSettingsMemberCount">—</span></p>
             </div>
           </div>
         </div>
@@ -2493,54 +2726,54 @@ textarea {
           <div class="pricing-tiers">
 
             <!-- Core -->
-            <div class="card" style="position:relative;display:flex;flex-direction:column;gap:0;">
-              <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:10px;">Core</div>
-              <div style="font-size:2rem;font-weight:800;line-height:1;margin-bottom:2px;">$0<span style="font-size:.9rem;font-weight:400;color:var(--text-dim);">/mo</span></div>
-              <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:16px;">No credit card required</div>
-              <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px;flex:1;">
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Unlimited FOIA requests</li>
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Automatic deadline tracking</li>
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Notes and file attachments</li>
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Full action history on every request</li>
+            <div class="card pricing-card">
+              <div class="pricing-tier-label">Core</div>
+              <div class="pricing-price">$0<span>/mo</span></div>
+              <div class="pricing-subtitle">No credit card required</div>
+              <ul class="pricing-features">
+                <li><span class="pricing-check">✓</span> Unlimited FOIA requests</li>
+                <li><span class="pricing-check">✓</span> Automatic deadline tracking</li>
+                <li><span class="pricing-check">✓</span> Notes and file attachments</li>
+                <li><span class="pricing-check">✓</span> Full action history on every request</li>
               </ul>
-              <div style="font-size:.73rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;line-height:1.5;">Everything you need to file and track your requests.</div>
+              <div class="pricing-footer">Everything you need to file and track your requests.</div>
             </div>
 
             <!-- Pro -->
-            <div class="card" style="position:relative;display:flex;flex-direction:column;gap:0;border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan);">
-              <div style="position:absolute;top:-1px;right:16px;background:var(--cyan);color:#000;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 9px;border-radius:0 0 5px 5px;">Most Popular</div>
-              <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:10px;">Pro</div>
-              <div style="font-size:2rem;font-weight:800;line-height:1;margin-bottom:2px;">$5<span style="font-size:.9rem;font-weight:400;color:var(--text-dim);">/mo</span></div>
-              <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:16px;font-style:italic;">Everything in Core, plus:</div>
-              <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px;flex:1;">
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Professional appeal letters</li>
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Priority email support</li>
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Early access to new features</li>
+            <div class="card pricing-card pricing-popular">
+              <div class="pricing-badge popular">Most Popular</div>
+              <div class="pricing-tier-label highlight">Pro</div>
+              <div class="pricing-price">$5<span>/mo</span></div>
+              <div class="pricing-subtitle" style="font-style:italic;">Everything in Core, plus:</div>
+              <ul class="pricing-features">
+                <li><span class="pricing-check">✓</span> Professional appeal letters</li>
+                <li><span class="pricing-check">✓</span> Priority email support</li>
+                <li><span class="pricing-check">✓</span> Early access to new features</li>
               </ul>
-              <div style="font-size:.73rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;line-height:1.5;">For when an agency ignores, delays, or denies your request.</div>
+              <div class="pricing-footer">For when an agency ignores, delays, or denies your request.</div>
             </div>
 
             <!-- Newsroom -->
-            <div class="card" style="position:relative;display:flex;flex-direction:column;gap:0;opacity:.6;">
-              <div style="position:absolute;top:-1px;right:16px;background:var(--bg3);border:1px solid var(--border);border-top:none;color:var(--text-dim);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 9px;border-radius:0 0 5px 5px;">Coming soon</div>
-              <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:10px;">Newsroom</div>
-              <div style="font-size:2rem;font-weight:800;line-height:1;margin-bottom:2px;">$15<span style="font-size:.9rem;font-weight:400;color:var(--text-dim);">/mo</span></div>
-              <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:16px;font-style:italic;">Everything in Pro, plus:</div>
-              <ul style="list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:8px;flex:1;">
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Multi-user accounts</li>
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Shared request dashboard</li>
-                <li style="font-size:.83rem;display:flex;gap:8px;align-items:baseline;"><span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span> Team notes and handoff tools</li>
+            <div class="card pricing-card pricing-coming-soon">
+              <div class="pricing-badge soon">Coming soon</div>
+              <div class="pricing-tier-label">Newsroom</div>
+              <div class="pricing-price">$15<span>/mo</span></div>
+              <div class="pricing-subtitle" style="font-style:italic;">Everything in Pro, plus:</div>
+              <ul class="pricing-features">
+                <li><span class="pricing-check">✓</span> Multi-user accounts</li>
+                <li><span class="pricing-check">✓</span> Shared request dashboard</li>
+                <li><span class="pricing-check">✓</span> Team notes and handoff tools</li>
               </ul>
-              <div style="font-size:.73rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;line-height:1.5;">Built for newsrooms managing requests across beats.</div>
+              <div class="pricing-footer">Built for newsrooms managing requests across beats.</div>
             </div>
 
           </div>
 
           <!-- Feature comparison table -->
-          <div class="card" style="width:100%;max-width:960px;margin-top:0;box-sizing:border-box;">
+          <div class="card" style="width:100%;max-width:960px;margin-top:0;">
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:16px;">Feature Comparison</h3>
             <div class="table-wrap">
-              <table style="width:100%;font-size:.82rem;">
+              <table style="font-size:.82rem;">
                 <thead>
                   <tr>
                     <th style="text-align:left;width:55%;">Feature</th>
@@ -2550,18 +2783,18 @@ textarea {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><td>Unlimited FOIA Requests</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Automatic Deadline Tracking</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Notes and File Attachments</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Full Action History</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Unlimited FOIA Requests</td><td class="td-check">✓</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
+                  <tr><td>Automatic Deadline Tracking</td><td class="td-check">✓</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
+                  <tr><td>Notes and File Attachments</td><td class="td-check">✓</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
+                  <tr><td>Full Action History</td><td class="td-check">✓</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
                   <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="4">Pro &amp; Above</td></tr>
-                  <tr><td>Professional Appeal Letters</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Priority Email Support</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Early Feature Access</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Professional Appeal Letters</td><td class="td-none">—</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
+                  <tr><td>Priority Email Support</td><td class="td-none">—</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
+                  <tr><td>Early Feature Access</td><td class="td-none">—</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
                   <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="4">Newsroom Only</td></tr>
-                  <tr><td>Multi-User Accounts</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Shared Request Dashboard</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
-                  <tr><td>Team Notes and Handoff Tools</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--text-dim);">—</td><td style="text-align:center;color:var(--green);">✓</td></tr>
+                  <tr><td>Multi-User Accounts</td><td class="td-none">—</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
+                  <tr><td>Shared Request Dashboard</td><td class="td-none">—</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
+                  <tr><td>Team Notes and Handoff Tools</td><td class="td-none">—</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
                 </tbody>
               </table>
             </div>
@@ -2788,15 +3021,15 @@ textarea {
       </div>
 
     </div><!-- /content -->
-  </div><!-- /main -->
+  </main><!-- /main -->
 </div><!-- /app -->
 
 <!-- ── Invite Member Modal ───────────────────────────────────── -->
-<div class="modal-overlay" id="inviteModal" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="inviteModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal" style="max-width:440px;">
     <div class="modal-header">
       <div class="modal-title">Invite Team Member</div>
-      <button class="modal-close" onclick="document.getElementById('inviteModal').classList.remove('open')">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="document.getElementById('inviteModal').classList.remove('open')">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -2825,11 +3058,11 @@ textarea {
 </div>
 
 <!-- ── Assign Request Modal ──────────────────────────────────── -->
-<div class="modal-overlay" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
       <div class="modal-title">Assign Request</div>
-      <button class="modal-close" onclick="document.getElementById('assignModal').classList.remove('open')">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="document.getElementById('assignModal').classList.remove('open')">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -2847,13 +3080,13 @@ textarea {
 </div>
 
 <!-- ── Beta Notice Modal ─────────────────────────────────────── -->
-<div class="modal-overlay" id="betaModal" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="betaModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
       <div>
         <h2>FOIA.io Beta</h2>
       </div>
-      <button class="modal-close" onclick="document.getElementById('betaModal').classList.remove('open')">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="document.getElementById('betaModal').classList.remove('open')">✕</button>
     </div>
     <div class="modal-body">
       <p style="font-size:.9rem;line-height:1.75;margin-bottom:12px;">FOIA.io is operating in a controlled beta phase.</p>
@@ -2866,14 +3099,14 @@ textarea {
 </div>
 
 <!-- ── Letter Modal ─────────────────────────────────────────── -->
-<div class="modal-overlay" id="letterModal">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="letterModal">
   <div class="modal">
     <div class="modal-header">
       <div>
         <h2>📄 FOIA Request Letter</h2>
         <div class="request-letter-modal" id="letterModalSub">Edit the letter below before sending.</div>
       </div>
-      <button class="modal-close" onclick="closeLetter()">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="closeLetter()">✕</button>
     </div>
     <div class="modal-body">
       <div
@@ -2885,6 +3118,7 @@ textarea {
       <div class="copy-row">
         <button class="btn btn-ghost btn-sm" onclick="copyLetter()">Copy to Clipboard</button>
         <button class="btn btn-ghost btn-sm" id="btnDownloadDocx" onclick="downloadDocx()">Download .docx</button>
+        <button class="btn btn-ghost btn-sm" onclick="downloadPdf()">Download PDF</button>
         <span class="copy-success" id="copySuccess">✓ Copied</span>
         <a id="foiaGovLink" href="https://www.foia.gov/create-a-request" target="_blank" rel="noopener"
            class="btn btn-ghost btn-sm">🌐 Open FOIA.gov Portal</a>
@@ -2898,11 +3132,11 @@ textarea {
 </div>
 
 <!-- ── Update Request Modal ─────────────────────────────────── -->
-<div class="modal-overlay" id="updateModal">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="updateModal">
   <div class="modal">
     <div class="modal-header">
       <h2>Update Request</h2>
-      <button class="modal-close" onclick="closeUpdateModal()">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="closeUpdateModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -2941,14 +3175,14 @@ textarea {
 </div>
 
 <!-- ── Appeal Modal ──────────────────────────────────────────── -->
-<div class="modal-overlay" id="appealModal">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="appealModal">
   <div class="modal">
     <div class="modal-header">
       <div>
         <h2>⚖︎ Administrative Appeal</h2>
         <div id="appealModalSub"></div>
       </div>
-      <button class="modal-close" onclick="closeAppealModal()">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="closeAppealModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-row appeal-type">
@@ -2987,7 +3221,7 @@ textarea {
 </div>
 
 <!-- ── Toast ────────────────────────────────────────────────── -->
-<div id="toast"></div>
+<div id="toast" role="alert" aria-live="polite"></div>
 
 <!-- ── Subscribe Page (shown over app when needed) ─────────── -->
 <div id="subscribePage">
@@ -3287,13 +3521,17 @@ function renderOrgSwitcher() {
   const select   = document.getElementById('orgSelect');
   const newsroomSection = document.getElementById('newsroomNavSection');
   const sharedBtn = document.getElementById('sharedDashNavBtn');
+  const activityBtn = document.getElementById('activityNavBtn');
   const teamBtn   = document.getElementById('teamNavBtn');
+  const settingsBtn = document.getElementById('orgSettingsNavBtn');
 
   if (!currentOrgs.length) {
     switcher.style.display = 'none';
     newsroomSection.style.display = 'none';
     sharedBtn.style.display = 'none';
+    activityBtn.style.display = 'none';
     teamBtn.style.display = 'none';
+    settingsBtn.style.display = 'none';
     return;
   }
 
@@ -3301,10 +3539,16 @@ function renderOrgSwitcher() {
   select.innerHTML = '<option value="0">Personal workspace</option>' +
     currentOrgs.map(o => `<option value="${o.id}" ${o.id === activeOrgId ? 'selected' : ''}>${esc(o.name)}</option>`).join('');
 
+  const hasActive = !!activeOrgId;
+  const userOrg = currentOrgs.find(o => o.id === activeOrgId);
+  const isOwner = userOrg?.role === 'owner';
+
   switcher.style.display = '';
   newsroomSection.style.display = '';
-  sharedBtn.style.display = activeOrgId ? '' : 'none';
+  sharedBtn.style.display = hasActive ? '' : 'none';
+  activityBtn.style.display = hasActive ? '' : 'none';
   teamBtn.style.display = '';
+  settingsBtn.style.display = hasActive && isOwner ? '' : 'none';
 }
 
 async function switchOrg(orgIdStr) {
@@ -3323,12 +3567,49 @@ async function loadSharedDashboard() {
   const org = currentOrgs.find(o => o.id === activeOrgId);
   if (org) document.getElementById('sharedDashTitle').textContent = org.name + ' — Requests';
 
-  const statusFilter = document.getElementById('sharedStatusFilter')?.value || '';
-  const params = statusFilter ? `?status=${statusFilter}` : '';
-  const { status, data } = await api('GET', `/api/org/${activeOrgId}/requests${params}`);
+  // Load stats + requests in parallel
+  const [statsRes, reqRes] = await Promise.all([
+    api('GET', `/api/org/${activeOrgId}/stats`),
+    api('GET', `/api/org/${activeOrgId}/requests${document.getElementById('sharedStatusFilter')?.value ? '?status=' + document.getElementById('sharedStatusFilter').value : ''}`)
+  ]);
+
   const el = document.getElementById('sharedDashContent');
-  if (status !== 200) { el.innerHTML = `<p style="color:var(--red)">Could not load requests.</p>`; return; }
-  const reqs = data.requests || [];
+
+  // Render stats bar
+  const statsEl = document.getElementById('sharedDashStats');
+  if (statsRes.status === 200 && statsEl) {
+    const s = statsRes.data.stats;
+    statsEl.innerHTML = `
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:800;color:var(--text);">${s.total}</div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Total</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:800;color:var(--cyan);">${s.new}</div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">New</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:800;color:var(--green);">${s.active}</div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Active</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:800;color:var(--yellow);">${s.appealed}</div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Appealed</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:800;color:var(--text-dim);">${s.closed}</div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Closed</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:800;color:var(--accent);">${s.members}</div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Members</div>
+        </div>
+      </div>`;
+  }
+
+  if (reqRes.status !== 200) { el.innerHTML = `<p style="color:var(--red)">Could not load requests.</p>`; return; }
+  const reqs = reqRes.data.requests || [];
   if (!reqs.length) {
     el.innerHTML = `<div class="card" style="text-align:center;padding:40px;color:var(--text-dim);">No requests yet in this workspace.</div>`;
     return;
@@ -3368,6 +3649,7 @@ async function loadTeamPage() {
   const orgPanel = document.getElementById('teamOrgPanel');
   const memberList = document.getElementById('teamMemberList');
   const inviteBtn  = document.getElementById('inviteBtn');
+  const leaveCard  = document.getElementById('teamLeaveCard');
 
   if (!currentOrgs.length) {
     noOrg.style.display = '';
@@ -3388,6 +3670,10 @@ async function loadTeamPage() {
   const isOwner = userOrg?.role === 'owner';
   if (isOwner) inviteBtn.style.display = '';
   else inviteBtn.style.display = 'none';
+
+  // Show leave button for non-sole-owners
+  const ownerCount = orgMembers.filter(m => m.role === 'owner').length;
+  leaveCard.style.display = (!isOwner || ownerCount > 1) ? '' : 'none';
 
   memberList.innerHTML = orgMembers.map(m => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;">
@@ -3411,6 +3697,9 @@ async function loadTeamPage() {
           <button class="btn btn-danger btn-sm" style="font-size:.7rem;padding:3px 8px;" onclick="removeMember(${orgId}, ${m.id}, '${esc(m.username)}')">Remove</button>` : ''}
       </div>
     </div>`).join('');
+
+  // Load pending invitations (owners only)
+  await loadPendingInvitations(orgId, isOwner);
 }
 
 async function createOrg() {
@@ -3507,6 +3796,126 @@ async function confirmAssign() {
   if (currentPage === 'shared-dashboard') await loadSharedDashboard();
 }
 
+async function loadPendingInvitations(orgId, isOwner) {
+  const el = document.getElementById('teamInviteList');
+  if (!isOwner) {
+    el.innerHTML = '<div style="font-size:.82rem;color:var(--text-dim);">Only owners can view pending invitations.</div>';
+    return;
+  }
+  const { status, data } = await api('GET', `/api/org/${orgId}/invitations`);
+  if (status !== 200) { el.innerHTML = '<div style="font-size:.82rem;color:var(--red);">Could not load invitations.</div>'; return; }
+  const invites = data.invitations || [];
+  if (!invites.length) {
+    el.innerHTML = '<div style="font-size:.82rem;color:var(--text-dim);">No pending invitations.</div>';
+    return;
+  }
+  el.innerHTML = invites.map(inv => {
+    const expires = new Date(inv.expires_at);
+    const daysLeft = Math.max(0, Math.ceil((expires - Date.now()) / 86400000));
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:.85rem;font-weight:600;">${esc(inv.email)}</div>
+        <div style="font-size:.72rem;color:var(--text-dim);">
+          Role: <strong>${inv.role}</strong> · Expires in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}
+          ${inv.invited_by_name ? ` · Invited by ${esc(inv.invited_by_name)}` : ''}
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" style="font-size:.7rem;padding:3px 8px;" onclick="revokeInvitation(${orgId}, ${inv.id}, '${esc(inv.email)}')">Revoke</button>
+    </div>`;
+  }).join('');
+}
+
+async function revokeInvitation(orgId, inviteId, email) {
+  if (!confirm(`Revoke invitation for ${email}?`)) return;
+  const { status, data } = await api('DELETE', `/api/org/${orgId}/invitations/${inviteId}`);
+  if (status !== 200) { toast(data.error || 'Could not revoke invitation', 'error'); return; }
+  toast('Invitation revoked', 'success');
+  await loadTeamPage();
+}
+
+async function leaveOrg() {
+  const org = currentOrgs.find(o => o.id === activeOrgId);
+  const orgName = org ? org.name : 'this organization';
+  if (!confirm(`Leave ${orgName}? You will lose access to all shared requests.`)) return;
+  const { status, data } = await api('POST', `/api/org/${activeOrgId}/leave`);
+  if (status !== 200) { toast(data.error || 'Could not leave organization', 'error'); return; }
+  toast(`Left ${orgName}`, 'success');
+  // Refresh org list
+  const meRes = await api('GET', '/api/auth/me');
+  if (meRes.data?.authenticated) {
+    currentOrgs = meRes.data.orgs || [];
+    activeOrgId = meRes.data.active_org_id || null;
+    renderOrgSwitcher();
+  }
+  nav('dashboard');
+}
+
+async function loadActivityFeed() {
+  if (!activeOrgId) return;
+  const el = document.getElementById('activityFeed');
+  const { status, data } = await api('GET', `/api/org/${activeOrgId}/activity?limit=50`);
+  if (status !== 200) { el.innerHTML = '<p style="color:var(--red)">Could not load activity.</p>'; return; }
+  const items = data.activity || [];
+  if (!items.length) {
+    el.innerHTML = '<div class="card" style="text-align:center;padding:40px;color:var(--text-dim);">No activity yet.</div>';
+    return;
+  }
+  el.innerHTML = items.map(a => {
+    const when = timeAgo(a.logged_at);
+    return `
+    <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;flex-shrink:0;margin-top:2px;">${esc((a.username||'?')[0].toUpperCase())}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.84rem;">
+          <strong>${esc(a.username)}</strong>
+          <span style="color:var(--text-dim);"> ${esc(a.action)}</span>
+        </div>
+        <div style="font-size:.76rem;color:var(--text-dim);margin-top:2px;">
+          <span style="color:var(--cyan);cursor:pointer;" onclick="openDetailById(${a.request_id})">${esc(a.foia_number)}</span>
+          ${a.subject ? ' — ' + esc(a.subject) : ''}
+          <span style="margin-left:6px;">${when}</span>
+        </div>
+        ${a.note ? `<div style="font-size:.76rem;color:var(--text-dim);margin-top:2px;font-style:italic;">${esc(a.note)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function timeAgo(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff/86400)}d ago`;
+  return d.toLocaleDateString();
+}
+
+async function loadOrgSettings() {
+  if (!activeOrgId) return;
+  const { status, data } = await api('GET', `/api/org/${activeOrgId}`);
+  if (status !== 200) return;
+  document.getElementById('orgSettingsName').value = data.org.name;
+  document.getElementById('orgSettingsSlug').textContent = data.org.slug;
+  document.getElementById('orgSettingsMemberCount').textContent = (data.members || []).length;
+}
+
+async function saveOrgSettings() {
+  if (!activeOrgId) return;
+  const name = document.getElementById('orgSettingsName').value.trim();
+  if (!name) { toast('Name is required', 'error'); return; }
+  const { status, data } = await api('PATCH', `/api/org/${activeOrgId}/settings`, { name });
+  if (status !== 200) { toast(data.error || 'Could not save settings', 'error'); return; }
+  // Update local org data
+  const org = currentOrgs.find(o => o.id === activeOrgId);
+  if (org) { org.name = data.name; org.slug = data.slug; }
+  renderOrgSwitcher();
+  document.getElementById('orgSettingsSlug').textContent = data.slug;
+  toast('Settings saved', 'success');
+}
+
 // ─────────────────────────────────────────────────────────────
 // Navigation
 // ─────────────────────────────────────────────────────────────
@@ -3522,7 +3931,9 @@ const PAGE_TITLES = {
   'terms':             'Terms of Service',
   'help':              'Help',
   'shared-dashboard':  'Shared Dashboard',
+  'activity':          'Activity',
   'team':              'Team',
+  'org-settings':      'Organization Settings',
   'pricing':         'Plans & Pricing',
   'admin':           'Admin',
 };
@@ -3552,9 +3963,11 @@ async function nav(page) {
   if (page === 'new-request')       await initNewRequestForm();
   if (page === 'agency-dir')        await loadAgencyDir();
   if (page === 'state-laws')        await loadStateLaws();
-  if (page === 'admin')             adminLoadCodes();
+  if (page === 'admin')             await adminLoadCodes();
   if (page === 'shared-dashboard')  await loadSharedDashboard();
+  if (page === 'activity')          await loadActivityFeed();
   if (page === 'team')              await loadTeamPage();
+  if (page === 'org-settings')      await loadOrgSettings();
 }
 
 function goBack() { nav(previousPage === 'detail' ? 'all-requests' : previousPage); }
@@ -4276,6 +4689,12 @@ async function downloadDocx() {
   window.location.href = `/api/requests/${pendingLetterId}/download-docx`;
 }
 
+async function downloadPdf() {
+  if (!pendingLetterId) return;
+  toast('Generating PDF…', '');
+  window.location.href = `/api/requests/${pendingLetterId}/download-pdf`;
+}
+
 async function quickSetTurn(id, value) {
   const { status, data } = await api('POST', `/api/requests/${id}/update`, { turn: value });
   if (status !== 200) {
@@ -4740,14 +5159,14 @@ function escapeHtml(text) {
 </script>
 
 <!-- ── Federal Agency Directory Modal ──────────────────────── -->
-<div class="modal-overlay" id="agencyDirModal" onclick="closeAgencyModal(event)">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="agencyDirModal" onclick="closeAgencyModal(event)">
   <div class="modal" style="max-width:860px;width:95%;">
     <div class="modal-header">
       <div>
         <h2>⚖︎ Federal FOIA Agency Directory</h2>
         <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">Federal agency FOIA contacts</div>
       </div>
-      <button class="modal-close" onclick="closeAgencyModal()">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="closeAgencyModal()">✕</button>
     </div>
     <div class="modal-body">
       <input id="agencyDirSearch" type="text" placeholder="Search agencies..."
@@ -4765,14 +5184,14 @@ function escapeHtml(text) {
 
 
 <!-- ── Law Enforcement Agency Directory Modal ──────────────── -->
-<div class="modal-overlay" id="lawEnforcementModal" onclick="closeLawEnforcementModal(event)">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="lawEnforcementModal" onclick="closeLawEnforcementModal(event)">
   <div class="modal" style="max-width:960px;width:95%;">
     <div class="modal-header">
       <div>
         <h2>✭ State & Local Agency Directory</h2>
         <div id="leSubtitle" style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">17,979 agencies • FBI 2024 data</div>
       </div>
-      <button class="modal-close" onclick="closeLawEnforcementModal()">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="closeLawEnforcementModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="filter-row" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
@@ -4806,14 +5225,14 @@ function escapeHtml(text) {
 </div>
 
 <!-- ── State Laws Modal ──────────────────────────────────────── -->
-<div class="modal-overlay" id="stateLawsModal" onclick="closeStateLawsModal(event)">
+<div class="modal-overlay" role="dialog" aria-modal="true" id="stateLawsModal" onclick="closeStateLawsModal(event)">
   <div class="modal" style="max-width:900px;width:95%;">
     <div class="modal-header">
       <div>
         <h2>⚖︎ State Public Records Laws</h2>
         <div style="font-size:.82rem;color:var(--text-dim);margin-top:2px;">All 50 states + DC</div>
       </div>
-      <button class="modal-close" onclick="closeStateLawsModal()">✕</button>
+      <button class="modal-close" aria-label="Close dialog" onclick="closeStateLawsModal()">✕</button>
     </div>
     <div class="modal-body">
       <input id="stateLawsSearch" type="text" placeholder="Search states..."
