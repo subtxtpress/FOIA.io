@@ -2156,6 +2156,9 @@ a:focus-visible,
         <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
       </div>
       <button class="btn auth-submit" onclick="doLogin()">Sign In</button>
+      <p style="text-align:center;margin-top:12px;">
+        <a href="#" onclick="authTab('forgot');return false" style="color:var(--text-dim);font-size:.85rem;">Forgot password?</a>
+      </p>
     </div>
 
     <!-- Register -->
@@ -2177,6 +2180,37 @@ a:focus-visible,
         <input type="text" id="regInvite" placeholder="AEOD-XXXXXXXX" autocomplete="off" style="text-transform:uppercase;letter-spacing:.5px;">
       </div>
       <button class="btn auth-submit" onclick="doRegister()">Create Account</button>
+    </div>
+
+    <!-- Forgot Password -->
+    <div id="forgotForm" style="display:none;">
+      <p style="color:var(--text-dim);font-size:.9rem;margin-bottom:16px;">
+        Enter your email and we'll send a reset link.
+      </p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="forgotEmail" placeholder="you@press.org" autocomplete="email">
+      </div>
+      <button class="btn auth-submit" onclick="doForgot()">Send Reset Link</button>
+      <p style="text-align:center;margin-top:12px;">
+        <a href="#" onclick="authTab('login');return false" style="color:var(--text-dim);font-size:.85rem;">Back to Sign In</a>
+      </p>
+    </div>
+
+    <!-- Reset Password -->
+    <div id="resetForm" style="display:none;">
+      <p style="color:var(--text-dim);font-size:.9rem;margin-bottom:16px;">
+        Enter your new password.
+      </p>
+      <div class="form-group">
+        <label>New Password <small style="color:var(--text-dim)">(min 8 characters)</small></label>
+        <input type="password" id="resetPass" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="resetPassConfirm" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <button class="btn auth-submit" onclick="doReset()">Reset Password</button>
     </div>
   </div>
 </div>
@@ -3302,7 +3336,12 @@ function authTab(tab) {
   document.querySelectorAll('.auth-tab').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(tab)));
   document.getElementById('loginForm').style.display    = tab === 'login'    ? '' : 'none';
   document.getElementById('registerForm').style.display = tab === 'register' ? '' : 'none';
+  document.getElementById('forgotForm').style.display   = tab === 'forgot'   ? '' : 'none';
+  document.getElementById('resetForm').style.display    = tab === 'reset'    ? '' : 'none';
   document.getElementById('authError').style.display    = 'none';
+  // Hide tabs bar on forgot/reset screens
+  const tabsBar = document.querySelector('.auth-tabs');
+  if (tabsBar) tabsBar.style.display = (tab === 'forgot' || tab === 'reset') ? 'none' : '';
 }
 
 async function doLogin() {
@@ -3329,6 +3368,38 @@ async function doRegister() {
   await bootAfterAuth();
 }
 
+async function doForgot() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showAuthError('Please enter your email'); return; }
+  const { status, data } = await api('POST', '/api/auth/forgot-password', { email });
+  if (status !== 200) {
+    showAuthError(data.error || 'Request failed');
+    return;
+  }
+  showAuthError('');
+  document.getElementById('forgotForm').innerHTML =
+    '<p style="color:var(--cyan);text-align:center;padding:24px 0;">If that email is registered, a reset link has been sent. Check your inbox.</p>' +
+    '<p style="text-align:center;margin-top:8px;"><a href="#" onclick="authTab(\'login\');return false" style="color:var(--text-dim);font-size:.85rem;">Back to Sign In</a></p>';
+}
+
+async function doReset() {
+  const password = document.getElementById('resetPass').value;
+  const confirm  = document.getElementById('resetPassConfirm').value;
+  if (password.length < 8) { showAuthError('Password must be at least 8 characters'); return; }
+  if (password !== confirm) { showAuthError('Passwords do not match'); return; }
+  const token = new URLSearchParams(window.location.search).get('reset');
+  if (!token) { showAuthError('Invalid reset link'); return; }
+  const { status, data } = await api('POST', '/api/auth/reset-password', { token, password });
+  if (status !== 200) {
+    showAuthError(data.error || 'Reset failed');
+    return;
+  }
+  showAuthError('');
+  document.getElementById('resetForm').innerHTML =
+    '<p style="color:var(--cyan);text-align:center;padding:24px 0;">Password updated! You can now sign in.</p>' +
+    '<p style="text-align:center;margin-top:8px;"><a href="#" onclick="authTab(\'login\');window.history.replaceState({},\'\',\'/\');return false" style="color:var(--text-dim);font-size:.85rem;">Sign In</a></p>';
+}
+
 async function bootAfterAuth() {
   // If there's a pending org invite, handle it now
   if (window._pendingInviteToken) {
@@ -3341,8 +3412,16 @@ async function bootAfterAuth() {
 }
 
 async function bootFromSession() {
-  // Check for org invite token in URL first
   const urlParams = new URLSearchParams(window.location.search);
+
+  // Check for password reset token in URL
+  const resetToken = urlParams.get('reset');
+  if (resetToken) {
+    authTab('reset');
+    return;
+  }
+
+  // Check for org invite token in URL
   const inviteToken = urlParams.get('token');
   if (inviteToken) {
     await handleInviteToken(inviteToken);

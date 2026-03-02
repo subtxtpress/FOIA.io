@@ -26,6 +26,11 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-production")
 app.permanent_session_lifetime = timedelta(days=30)
 STRIPE_SECRET = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_PRICE_ID = os.environ.get("STRIPE_PRICE_ID", "")  # your monthly price ID
+SMTP_HOST  = os.environ.get("SMTP_HOST", "")
+SMTP_PORT  = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER  = os.environ.get("SMTP_USER", "")
+SMTP_PASS  = os.environ.get("SMTP_PASS", "")
+SMTP_FROM  = os.environ.get("SMTP_FROM", "noreply@foia.io")
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
 MAX_UPLOAD_MB = 20
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -214,6 +219,17 @@ def init_db():
             invited_by  INTEGER NOT NULL REFERENCES users(id),
             expires_at  TIMESTAMP NOT NULL,
             accepted_at TIMESTAMP,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    db.execute(f"""
+        CREATE TABLE IF NOT EXISTS password_resets (
+            id          {pk},
+            email       TEXT NOT NULL,
+            token       TEXT NOT NULL UNIQUE,
+            expires_at  TEXT NOT NULL,
+            used        INTEGER DEFAULT 0,
             created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -1011,6 +1027,28 @@ def verify_password(stored, provided):
         return False
 
 
+def send_email(to, subject, body):
+    """Send a plain-text email via SMTP. Returns True on success."""
+    import smtplib
+    from email.mime.text import MIMEText
+    if not SMTP_HOST:
+        app.logger.warning("SMTP not configured — email to %s not sent", to)
+        return False
+    msg = MIMEText(body, "plain")
+    msg["Subject"] = subject
+    msg["From"] = SMTP_FROM
+    msg["To"] = to
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
+        return True
+    except Exception as e:
+        app.logger.error("Failed to send email to %s: %s", to, e)
+        return False
+
+
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -1305,6 +1343,79 @@ def login():
         "username": user["username"],
         "subscription_status": user["subscription_status"]
     })
+
+
+@app.route("/api/auth/forgot-password", methods=["POST"])
+def forgot_password():
+    data = request.get_json()
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    # Always return success to avoid revealing whether email exists
+    db = get_db()
+    user = db.execute("SELECT id, email FROM users WHERE email=?", (email,)).fetchone()
+
+    if user:
+        # Invalidate any existing unused tokens for this email
+        db.execute(
+            "UPDATE password_resets SET used=1 WHERE email=? AND used=0",
+            (email,)
+        )
+        token = secrets.token_urlsafe(32)
+        expires_at = (datetime.utcnow() + timedelta(hours=1)).isoformat()
+        db.insert(
+            "INSERT INTO password_resets (email, token, expires_at) VALUES (?,?,?)",
+            (email, token, expires_at)
+        )
+        db.commit()
+
+        reset_url = f"{request.host_url}?reset={token}"
+        send_email(
+            email,
+            "FOIA.io — Password Reset",
+            f"You requested a password reset for your FOIA.io account.\n\n"
+            f"Click the link below to set a new password:\n{reset_url}\n\n"
+            f"This link expires in 1 hour. If you didn't request this, you can ignore this email.\n\n"
+            f"— FOIA.io"
+        )
+
+    db.close()
+    return jsonify({"ok": True, "message": "If that email is registered, a reset link has been sent."})
+
+
+@app.route("/api/auth/reset-password", methods=["POST"])
+def reset_password():
+    data = request.get_json()
+    token = (data.get("token") or "").strip()
+    password = data.get("password") or ""
+
+    if not token:
+        return jsonify({"error": "Invalid reset link"}), 400
+    if len(password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters"}), 400
+
+    db = get_db()
+    reset = db.execute(
+        "SELECT * FROM password_resets WHERE token=? AND used=0 AND expires_at > ?",
+        (token, datetime.utcnow().isoformat())
+    ).fetchone()
+
+    if not reset:
+        db.close()
+        return jsonify({"error": "This reset link is invalid or has expired"}), 400
+
+    # Update the user's password
+    db.execute(
+        "UPDATE users SET password=? WHERE email=?",
+        (hash_password(password), reset["email"])
+    )
+    # Mark token as used
+    db.execute("UPDATE password_resets SET used=1 WHERE id=?", (reset["id"],))
+    db.commit()
+    db.close()
+
+    return jsonify({"ok": True, "message": "Password updated. You can now sign in."})
 
 
 @app.route("/api/auth/logout", methods=["POST"])
