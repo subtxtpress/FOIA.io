@@ -4,22 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FOIA.io — Public records, professionally managed.</title>
-  <meta name="description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers, and anyone who needs answers from government agencies.">
+  <meta name="description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers and anyone who needs answers from government agencies.">
   <meta name="robots" content="index, follow">
 
   <!-- Open Graph -->
   <meta property="og:title" content="FOIA.io — Public records, professionally managed.">
-  <meta property="og:description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers, and anyone who needs answers.">
+  <meta property="og:description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers and anyone who needs answers.">
   <meta property="og:image" content="https://foiaio-production.up.railway.app/img/og-image.png">
-  <meta property="og:url" content="https://foia.io">
+  <meta property="og:url" content="https://foiaio-production.up.railway.app">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="FOIA.io">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FOIA.io — Public records, professionally managed.">
-  <meta name="twitter:description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers, and anyone who needs answers.">
+  <meta name="twitter:description" content="Draft, track, and appeal FOIA requests — all in one place. Built for journalists, researchers and anyone who needs answers.">
   <meta name="twitter:image" content="https://foiaio-production.up.railway.app/img/og-image.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+  <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Mobile / PWA -->
+  <meta name="theme-color" content="#03DAC6" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#00897B" media="(prefers-color-scheme: light)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FOIA.io">
 
   <style>
     /* ─── Design Tokens ─────────────────────────────────────────── */
@@ -831,9 +846,6 @@
     @media (max-width: 768px) {
       .section { padding: 72px 0; }
 
-      /* Nav */
-      .nav-signin { display: none; }
-
       /* Hero */
       .hero { padding: 60px 24px 80px; min-height: 80vh; }
 
@@ -901,6 +913,108 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+      }
+    }
+
+    /* ─── Light Mode (system preference) ─────────────────────────── */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:        #FFFFFF;
+        --bg2:       #F5F5F5;
+        --bg3:       #EEEEEE;
+        --border:    #E0E0E0;
+        --cyan:      #00897B;
+        --cyan-dim:  rgba(0, 137, 123, 0.10);
+        --cyan-glow: rgba(0, 137, 123, 0.18);
+        --text:      #1a1a1a;
+        --text-dim:  #666666;
+        --red:       #B00020;
+        --shadow:    0 1px 4px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+      }
+
+      /* Nav — light frosted glass */
+      nav {
+        background: rgba(255, 255, 255, 0.85);
+        border-bottom-color: rgba(224, 224, 224, 0.6);
+      }
+
+      /* Ghost button hover */
+      .btn-ghost:hover {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: #bbb;
+      }
+
+      /* Nav sign-in hover */
+      .nav-signin:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
+
+      /* Hero orbs — softer for light bg */
+      .hero-orb-1 {
+        background: radial-gradient(circle, rgba(0, 137, 123, 0.12) 0%, transparent 70%);
+      }
+      .hero-orb-2 {
+        background: radial-gradient(circle, rgba(98, 71, 170, 0.10) 0%, transparent 70%);
+      }
+
+      /* Hero trust line */
+      .hero-trust { color: #999; }
+
+      /* Step number circle */
+      .step-num {
+        background: var(--bg);
+        border-color: rgba(0, 137, 123, 0.3);
+      }
+
+      /* Feature card hover */
+      .feat-card:hover {
+        border-color: rgba(0, 137, 123, 0.3);
+        box-shadow: 0 0 0 1px rgba(0, 137, 123, 0.08), var(--shadow);
+      }
+
+      /* Price badge free */
+      .price-badge-free {
+        background: rgba(0, 0, 0, 0.06);
+        color: var(--text-dim);
+      }
+
+      /* Price badge pro */
+      .price-badge-pro {
+        background: rgba(0, 137, 123, 0.12);
+      }
+
+      /* Price card pro gradient */
+      .price-card-pro {
+        background: linear-gradient(160deg, rgba(0, 137, 123, 0.06) 0%, var(--bg) 60%);
+        border-color: rgba(0, 137, 123, 0.35);
+        box-shadow: 0 -3px 0 0 var(--cyan), var(--shadow-lg);
+      }
+
+      /* Free CTA hover */
+      .price-cta-free:hover {
+        border-color: #bbb;
+        background: rgba(0, 0, 0, 0.04);
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar-track { background: var(--bg); }
+      ::-webkit-scrollbar-thumb:hover { background: #00796B; }
+
+      /* Selection */
+      ::selection {
+        background: rgba(0, 137, 123, 0.2);
+        color: var(--text);
+      }
+
+      /* Footer muted text */
+      .footer-bottom-left { color: #999; }
+      .footer-bottom-right a { color: #999; }
+      .footer-bottom-right a:hover { color: var(--text-dim); }
+
+      /* Dashed step connector */
+      .steps::before {
+        border-top-color: rgba(0, 137, 123, 0.25);
       }
     }
   </style>

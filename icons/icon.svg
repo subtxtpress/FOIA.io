@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <style>
+      @media (prefers-color-scheme: light) {
+        .bg { fill: #00897B; }
+      }
+    </style>
+  </defs>
+  <rect class="bg" width="512" height="512" rx="96" ry="96" fill="#03DAC6"/>
+  <!-- F lettermark -->
+  <path fill="#fff" d="M112 77h288v82H194v63h176v82H194v131h-82z"/>
+</svg>

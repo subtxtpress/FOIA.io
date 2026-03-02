@@ -294,7 +294,7 @@ body {
 }
 .user-status {
     font-size: .7rem;
-    color: var(--green);
+    color: var(--cyan);
 }
 #btnLogout {
   display: block;
@@ -464,14 +464,14 @@ body {
   letter-spacing: -1px;
   line-height: 1;
 }
-.stat-num.amber {
-  color: var(--amber);
+.stat-num.cyan {
+  color: var(--cyan);
 }
 .stat-num.red {
   color: var(--red);
 }
-.stat-num.green {
-  color: var(--green);
+.stat-num.muted {
+  color: var(--text-dim);
 }
 .stat-label {
   font-size: .75rem;
@@ -940,7 +940,7 @@ a:focus-visible,
   flex-wrap: wrap;
 }
 .copy-success {
-  color: var(--green);
+  color: var(--cyan);
   font-size: .8rem;
   display: none;
 }
@@ -1049,14 +1049,14 @@ a:focus-visible,
   font-size: .82rem;
 }
 .deadline-banner.ok {
-  background: rgba(39,174,96,.08);
-  border: 1px solid rgba(39,174,96,.3);
-  color: var(--green);
+  background: rgba(3,218,198,.08);
+  border: 1px solid rgba(3,218,198,.25);
+  color: var(--cyan);
 }
 .deadline-banner.warn {
-  background: rgba(243,156,18,.08);
-  border: 1px solid rgba(243,156,18,.3);
-  color: var(--amber);
+  background: rgba(207,102,121,.08);
+  border: 1px solid rgba(207,102,121,.25);
+  color: var(--red);
 }
 .deadline-banner.over {
   background: rgba(231,76,60,.08);
@@ -1125,8 +1125,8 @@ a:focus-visible,
   opacity: 1;
 }
 #toast.success {
-  border-color: var(--green);
-  color: var(--green);
+  border-color: var(--cyan);
+  color: var(--cyan);
 }
 #toast.error {
   border-color: var(--red);
@@ -1209,7 +1209,7 @@ a:focus-visible,
   align-items: baseline;
 }
 .pricing-check {
-  color: var(--green);
+  color: var(--cyan);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -1248,7 +1248,7 @@ a:focus-visible,
 }
 .pricing-coming-soon { opacity: .6; }
 /* Comparison table checkmark */
-.td-check { text-align: center; color: var(--green); }
+.td-check { text-align: center; color: var(--cyan); }
 .td-none  { text-align: center; color: var(--text-dim); }
 /* Sidebar footer links */
 .sidebar-links {
@@ -1344,7 +1344,7 @@ a:focus-visible,
 }
 .feature-list li::before {
   content: "✓";
-  color: var(--green);
+  color: var(--cyan);
   font-weight: 700;
 }
 /* ── Empty states ──────────────────────────────────────────── */
@@ -2347,7 +2347,7 @@ a:focus-visible,
             <div class="stat-label">Total Requests</div>
           </div>
           <div class="stat-card">
-            <div class="stat-num amber" id="statActive">–</div>
+            <div class="stat-num cyan" id="statActive">–</div>
             <div class="stat-label">Active</div>
           </div>
           <div class="stat-card">
@@ -2355,7 +2355,7 @@ a:focus-visible,
             <div class="stat-label">Overdue</div>
           </div>
           <div class="stat-card">
-            <div class="stat-num green" id="statClosed">–</div>
+            <div class="stat-num muted" id="statClosed">–</div>
             <div class="stat-label">Closed</div>
           </div>
         </div>
@@ -3669,7 +3669,7 @@ async function loadSharedDashboard() {
           <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">New</div>
         </div>
         <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--green);">${s.active}</div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--cyan);">${s.active}</div>
           <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Active</div>
         </div>
         <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
@@ -4131,7 +4131,7 @@ async function loadDashboard() {
   );
   document.getElementById('dashOverdueList').innerHTML =
     od.length ? renderMiniTable(od) :
-    '<p style="color:var(--green);padding:20px 0;text-align:center;">✓ No overdue requests</p>';
+    '<p style="color:var(--cyan);padding:20px 0;text-align:center;">✓ No overdue requests</p>';
 }
 
 function renderMiniTable(rows) {
@@ -4171,13 +4171,13 @@ async function loadActiveRequests() {
     let daysTxt = '—';
     if (dsd !== null) {
       if (dsd > 0)       daysTxt = `<span style="color:var(--red)">+${dsd}d overdue</span>`;
-      else if (dsd === 0) daysTxt = `<span style="color:var(--amber)">Due today</span>`;
-      else                daysTxt = `<span style="color:var(--green)">${Math.abs(dsd)}d left</span>`;
+      else if (dsd === 0) daysTxt = `<span style="color:var(--red)">Due today</span>`;
+      else                daysTxt = `<span style="color:var(--cyan)">${Math.abs(dsd)}d left</span>`;
     }
     const turnDropdown = `
       <select class="turn-select" onclick="event.stopPropagation()"
               onchange="quickSetTurn(${r.id}, this.value)"
-              style="background:var(--bg3);border:1px solid var(--border);color:${r.turn==='Their Turn'?'var(--cyan)':'var(--amber)'};
+              style="background:var(--bg3);border:1px solid var(--border);color:${r.turn==='Their Turn'?'var(--cyan)':'var(--text-dim)'};
                      padding:4px 8px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;outline:none;">
         <option value="My Turn"   ${r.turn!=='Their Turn'?'selected':''}>My Turn</option>
         <option value="Their Turn" ${r.turn==='Their Turn'?'selected':''}>Their Turn</option>
@@ -4579,11 +4579,11 @@ async function openDetail(idOrObj) {
         ${isActive ? `
           <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
           <button class="btn btn-primary btn-sm" onclick="openUpdateModal(${r.id})">Update Request</button>
-          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">File Appeal</button>
+          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--red);color:var(--red);">File Appeal</button>
           <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
         ${r.status === 'appealed' ? `
           <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
-          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View Appeal</button>
+          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--red);color:var(--red);">View Appeal</button>
           <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
         ${!isClosed ? `<button class="btn btn-danger btn-sm" onclick="deleteReq(${r.id})">Delete</button>` : ''}
       </div>
@@ -4612,14 +4612,14 @@ async function openDetail(idOrObj) {
 
     ${isAppealed && r.appeal_text ? `
     <div class="card" style="margin-bottom:16px;border-color:rgba(245,166,35,.3);">
-      <div class="card-title" style="color:var(--amber);">⚖️ Appeal on File</div>
+      <div class="card-title" style="color:var(--red);">⚖️ Appeal on File</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="meta-chip"><strong>Type:</strong> ${esc(appealTypeLabel(r.appeal_type))}</div>
         <div class="meta-chip"><strong>Filed:</strong> ${fmtDateTime(r.appeal_saved_at)}</div>
         ${r.appeal_exemption ? `<div class="meta-chip"><strong>Exemption:</strong> ${esc(r.appeal_exemption)}</div>` : ''}
       </div>
       <div style="display:flex;gap:6px;">
-        <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View / Edit Appeal</button>
+        <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--red);color:var(--red);">View / Edit Appeal</button>
         <button class="btn btn-ghost btn-sm" onclick="copyAppealText(${JSON.stringify(r.appeal_text).replace(/'/g,'&#39;')})">Copy Appeal</button>
       </div>
     </div>` : ''}
@@ -4681,7 +4681,7 @@ async function loadAttachments(reqId) {
       </div>
       <a href="/api/attachments/${a.id}/download"
          class="btn btn-ghost btn-sm" style="flex-shrink:0;">↓ Download</a>
-      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;color:var(--amber);"
+      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;color:var(--red);"
               onclick="deleteAttachment(${a.id}, ${reqId})">×</button>
     </div>
   `).join('');
@@ -5100,7 +5100,7 @@ async function adminLoadCodes() {
   el.innerHTML = data.map(c => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
       <span style="font-family:monospace;font-size:.88rem;">${escapeHtml(c.code)}</span>
-      <span style="font-size:.75rem;padding:2px 8px;border-radius:4px;${c.used ? 'background:var(--bg3);color:var(--text-dim);' : 'background:rgba(0,200,150,.1);color:var(--green);'}">${c.used ? 'Used' : 'Available'}</span>
+      <span style="font-size:.75rem;padding:2px 8px;border-radius:4px;${c.used ? 'background:var(--bg3);color:var(--text-dim);' : 'background:rgba(0,200,150,.1);color:var(--cyan);'}">${c.used ? 'Used' : 'Available'}</span>
     </div>
   `).join('');
 }
