@@ -250,9 +250,10 @@ body {
 }
 .nav-item.active {
   background: var(--bg3);
-  color: var(--accent);
+  color: #C5B99A;
   font-weight: 600;
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid;
+  border-image: var(--grad-neutral) 1;
   padding-left: 9px;
 }
 .nav-item .icon {
@@ -1887,7 +1888,8 @@ a:focus-visible,
   }
   .nav-item.active {
     padding-left: 7px;
-    border-left: 2px solid var(--accent);
+    border-left: 2px solid;
+    border-image: var(--grad-neutral) 1;
   }
   .nav-item .icon {
     width: 18px;
