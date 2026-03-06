@@ -71,9 +71,9 @@
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
-  --logo-grad: linear-gradient(90deg, #C07840 0%, #D49060 50%, #C07840 100%);
+  --logo-grad: linear-gradient(90deg, #C5B99A, #8B4513);
   --accent-subtle: rgba(192,120,64,0.12);
-  --grad-neutral: linear-gradient(to right, #D89858, #C07840);
+  --grad-neutral: linear-gradient(to right, #C5B99A, #8B4513);
 }
 /* ── Light mode — Warm earthy palette ─────────────────────── */
 [data-theme="light"] {
@@ -249,7 +249,7 @@ body {
     color: var(--text);
 }
 .nav-item.active {
-  background: rgba(192,120,64,.12);
+  background: var(--bg3);
   color: var(--accent);
   font-weight: 600;
   border-left: 3px solid var(--accent);
