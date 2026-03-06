@@ -6013,4 +6013,25 @@ function closeStateLawsModal(e) {
 function filterStateLaws() {
   const q = document.getElementById('stateLawsSearch').value.toLowerCase();
   document.querySelectorAll('#stateLawsBody tr').forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeAgencyModal(); closeStateLawsModal(); }
+});
+
+function copyRef(btn, text, label) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ ' + label;
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
    
