@@ -48,10 +48,10 @@
   --bg2:       #1e1e1e;
   --bg3:       #2a2a2a;
   --border:    #3a3a3a;
-  --accent:    #93A286;
-  --accent-dim: rgba(147,162,134,0.25);
-  --primary:   #cccccc;
-  --secondary: #93A286;
+  --accent:    #C5B99A;
+  --accent-dim: rgba(197,185,154,0.25);
+  --primary:   #C5B99A;
+  --secondary: #C5B99A;
   --error:     #C86856;            /* Canyon Rust (lifted) */
   --text:      #FFFFFF;
   --text-dim:  #B3B3B3;
@@ -59,7 +59,7 @@
   --on-secondary:#000000;
   --avatar-bg: #b3b3b3;
   --avatar-text:#000000;
-  --cyan:      #93A286;
+  --cyan:      #C5B99A;
   --red:       #C86856;            /* Canyon Rust (lifted) */
   --green:     #93A286;            /* Desert Sage (lifted) */
   --amber:     #E0BA62;            /* Sandstone Ochre (lifted) */
@@ -71,9 +71,9 @@
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
-  --logo-grad: linear-gradient(90deg, #78716C 0%, #93A286 32.8%, #FFFFFF 52.4%, #93A286 72.98%, #78716C 100%);
-  --accent-subtle: rgba(147,162,134,0.12);
-  --grad-neutral: linear-gradient(to right, #93A286, #5D6D58);
+  --logo-grad: linear-gradient(90deg, #8B4513 0%, #C5B99A 32.8%, #FFFFFF 52.4%, #C5B99A 72.98%, #8B4513 100%);
+  --accent-subtle: rgba(197,185,154,0.12);
+  --grad-neutral: linear-gradient(to right, #C5B99A, #8B4513);
 }
 /* ── Light mode — Warm earthy palette ─────────────────────── */
 [data-theme="light"] {
@@ -439,7 +439,7 @@ body {
 }
 /* ── Cards / Panels ────────────────────────────────────────── */
 .card {
-  background: var(--bg2);
+  background-color: var(--bg2);
   background-image: var(--grad-neutral);
   background-size: 100% 3px;
   background-repeat: no-repeat;
@@ -451,8 +451,8 @@ body {
   padding: 24px;
   box-shadow: var(--shadow);
   max-width: 100%;
-  overflow-x: hidden;
-  transition: background .22s ease, border-top-color .22s ease, transform .22s ease, box-shadow .22s ease;
+  overflow: hidden;
+  transition: box-shadow .22s ease, transform .22s ease;
 }
 .card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.5);
@@ -597,7 +597,7 @@ td {
   letter-spacing: .5px;
 }
 .badge-new {
-  background: rgba(147,162,134,.12);
+  background: rgba(197,185,154,.12);
   color: var(--secondary);
 }
 .badge-active {
@@ -609,7 +609,7 @@ td {
   color: var(--red);
 }
 .badge-closed {
-  background: rgba(147,162,134,.15);
+  background: rgba(197,185,154,.15);
   color: var(--secondary);
 }
 .badge-appealed {
@@ -617,7 +617,7 @@ td {
   color: var(--amber);
 }
 .badge-myturn {
-  background: rgba(147,162,134,.15);
+  background: rgba(197,185,154,.15);
   color: var(--secondary);
 }
 .badge-theirturn {
@@ -643,15 +643,15 @@ td {
   color: #000;
   border: 1px solid var(--cyan);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(147,162,134,0.2);
+  box-shadow: 0 2px 8px rgba(197,185,154,0.2);
   transition: all 0.2s;
 }
 .btn-primary:hover {
-  background: #A8B59B;
-  border-color: #A8B59B;
+  background: #D4C9AD;
+  border-color: #D4C9AD;
   color: #000;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(147,162,134,0.35);
+  box-shadow: 0 4px 12px rgba(197,185,154,0.35);
 }
 .btn-ghost {
   background: none;
@@ -715,7 +715,7 @@ select:focus-visible,
 textarea:focus-visible {
   border-color: var(--cyan);
   background: var(--bg2);
-  box-shadow: 0 0 0 3px rgba(147,162,134,.2);
+  box-shadow: 0 0 0 3px rgba(197,185,154,.2);
   outline: none;
 }
 input:focus:not(:focus-visible),
@@ -866,14 +866,14 @@ a:focus-visible,
   border: 1px solid var(--cyan);
   font-weight: 600;
   font-family: var(--font-body);
-  box-shadow: 0 2px 8px rgba(147,162,134,0.25);
+  box-shadow: 0 2px 8px rgba(197,185,154,0.25);
   transition: all 0.2s;
 }
 .auth-submit:hover {
-  background: #A8B59B;
-  border-color: #A8B59B;
+  background: #D4C9AD;
+  border-color: #D4C9AD;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(147,162,134,0.4);
+  box-shadow: 0 4px 12px rgba(197,185,154,0.4);
 }
 .auth-error {
   background: rgba(200,104,86,.08);
@@ -980,7 +980,7 @@ a:focus-visible,
 }
 .letter-pre:focus-visible {
   border-color: var(--cyan);
-  box-shadow: 0 0 0 3px rgba(147,162,134,.2);
+  box-shadow: 0 0 0 3px rgba(197,185,154,.2);
 }
 .letter-pre:focus:not(:focus-visible) {
   border-color: var(--cyan);
@@ -2334,7 +2334,7 @@ a:focus-visible,
 
 /* ── Cards ──────────────────────────────────────────────────── */
 [data-theme="light"] .card {
-  background: var(--bg2);
+  background-color: var(--bg2);
   background-image: var(--grad-neutral);
   background-size: 100% 3px;
   background-repeat: no-repeat;
