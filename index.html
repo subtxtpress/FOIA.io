@@ -71,7 +71,7 @@
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
-  --logo-grad: linear-gradient(90deg, #4d4d4d 0%, #d8d8d8 32.8%, #ffffff 52.4%, #d8d8d8 72.98%, #4d4d4d 100%);
+  --logo-grad: linear-gradient(90deg, #78716C 0%, #C5B99A 32.8%, #FFFFFF 52.4%, #C5B99A 72.98%, #78716C 100%);
   --accent-subtle: rgba(197,185,154,0.12);
 }
 /* ── Light mode — Warm earthy palette ─────────────────────── */
@@ -785,7 +785,7 @@ a:focus-visible,
   font-weight: 700;
   letter-spacing: -1px;
   margin-bottom: 8px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-family: var(--font-heading);
   display: inline-block;
   background: var(--logo-grad);
   -webkit-background-clip: text;
@@ -799,6 +799,7 @@ a:focus-visible,
   margin-top: 4px;
   letter-spacing: 0.3px;
   font-weight: 500;
+  font-family: var(--font-mono);
 }
 .auth-tabs {
   display: flex;
@@ -821,6 +822,7 @@ a:focus-visible,
   transition: all .15s;
   border: none;
   background: none;
+  font-family: var(--font-body);
 }
 .auth-tab.active {
   background: var(--bg2);
@@ -834,18 +836,19 @@ a:focus-visible,
   width: 100%;
   margin-top: 8px;
   justify-content: center;
-  background: var(--logo-grad);
-  color: #000000;
-  border: 1px solid #d8d8d8;
+  background: var(--cyan);
+  color: #000;
+  border: 1px solid var(--cyan);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(77,77,77,0.3);
+  font-family: var(--font-body);
+  box-shadow: 0 2px 8px rgba(197,185,154,0.25);
   transition: all 0.2s;
 }
 .auth-submit:hover {
-  background: var(--logo-grad);
-  border-color: #c8c8c8;
+  background: #D4C9AD;
+  border-color: #D4C9AD;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(77,77,77,0.4);
+  box-shadow: 0 4px 12px rgba(197,185,154,0.4);
 }
 .auth-error {
   background: rgba(200,104,86,.08);
