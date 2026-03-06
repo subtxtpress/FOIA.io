@@ -30,7 +30,7 @@
   <link rel="manifest" href="/manifest.json">
 
   <!-- Mobile / PWA -->
-  <meta name="theme-color" content="#C9A96E" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#C5B99A" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#8B4513" media="(prefers-color-scheme: light)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -48,9 +48,9 @@
       --bg2:       #1E1E1E;
       --bg3:       #2C2C2C;
       --border:    rgba(255,255,255,0.10);
-      --cyan:      #C9A96E;
-      --cyan-dim:  rgba(201,169,110,0.10);
-      --cyan-glow: rgba(201,169,110,0.22);
+      --cyan:      #C5B99A;
+      --cyan-dim:  rgba(197,185,154,0.10);
+      --cyan-glow: rgba(197,185,154,0.22);
       --text:      #E0E0E0;
       --text-dim:  #808080;
       --red:       #C86856;            /* Canyon Rust (lifted) */
@@ -100,11 +100,11 @@
       border-radius: 3px;
       opacity: 0.7;
     }
-    ::-webkit-scrollbar-thumb:hover { background: #D6BC86; }
+    ::-webkit-scrollbar-thumb:hover { background: #D4C9AD; }
 
     /* ─── Selection ──────────────────────────────────────────────── */
     ::selection {
-      background: rgba(201,169,110,0.25);
+      background: rgba(197,185,154,0.25);
       color: var(--text);
     }
 
@@ -142,8 +142,8 @@
     }
 
     .btn-primary:hover {
-      background: #D6BC86;
-      border-color: #D6BC86;
+      background: #D4C9AD;
+      border-color: #D4C9AD;
       box-shadow: 0 0 28px var(--cyan-glow);
       transform: translateY(-1px);
     }
@@ -255,7 +255,7 @@
       height: 700px;
       top: -180px;
       left: -200px;
-      background: radial-gradient(circle, rgba(201,169,110,0.18) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(197,185,154,0.18) 0%, transparent 70%);
       filter: blur(80px);
       opacity: 0.9;
       animation: orbFloat1 10s ease-in-out infinite alternate;
@@ -294,8 +294,8 @@
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
-      background: rgba(201,169,110,0.08);
-      border: 1px solid rgba(201,169,110,0.2);
+      background: rgba(197,185,154,0.08);
+      border: 1px solid rgba(197,185,154,0.2);
       border-radius: 100px;
       font-size: 0.78rem;
       font-weight: 600;
@@ -341,7 +341,7 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, var(--cyan) 0%, rgba(201,169,110,0.3) 100%);
+      background: linear-gradient(90deg, var(--cyan) 0%, rgba(197,185,154,0.3) 100%);
       border-radius: 2px;
     }
 
@@ -428,7 +428,7 @@
       left: calc(33.333% / 2 + 28px);
       right: calc(33.333% / 2 + 28px);
       height: 1px;
-      border-top: 2px dashed rgba(201,169,110,0.25);
+      border-top: 2px dashed rgba(197,185,154,0.25);
       z-index: 0;
       pointer-events: none;
     }
@@ -451,7 +451,7 @@
       height: 52px;
       border-radius: 50%;
       background: var(--bg);
-      border: 1.5px solid rgba(201,169,110,0.3);
+      border: 1.5px solid rgba(197,185,154,0.3);
       font-size: 0.85rem;
       font-weight: 700;
       color: var(--cyan);
@@ -491,8 +491,8 @@
 
     .feat-card:hover {
       background: var(--bg3);
-      border-color: rgba(201,169,110,0.25);
-      box-shadow: 0 0 0 1px rgba(201,169,110,0.08), var(--shadow);
+      border-color: rgba(197,185,154,0.25);
+      box-shadow: 0 0 0 1px rgba(197,185,154,0.08), var(--shadow);
     }
 
     .feat-emoji {
@@ -546,8 +546,8 @@
     }
 
     .price-card-pro {
-      background: linear-gradient(160deg, rgba(201,169,110,0.05) 0%, var(--bg) 60%);
-      border-color: rgba(201,169,110,0.3);
+      background: linear-gradient(160deg, rgba(197,185,154,0.05) 0%, var(--bg) 60%);
+      border-color: rgba(197,185,154,0.3);
       box-shadow: 0 -3px 0 0 var(--cyan), var(--shadow-lg);
     }
 
@@ -568,7 +568,7 @@
     }
 
     .price-badge-pro {
-      background: rgba(201,169,110,0.15);
+      background: rgba(197,185,154,0.15);
       color: var(--cyan);
     }
 
@@ -671,8 +671,8 @@
     }
 
     .price-cta-pro:hover {
-      background: #D6BC86;
-      border-color: #D6BC86;
+      background: #D4C9AD;
+      border-color: #D4C9AD;
       box-shadow: 0 0 28px var(--cyan-glow);
       transform: translateY(-1px);
     }
