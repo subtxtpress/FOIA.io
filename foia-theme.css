@@ -1,0 +1,151 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FOIA.IO — THEME TOKENS
+   Light mode (default) + Dark mode ([data-theme="dark"])
+
+   Variable naming matches your light_mode_boilerplate.html exactly
+   so you can drop this into any page that uses those variable names.
+
+   Usage:
+     <html>                    → light mode
+     <html data-theme="dark">  → dark mode
+     Toggle with JS:
+       document.documentElement.dataset.theme =
+         document.documentElement.dataset.theme === 'dark' ? '' : 'dark';
+   ═══════════════════════════════════════════════════════════════════ */
+
+
+/* ─────────────────────────────────────────────────────────────────
+   LIGHT MODE (default)
+   Taken directly from your boilerplate — no changes.
+───────────────────────────────────────────────────────────────── */
+:root {
+
+  /* ── CORE PALETTE ──────────────────────────────────────────────── */
+  --palette-lightest:  #F7F5F2;   /* page background */
+  --palette-light:     #E8E2D9;   /* card surfaces, panels */
+  --palette-mid:       #C5B99A;   /* borders, dividers */
+  --palette-accent:    #8B4513;   /* primary accent — buttons, highlights */
+  --palette-dark:      #1C1917;   /* headings, strong text */
+
+  /* ── SURFACES ──────────────────────────────────────────────────── */
+  --surface-page:      #F7F5F2;
+  --surface-card:      #FFFFFF;
+  --surface-card-alt:  rgba(197, 185, 154, 0.18);
+  --surface-elevated:  #F0EBE2;
+
+  /* ── TEXT ──────────────────────────────────────────────────────── */
+  --text-heading:      #1C1917;
+  --text-body:         #44403C;
+  --text-label:        #78716C;
+  --text-muted:        rgba(68, 64, 60, 0.45);
+
+  /* ── ACCENT SYSTEM ─────────────────────────────────────────────── */
+  --accent:            #8B4513;
+  --accent-subtle:     rgba(139, 69, 19, 0.08);
+  --accent-border:     rgba(139, 69, 19, 0.40);
+
+  /* ── BORDERS ───────────────────────────────────────────────────── */
+  --border-light:      rgba(197, 185, 154, 0.35);
+  --border-mid:        rgba(139, 100, 60, 0.20);
+  --border-strong:     rgba(139, 100, 60, 0.45);
+
+  /* ── GRADIENTS ─────────────────────────────────────────────────── */
+  --grad-header:       linear-gradient(160deg, #F7F5F2 0%, #E8E2D9 100%);
+  --grad-accent:       linear-gradient(180deg, #C5B99A 0%, #8B4513 100%);
+  --grad-accent-warm:  linear-gradient(180deg, #E8E2D9 0%, #8B4513 100%);
+  --grad-neutral:      linear-gradient(to right, #C5B99A, #8B4513);
+  --grad-timeline:     linear-gradient(to bottom, #1C1917, #C5B99A, #8B4513);
+
+  /* ── STATUS COLORS ─────────────────────────────────────────────── */
+  /* Not in original boilerplate — added for FOIA.io dashboard use   */
+  --status-active:     #4a7a38;   /* green — active requests */
+  --status-overdue:    #b03a28;   /* red — overdue / error */
+  --status-pending:    #9a6e18;   /* amber — pending / appealed */
+  --status-active-bg:  rgba(74, 122, 56, 0.10);
+  --status-overdue-bg: rgba(176, 58, 40, 0.10);
+  --status-pending-bg: rgba(154, 110, 24, 0.10);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   DARK MODE
+   Derived from the same warm palette — surfaces pulled from
+   --palette-dark (#1C1917) stepped upward. Accent shifts to a
+   lighter amber-brown so it reads on dark backgrounds. The warm
+   undertone is preserved throughout so both modes feel like the
+   same system.
+
+   Derivation logic:
+   • Page bg     = #1C1917 + slight warm lift → #1e1a16
+   • Card bg     = one step lighter           → #28231e
+   • Elevated    = two steps lighter          → #332d27
+   • Mid border  = --palette-mid at low alpha
+   • Accent      = lightened saddle brown     → #c47a3a (readable on dark)
+   • Text        = inverted: lightest becomes heading, mid becomes body
+   • Gradients   = dark equivalents of each light gradient
+───────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+
+  /* ── CORE PALETTE (dark equivalents) ───────────────────────────── */
+  --palette-lightest:  #1e1a16;   /* was page bg, now darkest surface */
+  --palette-light:     #28231e;   /* card surface */
+  --palette-mid:       #C5B99A;   /* mid-tone unchanged — still used for borders */
+  --palette-accent:    #c47a3a;   /* lightened for dark bg readability */
+  --palette-dark:      #F0EAE0;   /* was darkest text, now lightest text */
+
+  /* ── SURFACES ──────────────────────────────────────────────────── */
+  --surface-page:      #1e1a16;   /* warm near-black — not pure #000 */
+  --surface-card:      #28231e;   /* one stop lighter, keeps warm hue */
+  --surface-card-alt:  rgba(197, 185, 154, 0.07);   /* tint stays mid-based, lower alpha */
+  --surface-elevated:  #332d27;   /* hover / elevated surface */
+
+  /* ── TEXT ──────────────────────────────────────────────────────── */
+  --text-heading:      #F0EAE0;   /* warm off-white — not pure #fff */
+  --text-body:         #C8BFB4;   /* warm mid-light */
+  --text-label:        #8a8078;   /* muted warm grey */
+  --text-muted:        rgba(197, 185, 154, 0.40);
+
+  /* ── ACCENT SYSTEM ─────────────────────────────────────────────── */
+  --accent:            #c47a3a;   /* lighter amber-brown — 4.6:1 on --surface-page */
+  --accent-subtle:     rgba(196, 122, 58, 0.12);
+  --accent-border:     rgba(196, 122, 58, 0.40);
+
+  /* ── BORDERS ───────────────────────────────────────────────────── */
+  --border-light:      rgba(197, 185, 154, 0.10);   /* very subtle */
+  --border-mid:        rgba(197, 185, 154, 0.16);   /* standard card outline */
+  --border-strong:     rgba(197, 185, 154, 0.32);   /* active selections */
+
+  /* ── GRADIENTS ─────────────────────────────────────────────────── */
+  --grad-header:       linear-gradient(160deg, #28231e 0%, #1e1a16 100%);
+  /*                   ↑ dark equivalent of the warm linen header     */
+  --grad-accent:       linear-gradient(180deg, #C5B99A 0%, #c47a3a 100%);
+  /*                   ↑ mid-sand → amber (works on dark surfaces)    */
+  --grad-accent-warm:  linear-gradient(180deg, #332d27 0%, #c47a3a 100%);
+  /*                   ↑ elevated surface → accent                    */
+  --grad-neutral:      linear-gradient(to right, #C5B99A, #c47a3a);
+  /*                   ↑ horizontal accent strip — same logic, lighter accent */
+  --grad-timeline:     linear-gradient(to bottom, #F0EAE0, #C5B99A, #c47a3a);
+  /*                   ↑ inverted: light heading tone → mid → accent  */
+
+  /* ── STATUS COLORS (dark mode) ─────────────────────────────────── */
+  --status-active:     #7ab860;   /* brighter green — readable on dark */
+  --status-overdue:    #e05a48;   /* brighter red */
+  --status-pending:    #d49838;   /* brighter amber */
+  --status-active-bg:  rgba(122, 184, 96, 0.12);
+  --status-overdue-bg: rgba(224, 90, 72, 0.12);
+  --status-pending-bg: rgba(212, 152, 56, 0.12);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   CONTRAST AUDIT (dark mode accent on dark surfaces)
+
+   --accent (#c47a3a) on --surface-page (#1e1a16):  ~4.6:1  AA ✓
+   --accent (#c47a3a) on --surface-card (#28231e):  ~4.2:1  AA large / UI only
+   --text-heading (#F0EAE0) on --surface-page:      ~13.1:1 AAA ✓
+   --text-body    (#C8BFB4) on --surface-page:       ~7.8:1 AAA ✓
+   --text-label   (#8a8078) on --surface-page:       ~3.9:1 AA large only
+
+   Same constraint as light mode: accent is structural only —
+   borders, top-strips, left-rules. Never body copy.
+───────────────────────────────────────────────────────────────── */

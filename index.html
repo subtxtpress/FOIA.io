@@ -41,27 +41,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="foia-theme.css">
 <style>
 /* ── Dark mode (default) ───────────────────────────────────── */
 :root {
-  --bg:        #121212;
-  --bg2:       #1E1E1E;
-  --bg3:       #2C2C2C;
-  --border:    rgba(255,255,255,0.10);
-  --primary:   #B85C3F;              /* buttons, CTAs, form submits */
-  --primary-dim: rgba(184, 92, 63, 0.40);
-  --accent:    #C5B99A;              /* nav active, highlights, brand pops */
-  --accent-dim: rgba(197, 185, 154, 0.40);
-  --accent-subtle: rgba(197, 185, 154, 0.12);
-  --error:     #C86856;
-  --text:      #E0E0E0;
-  --text-dim:  #808080;
+  --bg:        #1e1a16;
+  --bg2:       #28231e;
+  --bg3:       #332d27;
+  --border:    rgba(197,185,154,0.16);
+  --primary:   #c47a3a;
+  --primary-dim: rgba(196,122,58,0.40);
+  --accent:    #c47a3a;
+  --accent-dim: rgba(196,122,58,0.40);
+  --accent-subtle: rgba(196,122,58,0.12);
+  --error:     #e05a48;
+  --text:      #F0EAE0;
+  --text-dim:  #8a8078;
   --on-primary:#FFFFFF;
-  --avatar-bg: #b3b3b3;
-  --avatar-text:#000000;
-  --red:       #C86856;              /* error, danger, overdue */
-  --green:     #8a9e7a;              /* success, active, positive */
-  --amber:     #d4a862;              /* warning, pending, appealed */
+  --avatar-bg: #332d27;
+  --avatar-text:#F0EAE0;
+  --red:       #e05a48;
+  --green:     #7ab860;
+  --amber:     #d49838;
   --radius:    10px;
   --shadow:    0 2px 8px rgba(0,0,0,0.4);
   --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
@@ -70,47 +71,78 @@
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
-  --logo-grad: linear-gradient(90deg, #C5B99A, #8B4513);
-  --grad-neutral: linear-gradient(to right, #C5B99A, #5d6d58);
+  --logo-grad: linear-gradient(90deg, #C5B99A, #c47a3a);
+  --grad-neutral: linear-gradient(to right, #C5B99A, #c47a3a);
+  --grad-header:  linear-gradient(160deg, #28231e 0%, #1e1a16 100%);
+  --grad-accent:  linear-gradient(180deg, #C5B99A 0%, #c47a3a 100%);
+  --grad-timeline: linear-gradient(to bottom, #F0EAE0, #C5B99A, #c47a3a);
+  --surface-page:     #1e1a16;
+  --surface-card:     #28231e;
+  --surface-elevated: #332d27;
+  --surface-card-alt: rgba(197,185,154,0.07);
+  --text-heading:     #F0EAE0;
+  --text-body:        #C8BFB4;
+  --text-label:       #8a8078;
+  --text-muted:       rgba(197,185,154,0.40);
+  --border-light:     rgba(197,185,154,0.10);
+  --border-mid:       rgba(197,185,154,0.16);
+  --border-strong:    rgba(197,185,154,0.32);
+  --palette-lightest: #1e1a16;
+  --palette-light:    #28231e;
+  --palette-mid:      #C5B99A;
+  --palette-accent:   #c47a3a;
+  --palette-dark:     #F0EAE0;
 }
-/* ── Light mode — Warm earthy palette ─────────────────────── */
+/* ── Light mode — Boilerplate warm earthy palette ──────────── */
 [data-theme="light"] {
-  /* Core palette */
-  --bg:          #F7F5F2;          /* page background (warm off-white) */
-  --bg2:         #FFFFFF;          /* card / sidebar surfaces */
-  --bg3:         #F0EBE2;          /* elevated / hover states */
-  --border:      rgba(139,100,60,0.20);
-  --primary:     #8B4513;          /* buttons, CTAs, form submits */
+  --bg:        #F7F5F2;
+  --bg2:       #FFFFFF;
+  --bg3:       #F0EBE2;
+  --border:    rgba(139,100,60,0.20);
+  --primary:   #8B4513;
   --primary-dim: rgba(139,69,19,0.40);
-  --accent:      #8B4513;          /* nav active, highlights, brand pops */
-  --accent-dim:  rgba(139,69,19,0.40);
+  --accent:    #8B4513;
+  --accent-dim: rgba(139,69,19,0.40);
   --accent-subtle: rgba(139,69,19,0.08);
   --accent-border: rgba(139,69,19,0.40);
-  --error:       #A0402E;          /* Canyon Rust */
-  --text:        #1C1917;          /* heading text (near-black) */
-  --text-dim:    #78716C;          /* label / secondary text */
-  --on-primary:  #FFFFFF;          /* text on primary buttons */
-  --avatar-bg:   #E8E2D9;
-  --avatar-text: #1C1917;
-  --red:         #A0402E;          /* error, danger, overdue */
-  --green:       #6B7A5E;          /* success, active, positive */
-  --amber:       #B8923A;          /* warning, pending, appealed */
-  --shadow:      0 2px 16px rgba(0,0,0,0.06);
-  --shadow-lg:   0 8px 28px rgba(0,0,0,0.10);
-  --logo-grad:   linear-gradient(90deg, #C5B99A 0%, #8B4513 32.8%, #1C1917 52.4%, #8B4513 72.98%, #C5B99A 100%);
-
-  /* Extended variables */
-  --text-body:        #44403C;
-  --border-light:     rgba(197,185,154,0.35);
-  --border-strong:    rgba(139,100,60,0.45);
+  --error:     #b03a28;
+  --text:      #1C1917;
+  --text-dim:  #78716C;
+  --on-primary:#FFFFFF;
+  --avatar-bg: #E8E2D9;
+  --avatar-text:#1C1917;
+  --red:       #b03a28;
+  --green:     #4a7a38;
+  --amber:     #9a6e18;
+  --radius:    10px;
+  --shadow:    0 2px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 28px rgba(0,0,0,0.10);
+  --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+  --font-heading: 'Barlow Condensed', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+  --font-body:    'Inter', sans-serif;
+  --font-doc:  'Georgia', 'Times New Roman', serif;
+  --logo-grad: linear-gradient(90deg, #C5B99A 0%, #8B4513 32.8%, #1C1917 52.4%, #8B4513 72.98%, #C5B99A 100%);
+  --grad-neutral:  linear-gradient(to right, #C5B99A, #8B4513);
+  --grad-header:   linear-gradient(160deg, #F7F5F2 0%, #E8E2D9 100%);
+  --grad-accent:   linear-gradient(180deg, #C5B99A 0%, #8B4513 100%);
+  --grad-timeline: linear-gradient(to bottom, #1C1917, #C5B99A, #8B4513);
+  --surface-page:     #F7F5F2;
+  --surface-card:     #FFFFFF;
+  --surface-elevated: #F0EBE2;
   --surface-card-alt: rgba(197,185,154,0.18);
-  --grad-header:      linear-gradient(160deg, #F7F5F2 0%, #E8E2D9 100%);
-  --grad-accent:      linear-gradient(180deg, #C5B99A 0%, #8B4513 100%);
-  --grad-neutral:     linear-gradient(to right, #C5B99A, #8B4513);
-  --grad-timeline:    linear-gradient(to bottom, #1C1917, #C5B99A, #8B4513);
-  --font-heading:     'Barlow Condensed', sans-serif;
-  --font-mono:        'IBM Plex Mono', monospace;
-  --font-body:        'Inter', sans-serif;
+  --text-heading:     #1C1917;
+  --text-body:        #44403C;
+  --text-label:       #78716C;
+  --text-muted:       rgba(68,64,60,0.45);
+  --border-light:     rgba(197,185,154,0.35);
+  --border-mid:       rgba(139,100,60,0.20);
+  --border-strong:    rgba(139,100,60,0.45);
+  --palette-lightest: #F7F5F2;
+  --palette-light:    #E8E2D9;
+  --palette-mid:      #C5B99A;
+  --palette-accent:   #8B4513;
+  --palette-dark:     #1C1917;
 }
 /* ── Reset & Variables ─────────────────────────────────────── */
 *,
@@ -167,6 +199,17 @@ body {
 .sidebar-logo {
   padding: 24px 20px 18px;
   border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.sidebar-logo::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--grad-neutral);
+  pointer-events: none;
 }
 .sidebar-logo h1 {
   font-family: var(--font-heading);
@@ -246,7 +289,7 @@ body {
 }
 .nav-item.active {
   background: var(--bg3);
-  color: #C5B99A;
+  color: var(--palette-mid);
   font-weight: 600;
   border-left: 3px solid;
   border-image: var(--grad-neutral) 1;
@@ -388,7 +431,18 @@ body {
   top: 0;
   z-index: 50;
   backdrop-filter: blur(10px);
-  background: var(--bg2);
+  background: var(--grad-header);
+  position: relative;
+}
+.topbar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--grad-neutral);
+  pointer-events: none;
 }
 .topbar-title {
   font-family: var(--font-heading);
@@ -675,15 +729,16 @@ td {
   color: var(--on-primary);
   border: 1px solid var(--primary);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(192,120,64,0.2);
+  box-shadow: 0 2px 8px var(--primary-glow);
   transition: all 0.2s;
 }
 .btn-primary:hover {
-  background: #D08A50;
-  border-color: #D08A50;
+  background: var(--primary);
+  filter: brightness(1.12);
+  border-color: var(--primary);
   color: var(--on-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(192,120,64,0.35);
+  box-shadow: 0 4px 12px var(--primary-glow);
 }
 .btn-ghost {
   background: none;
@@ -904,14 +959,15 @@ a:focus-visible,
   border: 1px solid var(--primary);
   font-weight: 600;
   font-family: var(--font-body);
-  box-shadow: 0 2px 8px rgba(192,120,64,0.25);
+  box-shadow: 0 2px 8px var(--primary-glow);
   transition: all 0.2s;
 }
 .auth-submit:hover {
-  background: #D08A50;
-  border-color: #D08A50;
+  background: var(--primary);
+  filter: brightness(1.12);
+  border-color: var(--primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(192,120,64,0.4);
+  box-shadow: 0 4px 12px var(--primary-glow);
 }
 .auth-error {
   background: rgba(200,104,86,.08);
@@ -2280,9 +2336,23 @@ a:focus-visible,
 }
 [data-theme="light"] .sidebar-logo {
   border-bottom: 1px solid var(--border-light);
+  background: transparent;
+}
+[data-theme="light"] .sidebar-logo::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, #C5B99A, #8B4513);
+  display: block;
 }
 [data-theme="light"] .sidebar-logo h1 {
-  background: linear-gradient(90deg, #C5B99A 0%, #8B4513 40%, #1C1917 60%, #8B4513 80%, #C5B99A 100%);
+  background: linear-gradient(90deg, #8B4513 0%, #1C1917 50%, #8B4513 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 [data-theme="light"] .sidebar-logo p {
   color: var(--text-dim);
@@ -2397,7 +2467,7 @@ a:focus-visible,
   box-shadow: 0 2px 8px rgba(139,69,19,0.18);
 }
 [data-theme="light"] .btn-primary:hover {
-  background: linear-gradient(135deg, #8B4513, #6d3410);
+  background: linear-gradient(135deg, var(--palette-accent), #6d3410);
   border-color: #6d3410;
   color: #FFFFFF;
   box-shadow: 0 4px 16px rgba(139,69,19,0.30);
@@ -2424,16 +2494,16 @@ a:focus-visible,
 }
 [data-theme="light"] .badge-active,
 [data-theme="light"] .badge-myturn {
-  background: rgba(107,122,94,0.10);
+  background: var(--status-active-bg);
   color: var(--green);
 }
 [data-theme="light"] .badge-overdue {
-  background: rgba(160,64,46,0.10);
+  background: var(--status-overdue-bg);
   color: var(--red);
 }
 [data-theme="light"] .badge-appealed,
 [data-theme="light"] .badge-theirturn {
-  background: rgba(184,146,58,0.10);
+  background: var(--status-pending-bg);
   color: var(--amber);
 }
 [data-theme="light"] .nav-badge {
@@ -2524,19 +2594,19 @@ a:focus-visible,
 
 /* ── Deadline Banners ──────────────────────────────────────── */
 [data-theme="light"] .deadline-banner.ok {
-  background: rgba(107,122,94,0.08);
+  background: var(--status-active-bg);
   border: none;
   border-left: 3px solid var(--green);
   color: var(--green);
 }
 [data-theme="light"] .deadline-banner.warn {
-  background: rgba(184,146,58,0.08);
+  background: var(--status-pending-bg);
   border: none;
   border-left: 3px solid var(--amber);
   color: var(--amber);
 }
 [data-theme="light"] .deadline-banner.over {
-  background: rgba(160,64,46,0.08);
+  background: var(--status-overdue-bg);
   border: none;
   border-left: 3px solid var(--red);
   color: var(--red);
@@ -2566,7 +2636,7 @@ a:focus-visible,
   border-bottom: 1px solid var(--border-light);
 }
 [data-theme="light"] .auth-logo h1 {
-  background: linear-gradient(90deg, #C5B99A 0%, #8B4513 40%, #1C1917 60%, #8B4513 80%, #C5B99A 100%);
+  background: linear-gradient(90deg, var(--palette-mid) 0%, var(--palette-accent) 40%, var(--palette-dark) 60%, var(--palette-accent) 80%, var(--palette-mid) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -2593,7 +2663,7 @@ a:focus-visible,
   box-shadow: 0 2px 8px rgba(139,69,19,0.18);
 }
 [data-theme="light"] .auth-submit:hover {
-  background: linear-gradient(135deg, #8B4513, #6d3410);
+  background: linear-gradient(135deg, var(--palette-accent), #6d3410);
   border-color: #6d3410;
   color: #FFFFFF;
   box-shadow: 0 4px 16px rgba(139,69,19,0.30);
@@ -2630,17 +2700,17 @@ a:focus-visible,
   box-shadow: 0 8px 28px rgba(0,0,0,0.10);
 }
 [data-theme="light"] #toast.success {
-  background: rgba(107,122,94,0.08);
+  background: var(--status-active-bg);
   border-color: var(--green);
   color: var(--green);
 }
 [data-theme="light"] #toast.warning {
-  background: rgba(184,146,58,0.08);
+  background: var(--status-pending-bg);
   border-color: var(--amber);
   color: var(--amber);
 }
 [data-theme="light"] #toast.error {
-  background: rgba(160,64,46,0.08);
+  background: var(--status-overdue-bg);
   border-color: var(--red);
   color: var(--red);
 }
@@ -3534,7 +3604,7 @@ a:focus-visible,
 
             <div style="background:var(--bg3);border-radius:8px;padding:16px 20px;margin-bottom:20px;">
               <div style="font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Support Email</div>
-              <a href="mailto:support@subtxtpress.com" style="color:var(--text);font-size:1rem;font-weight:600;">support@subtxtpress.com</a>
+              <a href="/cdn-cgi/l/email-protection#067573767669747246757364727e7276746375752865696b" style="color:var(--text);font-size:1rem;font-weight:600;"><span class="__cf_email__" data-cfemail="5f2c2a2f2f302d2b1f2c2a3d2b272b2f2d3a2c2c713c3032">[email&#160;protected]</span></a>
             </div>
 
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:12px;">What to Include</h3>
@@ -3626,7 +3696,7 @@ a:focus-visible,
 
           <section>
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Contact</h3>
-            <p style="font-size:.9rem;line-height:1.7;">Questions, issues, or data concerns: <a href="mailto:support@subtxtpress.com" style="color:var(--text);">support@subtxtpress.com</a></p>
+            <p style="font-size:.9rem;line-height:1.7;">Questions, issues, or data concerns: <a href="/cdn-cgi/l/email-protection#7a090f0a0a15080e3a090f180e020e0a081f090954191517" style="color:var(--text);"><span class="__cf_email__" data-cfemail="b3c0c6c3c3dcc1c7f3c0c6d1c7cbc7c3c1d6c0c09dd0dcde">[email&#160;protected]</span></a></p>
           </section>
         </div>
       </div>
@@ -3703,7 +3773,7 @@ a:focus-visible,
       <p style="font-size:.9rem;line-height:1.75;margin-bottom:12px;">FOIA.io is operating in a controlled beta phase.</p>
       <p style="font-size:.9rem;line-height:1.75;color:var(--text-dim);">The platform is fully functional for day‑to‑day FOIA management, but certain features are still undergoing refinement. Users may experience occasional inconsistencies or incomplete functionality. Feedback during this period is actively incorporated into development and stability improvements.</p>
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-dim);">
-        Questions or feedback: <a href="mailto:support@subtxtpress.com" style="color:var(--text);">support@subtxtpress.com</a>
+        Questions or feedback: <a href="/cdn-cgi/l/email-protection#13606663637c616753606671676b6763617660603d707c7e" style="color:var(--text);"><span class="__cf_email__" data-cfemail="70030500001f02043003051204080400021503035e131f1d">[email&#160;protected]</span></a>
       </div>
     </div>
   </div>
@@ -3862,7 +3932,7 @@ a:focus-visible,
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ─────────────────────────────────────────────────────────────
 // State
 // ─────────────────────────────────────────────────────────────
@@ -5937,24 +6007,4 @@ function closeStateLawsModal(e) {
 function filterStateLaws() {
   const q = document.getElementById('stateLawsSearch').value.toLowerCase();
   document.querySelectorAll('#stateLawsBody tr').forEach(tr => {
-    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
-  });
-}
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeAgencyModal(); closeStateLawsModal(); }
-});
-
-function copyRef(btn, text, label) {
-  navigator.clipboard.writeText(text).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = '✓ ' + label;
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = orig;
-      btn.classList.remove('copied');
-    }, 2000);
-  });
-}
-</script>
-</body>
-</html>
+   
