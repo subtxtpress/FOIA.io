@@ -31,10 +31,15 @@
 
   <!-- Mobile / PWA -->
   <meta name="theme-color" content="#4DB6AC" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#00897B" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#8B4513" media="(prefers-color-scheme: light)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FOIA.io">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* ─── Design Tokens ─────────────────────────────────────────── */
@@ -48,11 +53,16 @@
       --cyan-glow: rgba(77, 182, 172, 0.22);
       --text:      #FFFFFF;
       --text-dim:  #B3B3B3;
-      --red:       #CF6679;
+      --red:       #C86856;            /* Canyon Rust (lifted) */
+      --green:     #93A286;            /* Desert Sage (lifted) */
+      --amber:     #E0BA62;            /* Sandstone Ochre (lifted) */
       --radius:    6px;
       --shadow:    0 2px 8px rgba(0,0,0,0.4);
       --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
       --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+      --font-heading: 'Barlow Condensed', sans-serif;
+      --font-mono:    'IBM Plex Mono', monospace;
+      --font-body:    'Inter', sans-serif;
     }
 
     /* ─── Reset ──────────────────────────────────────────────────── */
@@ -916,105 +926,204 @@
       }
     }
 
-    /* ─── Light Mode (system preference) ─────────────────────────── */
+    /* ─── Typography (shared by both themes) ──────────────────── */
+    body { font-family: var(--font-body), var(--font); }
+
+    .nav-wordmark,
+    .hero-headline,
+    .section-title,
+    .how-header h2,
+    .pricing-header h2,
+    .faq-header h2 {
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .hero-eyebrow,
+    .section-label,
+    .step-num,
+    .price-badge,
+    .price-badge-free,
+    .price-badge-pro,
+    .price-name,
+    .price-amount,
+    .footer-col-title,
+    summary,
+    .btn,
+    .nav-signin,
+    .price-cta {
+      font-family: var(--font-mono);
+    }
+
+    .step-title,
+    .feat-title {
+      font-family: var(--font-body);
+    }
+
+    /* ─── Light Mode — Warm Earthy Palette (system preference) ──── */
     @media (prefers-color-scheme: light) {
       :root {
-        --bg:        #FFFFFF;
-        --bg2:       #F5F5F5;
-        --bg3:       #EEEEEE;
-        --border:    #E0E0E0;
-        --cyan:      #00897B;
-        --cyan-dim:  rgba(0, 137, 123, 0.10);
-        --cyan-glow: rgba(0, 137, 123, 0.18);
-        --text:      #1a1a1a;
-        --text-dim:  #666666;
-        --red:       #B00020;
-        --shadow:    0 1px 4px rgba(0,0,0,0.08);
-        --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+        --bg:          #F7F5F2;
+        --bg2:         #FFFFFF;
+        --bg3:         #F0EBE2;
+        --border:      rgba(139,100,60,0.20);
+        --cyan:        #8B4513;
+        --cyan-dim:    rgba(139,69,19,0.08);
+        --cyan-glow:   rgba(139,69,19,0.15);
+        --text:        #1C1917;
+        --text-dim:    #78716C;
+        --red:         #A0402E;
+        --green:       #6B7A5E;
+        --amber:       #B8923A;
+        --shadow:      0 2px 16px rgba(0,0,0,0.06);
+        --shadow-lg:   0 8px 28px rgba(0,0,0,0.10);
+        --accent-subtle: rgba(139,69,19,0.08);
+        --border-light:  rgba(197,185,154,0.35);
+        --border-strong: rgba(139,100,60,0.45);
       }
 
-      /* Nav — light frosted glass */
+      /* Body text refinement */
+      body { color: #44403C; }
+
+      /* Nav — warm frosted glass */
       nav {
-        background: rgba(255, 255, 255, 0.85);
-        border-bottom-color: rgba(224, 224, 224, 0.6);
+        background: rgba(247, 245, 242, 0.88);
+        border-bottom-color: rgba(139,100,60,0.15);
       }
 
       /* Ghost button hover */
       .btn-ghost:hover {
-        background: rgba(0, 0, 0, 0.04);
-        border-color: #bbb;
+        background: rgba(139,69,19,0.04);
+        border-color: var(--border-light);
       }
 
       /* Nav sign-in hover */
       .nav-signin:hover {
-        background: rgba(0, 0, 0, 0.04);
+        background: rgba(139,69,19,0.04);
       }
 
-      /* Hero orbs — softer for light bg */
+      /* Primary button — saddlebrown */
+      .btn-primary {
+        background: #8B4513;
+        color: #FFFFFF;
+        border-color: #8B4513;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(180deg, #C5B99A 0%, #8B4513 100%);
+        border-color: #8B4513;
+        box-shadow: 0 4px 20px rgba(139,69,19,0.25);
+      }
+
+      /* Hero orbs — warm brown/gold tints */
       .hero-orb-1 {
-        background: radial-gradient(circle, rgba(0, 137, 123, 0.12) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(139,69,19,0.10) 0%, transparent 70%);
       }
       .hero-orb-2 {
-        background: radial-gradient(circle, rgba(98, 71, 170, 0.10) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(197,185,154,0.18) 0%, transparent 70%);
+      }
+
+      /* Hero eyebrow */
+      .hero-eyebrow {
+        background: rgba(139,69,19,0.06);
+        border-color: rgba(139,69,19,0.18);
+      }
+
+      /* Hero headline accent underline */
+      .hero-headline-accent::after {
+        background: linear-gradient(90deg, #8B4513 0%, rgba(139,69,19,0.3) 100%);
       }
 
       /* Hero trust line */
-      .hero-trust { color: #999; }
+      .hero-trust { color: var(--text-dim); }
 
-      /* Step number circle */
+      /* Section label */
+      .section-label { color: #8B4513; }
+
+      /* Step number circle — warm accent */
       .step-num {
         background: var(--bg);
-        border-color: rgba(0, 137, 123, 0.3);
+        border-color: rgba(139,69,19,0.25);
       }
 
-      /* Feature card hover */
+      /* Dashed step connector */
+      .steps::before {
+        border-top-color: rgba(139,69,19,0.20);
+      }
+
+      /* Feature card hover — warm */
       .feat-card:hover {
-        border-color: rgba(0, 137, 123, 0.3);
-        box-shadow: 0 0 0 1px rgba(0, 137, 123, 0.08), var(--shadow);
+        border-color: rgba(139,69,19,0.25);
+        box-shadow: 0 0 0 1px rgba(139,69,19,0.06), var(--shadow);
       }
 
       /* Price badge free */
       .price-badge-free {
-        background: rgba(0, 0, 0, 0.06);
+        background: rgba(139,100,60,0.08);
         color: var(--text-dim);
       }
 
-      /* Price badge pro */
+      /* Price badge pro — warm */
       .price-badge-pro {
-        background: rgba(0, 137, 123, 0.12);
+        background: rgba(139,69,19,0.10);
       }
 
-      /* Price card pro gradient */
+      /* Price card pro — warm gradient */
       .price-card-pro {
-        background: linear-gradient(160deg, rgba(0, 137, 123, 0.06) 0%, var(--bg) 60%);
-        border-color: rgba(0, 137, 123, 0.35);
-        box-shadow: 0 -3px 0 0 var(--cyan), var(--shadow-lg);
+        background: linear-gradient(160deg, rgba(139,69,19,0.04) 0%, var(--bg) 60%);
+        border-color: rgba(139,69,19,0.30);
+        box-shadow: 0 -3px 0 0 #8B4513, var(--shadow-lg);
+      }
+
+      /* Pro CTA — warm */
+      .price-cta-pro {
+        background: #8B4513;
+        color: #FFFFFF;
+        border-color: #8B4513;
+      }
+      .price-cta-pro:hover {
+        background: linear-gradient(180deg, #C5B99A 0%, #8B4513 100%);
+        border-color: #8B4513;
+        box-shadow: 0 4px 20px rgba(139,69,19,0.25);
       }
 
       /* Free CTA hover */
       .price-cta-free:hover {
-        border-color: #bbb;
-        background: rgba(0, 0, 0, 0.04);
+        border-color: var(--border-light);
+        background: rgba(139,69,19,0.04);
       }
+
+      /* Price check marks */
+      .price-features li .check { color: #8B4513; }
+
+      /* FAQ — warm open state */
+      details[open] summary { color: #8B4513; }
+      details[open] summary .chevron { color: #8B4513; }
+      summary:hover { color: #8B4513; }
 
       /* Scrollbar */
       ::-webkit-scrollbar-track { background: var(--bg); }
-      ::-webkit-scrollbar-thumb:hover { background: #00796B; }
+      ::-webkit-scrollbar-thumb { background: #C5B99A; }
+      ::-webkit-scrollbar-thumb:hover { background: #8B4513; }
 
       /* Selection */
       ::selection {
-        background: rgba(0, 137, 123, 0.2);
+        background: rgba(139,69,19,0.15);
         color: var(--text);
       }
 
-      /* Footer muted text */
-      .footer-bottom-left { color: #999; }
-      .footer-bottom-right a { color: #999; }
-      .footer-bottom-right a:hover { color: var(--text-dim); }
+      /* Footer — warm muted text */
+      .footer-bottom-left { color: var(--text-dim); }
+      .footer-bottom-right a { color: var(--text-dim); }
+      .footer-bottom-right a:hover { color: #8B4513; }
+      .footer-links a:hover { color: #8B4513; }
 
-      /* Dashed step connector */
-      .steps::before {
-        border-top-color: rgba(0, 137, 123, 0.25);
+      /* Footer logo warm gradient */
+      .footer-logo-text {
+        background: linear-gradient(90deg, #C5B99A, #8B4513);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
     }
   </style>
