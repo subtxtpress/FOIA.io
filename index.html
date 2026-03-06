@@ -5017,8 +5017,14 @@ async function onStateChange() {
 }
 
 async function loadStateLaws() {
-  const { data } = await api('GET', '/api/states');
   const tbody = document.getElementById('stateLawsBody');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-dim);">Loading…</td></tr>';
+  const { status, data } = await api('GET', '/api/states');
+  if (status !== 200 || !Array.isArray(data)) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--red);">Error loading state laws. Please try again.</td></tr>';
+    stateLawsLoaded = false;
+    return;
+  }
   tbody.innerHTML = data.map(s => `
     <tr>
       <td style="font-weight:600;">${esc(s.state_name)}</td>

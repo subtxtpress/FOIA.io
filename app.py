@@ -1822,7 +1822,7 @@ def get_le_states():
 def get_states():
     db = get_db()
     rows = db.execute(
-        "SELECT id, state_name, state_code, law_name, citation, response_days, appeal_days "
+        "SELECT id, state_name, state_code, law_name, citation, response_days, appeal_days, notes "
         "FROM state_laws ORDER BY state_name"
     ).fetchall()
     db.close()
