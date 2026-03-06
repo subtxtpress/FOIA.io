@@ -625,6 +625,40 @@ table {
 #agencyDirBody td, #agencyDirModal thead th {
   font-size: .7rem;
 }
+#agencyDirBody td {
+  padding: 8px 12px;
+}
+/* ── State Laws table ─────────────────────────────────────── */
+#stateLawsModal table {
+  font-size: .72rem;
+}
+#stateLawsBody td {
+  padding: 8px 10px;
+  font-size: .72rem;
+}
+#stateLawsBody td:nth-child(1) {
+  white-space: nowrap;
+  font-weight: 600;
+}
+#stateLawsBody td:nth-child(2) {
+  white-space: nowrap;
+}
+#stateLawsBody td:nth-child(4) {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  white-space: nowrap;
+}
+#stateLawsBody td:nth-child(5),
+#stateLawsBody td:nth-child(6) {
+  text-align: center;
+  white-space: nowrap;
+}
+#stateLawsBody td:nth-child(7) {
+  font-size: .68rem;
+  color: var(--text-dim);
+  max-width: 220px;
+  overflow-wrap: break-word;
+}
 thead th {
   background: var(--bg3);
   padding: 14px 16px;
@@ -654,6 +688,7 @@ td {
   font-family: var(--font-body);
   font-size: .8rem;
   padding: 13px 16px;
+  overflow-wrap: break-word;
 }
 .td-number {
   font-family: var(--font-mono);
@@ -2014,6 +2049,15 @@ a:focus-visible,
   }
   .td-agency {
     font-size: 0.8rem;
+  }
+  /* State Laws modal: hide low-priority columns on mobile */
+  #stateLawsBody td:nth-child(4),
+  #stateLawsBody td:nth-child(6),
+  #stateLawsBody td:nth-child(7),
+  #stateLawsModal thead th:nth-child(4),
+  #stateLawsModal thead th:nth-child(6),
+  #stateLawsModal thead th:nth-child(7) {
+    display: none;
   }
   /* Active requests: 2x2 card layout on mobile */
   #page-active-requests thead { display: none; }
@@ -4887,18 +4931,18 @@ async function loadAgencyDir() {
           <div style="font-weight:600;font-size:.78rem;margin-bottom:5px;">${esc(full.name)}</div>
           <div style="margin-bottom:4px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></div>
           <div style="display:flex;align-items:center;gap:6px;">
-            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--text);font-size:.7rem;word-break:break-all;">${esc(email)}</a>
+            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--text);font-size:.7rem;overflow-wrap:break-word;">${esc(email)}</a>
             <button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email" style="flex-shrink:0;">⎘</button>`
             : `<span style="color:var(--text-dim);font-style:italic;font-size:.7rem;">Call agency for email</span>`}
           </div>
         </td>`;
     } else {
       tr.innerHTML = `
-        <td style="font-weight:600;padding:8px 12px;">${esc(full.name)}</td>
-        <td style="padding:8px 12px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
-        <td style="padding:8px 12px;word-break:break-all;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--text);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
-        <td class="hide-mobile" style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
-        <td style="padding:8px 12px;">${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
+        <td style="font-weight:600;">${esc(full.name)}</td>
+        <td><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
+        <td style="overflow-wrap:break-word;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--text);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
+        <td class="hide-mobile">${esc(full.foia_phone||'—')}</td>
+        <td>${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
     }
     tbody.appendChild(tr);
   }
@@ -5027,13 +5071,13 @@ async function loadStateLaws() {
   }
   tbody.innerHTML = data.map(s => `
     <tr>
-      <td style="font-weight:600;">${esc(s.state_name)}</td>
+      <td>${esc(s.state_name)}</td>
       <td><span class="badge badge-active">${esc(s.state_code)}</span></td>
-      <td style="font-size:.82rem;">${esc(s.law_name)}</td>
-      <td style="font-size:.78rem;color:var(--text);font-family:monospace;">${esc(s.citation)}</td>
-      <td style="text-align:center;">${s.response_days || '<span style="color:var(--text-dim)">Reasonable</span>'}</td>
-      <td style="text-align:center;">${s.appeal_days || '<span style="color:var(--text-dim)">—</span>'}</td>
-      <td style="font-size:.78rem;color:var(--text-dim);max-width:300px;">${esc(s.notes||'')}</td>
+      <td>${esc(s.law_name)}</td>
+      <td>${esc(s.citation)}</td>
+      <td>${s.response_days || '<span style="color:var(--text-dim)">Reasonable</span>'}</td>
+      <td>${s.appeal_days || '<span style="color:var(--text-dim)">—</span>'}</td>
+      <td>${esc(s.notes||'')}</td>
       <td><button class="copy-ref-btn" onclick="copyRef(this,'${esc(s.citation).replace(/'/g,"\'").replace(/"/g,'&quot;')}','Citation copied')" title="Copy citation">⎘</button></td>
     </tr>`).join('');
 }
@@ -5958,7 +6002,7 @@ function escapeHtml(text) {
 
 <!-- ── State Laws Modal ──────────────────────────────────────── -->
 <div class="modal-overlay" role="dialog" aria-modal="true" id="stateLawsModal" onclick="closeStateLawsModal(event)">
-  <div class="modal" style="max-width:900px;width:95%;">
+  <div class="modal" style="max-width:1060px;width:95%;">
     <div class="modal-header">
       <div>
         <h2>⚖︎ State Public Records Laws</h2>
