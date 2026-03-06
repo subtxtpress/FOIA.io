@@ -12,3 +12,4 @@ node_modules/
 *.db-shm
 *.db-wal
 SQLite format 3*
+.claude/worktrees/
