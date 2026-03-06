@@ -48,21 +48,20 @@
   --bg2:       #1E1E1E;
   --bg3:       #2C2C2C;
   --border:    rgba(255,255,255,0.10);
-  --accent:    #C07840;
-  --accent-dim: rgba(192,120,64,0.40);
-  --primary:   #C07840;
-  --secondary: #C07840;
-  --error:     #C86856;            /* Canyon Rust (lifted) */
+  --primary:   #B85C3F;              /* buttons, CTAs, form submits */
+  --primary-dim: rgba(184, 92, 63, 0.40);
+  --accent:    #C5B99A;              /* nav active, highlights, brand pops */
+  --accent-dim: rgba(197, 185, 154, 0.40);
+  --accent-subtle: rgba(197, 185, 154, 0.12);
+  --error:     #C86856;
   --text:      #E0E0E0;
   --text-dim:  #808080;
   --on-primary:#FFFFFF;
-  --on-secondary:#FFFFFF;
   --avatar-bg: #b3b3b3;
   --avatar-text:#000000;
-  --cyan:      #C07840;
-  --red:       #C86856;            /* Canyon Rust (lifted) */
-  --green:     #93A286;            /* Desert Sage (lifted) */
-  --amber:     #E0BA62;            /* Sandstone Ochre (lifted) */
+  --red:       #C86856;              /* error, danger, overdue */
+  --green:     #8a9e7a;              /* success, active, positive */
+  --amber:     #d4a862;              /* warning, pending, appealed */
   --radius:    10px;
   --shadow:    0 2px 8px rgba(0,0,0,0.4);
   --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
@@ -72,8 +71,7 @@
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
   --logo-grad: linear-gradient(90deg, #C5B99A, #8B4513);
-  --accent-subtle: rgba(192,120,64,0.12);
-  --grad-neutral: linear-gradient(to right, #C5B99A, #8B4513);
+  --grad-neutral: linear-gradient(to right, #C5B99A, #5d6d58);
 }
 /* ── Light mode — Warm earthy palette ─────────────────────── */
 [data-theme="light"] {
@@ -81,32 +79,30 @@
   --bg:          #F7F5F2;          /* page background (warm off-white) */
   --bg2:         #FFFFFF;          /* card / sidebar surfaces */
   --bg3:         #F0EBE2;          /* elevated / hover states */
-  --border:      rgba(139,100,60,0.20);  /* standard border */
-  --accent:      #8B4513;          /* saddlebrown accent */
-  --accent-dim:  rgba(139,69,19,0.40);   /* accent border strength */
-  --primary:     #8B4513;          /* primary buttons */
-  --secondary:   #8B4513;          /* secondary accent */
+  --border:      rgba(139,100,60,0.20);
+  --primary:     #8B4513;          /* buttons, CTAs, form submits */
+  --primary-dim: rgba(139,69,19,0.40);
+  --accent:      #8B4513;          /* nav active, highlights, brand pops */
+  --accent-dim:  rgba(139,69,19,0.40);
+  --accent-subtle: rgba(139,69,19,0.08);
+  --accent-border: rgba(139,69,19,0.40);
   --error:       #A0402E;          /* Canyon Rust */
   --text:        #1C1917;          /* heading text (near-black) */
   --text-dim:    #78716C;          /* label / secondary text */
-  --on-primary:  #FFFFFF;          /* text on accent buttons */
-  --on-secondary:#FFFFFF;
-  --avatar-bg:   #E8E2D9;         /* warm neutral avatar bg */
+  --on-primary:  #FFFFFF;          /* text on primary buttons */
+  --avatar-bg:   #E8E2D9;
   --avatar-text: #1C1917;
-  --cyan:        #8B4513;          /* accent for badges, active states */
-  --red:         #A0402E;          /* Canyon Rust */
-  --green:       #6B7A5E;          /* Desert Sage */
-  --amber:       #B8923A;          /* Sandstone Ochre */
+  --red:         #A0402E;          /* error, danger, overdue */
+  --green:       #6B7A5E;          /* success, active, positive */
+  --amber:       #B8923A;          /* warning, pending, appealed */
   --shadow:      0 2px 16px rgba(0,0,0,0.06);
   --shadow-lg:   0 8px 28px rgba(0,0,0,0.10);
   --logo-grad:   linear-gradient(90deg, #C5B99A 0%, #8B4513 32.8%, #1C1917 52.4%, #8B4513 72.98%, #C5B99A 100%);
 
-  /* Extended variables (light-mode only — dark mode will adopt later) */
+  /* Extended variables */
   --text-body:        #44403C;
   --border-light:     rgba(197,185,154,0.35);
   --border-strong:    rgba(139,100,60,0.45);
-  --accent-subtle:    rgba(139,69,19,0.08);
-  --accent-border:    rgba(139,69,19,0.40);
   --surface-card-alt: rgba(197,185,154,0.18);
   --grad-header:      linear-gradient(160deg, #F7F5F2 0%, #E8E2D9 100%);
   --grad-accent:      linear-gradient(180deg, #C5B99A 0%, #8B4513 100%);
@@ -169,7 +165,7 @@ body {
   z-index: 100;
 }
 .sidebar-logo {
-  padding: 24px 20px 16px;
+  padding: 24px 20px 18px;
   border-bottom: 1px solid var(--border);
 }
 .sidebar-logo h1 {
@@ -554,11 +550,11 @@ body {
 }
 .stat-label {
   font-family: var(--font-mono);
-  font-size: .75rem;
+  font-size: .6rem;
   color: var(--text-dim);
   margin-top: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.1em;
   font-weight: 600;
 }
 /* ── Tables ────────────────────────────────────────────────── */
@@ -580,7 +576,7 @@ thead th {
   padding: 14px 16px;
   text-align: left;
   font-family: var(--font-mono);
-  font-size: .7rem;
+  font-size: .6rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -625,8 +621,9 @@ td {
   padding: 3px 10px;
   border-radius: 4px;
   font-family: var(--font-mono);
-  font-size: .68rem;
+  font-size: .6rem;
   font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   letter-spacing: .5px;
 }
@@ -674,9 +671,9 @@ td {
   white-space: nowrap;
 }
 .btn-primary {
-  background: var(--cyan);
+  background: var(--primary);
   color: var(--on-primary);
-  border: 1px solid var(--cyan);
+  border: 1px solid var(--primary);
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(192,120,64,0.2);
   transition: all 0.2s;
@@ -902,9 +899,9 @@ a:focus-visible,
   width: 100%;
   margin-top: 8px;
   justify-content: center;
-  background: var(--cyan);
+  background: var(--primary);
   color: var(--on-primary);
-  border: 1px solid var(--cyan);
+  border: 1px solid var(--primary);
   font-weight: 600;
   font-family: var(--font-body);
   box-shadow: 0 2px 8px rgba(192,120,64,0.25);
@@ -2272,9 +2269,7 @@ a:focus-visible,
 
 /* ── Typography & Base ──────────────────────────────────────── */
 [data-theme="light"] body {
-  font-family: var(--font-body);
   color: var(--text-body);
-  -webkit-font-smoothing: antialiased;
 }
 
 /* ── Sidebar ────────────────────────────────────────────────── */
@@ -2285,28 +2280,12 @@ a:focus-visible,
 }
 [data-theme="light"] .sidebar-logo {
   border-bottom: 1px solid var(--border-light);
-  padding-bottom: 18px;
 }
 [data-theme="light"] .sidebar-logo h1 {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   background: linear-gradient(90deg, #C5B99A 0%, #8B4513 40%, #1C1917 60%, #8B4513 80%, #C5B99A 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 [data-theme="light"] .sidebar-logo p {
-  font-family: var(--font-mono);
-  font-size: .65rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
   color: var(--text-dim);
-}
-[data-theme="light"] .sidebar-nav-wrap::after {
-  background: linear-gradient(to bottom, transparent, var(--bg2));
 }
 [data-theme="light"] .nav-item {
   color: var(--text-body);
@@ -2320,9 +2299,6 @@ a:focus-visible,
   color: var(--accent);
   border-left: 3px solid var(--accent);
   padding-left: 9px;
-}
-[data-theme="light"] .nav-label {
-  color: var(--text-dim);
 }
 [data-theme="light"] .sidebar-footer {
   border-top: 1px solid var(--border-light);
@@ -2410,25 +2386,20 @@ a:focus-visible,
   background: var(--bg3);
 }
 [data-theme="light"] .stat-label {
-  font-size: .6rem;
-  letter-spacing: 0.1em;
+  color: var(--text-dim);
 }
 
 /* ── Buttons ────────────────────────────────────────────────── */
-[data-theme="light"] .btn {
-  border-radius: 8px;
-}
 [data-theme="light"] .btn-primary {
-  background: var(--accent);
+  background: var(--primary);
   color: var(--on-primary);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--primary);
   box-shadow: 0 2px 8px rgba(139,69,19,0.18);
 }
 [data-theme="light"] .btn-primary:hover {
   background: linear-gradient(135deg, #8B4513, #6d3410);
   border-color: #6d3410;
   color: #FFFFFF;
-  transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(139,69,19,0.30);
 }
 [data-theme="light"] .btn-ghost {
@@ -2446,10 +2417,6 @@ a:focus-visible,
 }
 
 /* ── Badges ─────────────────────────────────────────────────── */
-[data-theme="light"] .badge {
-  font-size: .6rem;
-  letter-spacing: 0.08em;
-}
 [data-theme="light"] .badge-new,
 [data-theme="light"] .badge-closed {
   background: rgba(128,128,128,0.08);
@@ -2477,7 +2444,6 @@ a:focus-visible,
 /* ── Tables ─────────────────────────────────────────────────── */
 [data-theme="light"] thead th {
   background: var(--surface-card-alt);
-  font-size: .6rem;
   color: var(--text-dim);
   border-bottom: 1px solid var(--border);
 }
@@ -2539,7 +2505,6 @@ a:focus-visible,
 [data-theme="light"] .modal {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 14px;
   box-shadow: 0 16px 48px rgba(0,0,0,0.14), 0 0 0 1px var(--border-light);
 }
 [data-theme="light"] .modal-header {
@@ -2622,16 +2587,15 @@ a:focus-visible,
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 [data-theme="light"] .auth-submit {
-  background: var(--accent);
+  background: var(--primary);
   color: var(--on-primary);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--primary);
   box-shadow: 0 2px 8px rgba(139,69,19,0.18);
 }
 [data-theme="light"] .auth-submit:hover {
   background: linear-gradient(135deg, #8B4513, #6d3410);
   border-color: #6d3410;
   color: #FFFFFF;
-  transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(139,69,19,0.30);
 }
 [data-theme="light"] .auth-error {

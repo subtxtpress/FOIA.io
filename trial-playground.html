@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOIA.io Accent Palette Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ui-bg: #1a1a1a;
+    --ui-surface: #242424;
+    --ui-surface2: #2e2e2e;
+    --ui-border: #3a3a3a;
+    --ui-text: #e0e0e0;
+    --ui-text-dim: #999;
+    --ui-accent: #C5B99A;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--ui-bg);
+    color: var(--ui-text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === LAYOUT === */
+  .app {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+  }
+
+  .app-header {
+    grid-column: 1 / -1;
+    padding: 16px 24px;
+    background: var(--ui-surface);
+    border-bottom: 1px solid var(--ui-border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .app-header h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ui-accent);
+  }
+
+  .app-header span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ui-text-dim);
+  }
+
+  /* === CONTROLS PANEL === */
+  .controls {
+    background: var(--ui-surface);
+    border-right: 1px solid var(--ui-border);
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 56px);
+  }
+
+  .control-group {
+    margin-bottom: 24px;
+  }
+
+  .control-group-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--ui-text-dim);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--ui-border);
+  }
+
+  .color-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+    margin-bottom: 4px;
+  }
+
+  .color-option:hover {
+    background: var(--ui-surface2);
+  }
+
+  .color-option.selected {
+    border-color: var(--ui-accent);
+    background: rgba(197,185,154,0.1);
+  }
+
+  .color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .color-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .color-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ui-text);
+  }
+
+  .color-hex {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ui-text-dim);
+  }
+
+  .custom-hex-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-top: 4px;
+  }
+
+  .custom-hex-row input[type="color"] {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+  }
+
+  .custom-hex-row input[type="text"] {
+    flex: 1;
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ui-text);
+    width: 100%;
+  }
+
+  .custom-hex-row input[type="text"]:focus {
+    outline: none;
+    border-color: var(--ui-accent);
+  }
+
+  .custom-hex-label {
+    font-size: 11px;
+    color: var(--ui-text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* === PRESETS === */
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .preset-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-bg);
+    color: var(--ui-text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .preset-btn:hover {
+    border-color: var(--ui-accent);
+    color: var(--ui-text);
+  }
+
+  .preset-btn.active {
+    background: var(--ui-accent);
+    color: #1a1a1a;
+    border-color: var(--ui-accent);
+  }
+
+  /* === PREVIEW AREA === */
+  .preview-area {
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(100vh - 56px);
+    background: var(--ui-bg);
+  }
+
+  .preview-modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .preview-mode {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--ui-border);
+  }
+
+  .preview-mode-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 8px 16px;
+    background: var(--ui-surface2);
+    color: var(--ui-text-dim);
+    text-align: center;
+  }
+
+  /* Light mode preview */
+  .lm {
+    --p-bg: #F7F5F2;
+    --p-card: #FFFFFF;
+    --p-elevated: #F0EBE2;
+    --p-mid: #C5B99A;
+    --p-accent: #8B4513;
+    --p-text: #1C1917;
+    --p-body: #44403C;
+    --p-dim: #78716C;
+    --p-border: rgba(139,100,60,0.20);
+    --p-border-strong: rgba(139,100,60,0.45);
+    --p-accent-subtle: rgba(139,69,19,0.08);
+  }
+
+  .dm {
+    --p-bg: #121212;
+    --p-card: #1E1E1E;
+    --p-elevated: #2C2C2C;
+    --p-mid: #C5B99A;
+    --p-accent: #C5B99A;
+    --p-text: #E0E0E0;
+    --p-body: #B0B0B0;
+    --p-dim: #808080;
+    --p-border: rgba(255,255,255,0.12);
+    --p-border-strong: rgba(255,255,255,0.24);
+    --p-accent-subtle: rgba(197,185,154,0.12);
+  }
+
+  .mock-dashboard {
+    background: var(--p-bg);
+    padding: 16px;
+    min-height: 480px;
+  }
+
+  /* Mock topbar */
+  .mock-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    border-bottom: 2px solid var(--p-accent);
+  }
+
+  .lm .mock-topbar {
+    background: linear-gradient(160deg, #F7F5F2 0%, #E8E2D9 100%);
+  }
+
+  .dm .mock-topbar {
+    background: var(--p-card);
+  }
+
+  .mock-topbar h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--p-text);
+  }
+
+  .mock-btn-primary {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: none;
+    color: #fff;
+    background: var(--p-accent);
+    letter-spacing: 0.5px;
+  }
+
+  /* Mock stat strip */
+  .mock-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--p-card);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    border: 1px solid var(--p-border);
+  }
+
+  .mock-stats-wrap {
+    padding-top: 3px;
+    border-radius: 9px;
+    margin-bottom: 14px;
+  }
+
+  .mock-stat {
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--p-card);
+  }
+
+  .mock-stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--p-text);
+  }
+
+  .mock-stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--p-dim);
+    margin-top: 2px;
+  }
+
+  /* Badges */
+  .mock-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 12px;
+    background: var(--p-card);
+    border-radius: 8px;
+    border: 1px solid var(--p-border);
+  }
+
+  .mock-badges-title {
+    width: 100%;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--p-dim);
+    margin-bottom: 6px;
+  }
+
+  .mock-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-accent {
+    color: var(--p-accent);
+  }
+
+  .lm .badge-accent { background: var(--p-accent-subtle); }
+  .dm .badge-accent { background: rgba(197,185,154,0.12); }
+
+  /* Buttons row */
+  .mock-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 12px;
+    background: var(--p-card);
+    border-radius: 8px;
+    border: 1px solid var(--p-border);
+  }
+
+  .mock-buttons-title {
+    width: 100%;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--p-dim);
+    margin-bottom: 6px;
+  }
+
+  .mock-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: none;
+    color: #fff;
+    letter-spacing: 0.5px;
+    cursor: default;
+  }
+
+  /* Deadline banners */
+  .mock-banners {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .mock-banner {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-left: 3px solid;
+  }
+
+  .mock-banner-icon {
+    font-size: 14px;
+  }
+
+  /* Toast */
+  .mock-toasts {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .mock-toast {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid;
+  }
+
+  .mock-toast-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Form validation */
+  .mock-form {
+    padding: 12px;
+    background: var(--p-card);
+    border-radius: 8px;
+    border: 1px solid var(--p-border);
+    margin-bottom: 14px;
+  }
+
+  .mock-form-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--p-dim);
+    margin-bottom: 10px;
+  }
+
+  .mock-input-group {
+    margin-bottom: 10px;
+  }
+
+  .mock-input-group:last-child { margin-bottom: 0; }
+
+  .mock-label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--p-dim);
+    margin-bottom: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .mock-input {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    background: var(--p-bg);
+    color: var(--p-body);
+    border: 1px solid;
+  }
+
+  .mock-input-msg {
+    font-size: 10px;
+    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Status dots */
+  .mock-status-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: var(--p-body);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .mock-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* === WCAG TABLE === */
+  .wcag-section {
+    margin-top: 24px;
+  }
+
+  .wcag-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ui-accent);
+    margin-bottom: 12px;
+  }
+
+  .wcag-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .wcag-table-wrap {
+    background: var(--ui-surface);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--ui-border);
+  }
+
+  .wcag-table-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 12px;
+    background: var(--ui-surface2);
+    color: var(--ui-text-dim);
+  }
+
+  .wcag-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .wcag-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ui-text-dim);
+    padding: 6px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--ui-border);
+    background: var(--ui-surface);
+  }
+
+  .wcag-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--ui-border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+
+  .wcag-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .wcag-pass { color: #6B7A5E; }
+  .wcag-fail { color: #B85C3F; }
+  .wcag-ratio { color: var(--ui-text); }
+
+  .wcag-bg-preview {
+    display: inline-block;
+    width: 40px;
+    height: 18px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* === PROMPT OUTPUT === */
+  .prompt-area {
+    grid-column: 1 / -1;
+    background: var(--ui-surface);
+    border-top: 1px solid var(--ui-border);
+    padding: 16px 24px;
+  }
+
+  .prompt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .prompt-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--ui-text-dim);
+  }
+
+  .copy-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--ui-accent);
+    background: transparent;
+    color: var(--ui-accent);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover {
+    background: var(--ui-accent);
+    color: #1a1a1a;
+  }
+
+  #prompt-output {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ui-text);
+    white-space: pre-wrap;
+    padding: 12px;
+    background: var(--ui-bg);
+    border-radius: 6px;
+    border: 1px solid var(--ui-border);
+    min-height: 48px;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--ui-border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="app-header">
+    <h1>FOIA.io Accent Palette</h1>
+    <span>Red Rock Canyon Extraction</span>
+  </header>
+
+  <!-- CONTROLS -->
+  <aside class="controls">
+    <div class="control-group">
+      <div class="control-group-title">Presets</div>
+      <div class="presets">
+        <button class="preset-btn active" onclick="applyPreset('desert')">Desert Sage</button>
+        <button class="preset-btn" onclick="applyPreset('canyon')">Canyon Deep</button>
+        <button class="preset-btn" onclick="applyPreset('juniper')">Juniper Gold</button>
+        <button class="preset-btn" onclick="applyPreset('warm')">Warm Lifted</button>
+      </div>
+    </div>
+
+    <!-- GREEN -->
+    <div class="control-group">
+      <div class="control-group-title">Green / Success</div>
+      <div id="green-options"></div>
+      <div class="custom-hex-row">
+        <input type="color" id="green-picker" value="#6B7A5E" oninput="customColor('green', this.value)">
+        <div style="flex:1">
+          <div class="custom-hex-label">Custom</div>
+          <input type="text" id="green-custom" placeholder="#6B7A5E" oninput="customColorText('green', this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- AMBER -->
+    <div class="control-group">
+      <div class="control-group-title">Amber / Warning</div>
+      <div id="amber-options"></div>
+      <div class="custom-hex-row">
+        <input type="color" id="amber-picker" value="#B8923A" oninput="customColor('amber', this.value)">
+        <div style="flex:1">
+          <div class="custom-hex-label">Custom</div>
+          <input type="text" id="amber-custom" placeholder="#B8923A" oninput="customColorText('amber', this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- RED -->
+    <div class="control-group">
+      <div class="control-group-title">Red / Error</div>
+      <div id="red-options"></div>
+      <div class="custom-hex-row">
+        <input type="color" id="red-picker" value="#A0402E" oninput="customColor('red', this.value)">
+        <div style="flex:1">
+          <div class="custom-hex-label">Custom</div>
+          <input type="text" id="red-custom" placeholder="#A0402E" oninput="customColorText('red', this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="control-group-title">Primary Accent</div>
+
+      <div class="color-option" id="acc-opt-rose1" onclick="selectAccent('rose1')">
+        <div class="color-swatch" style="background:#7A3030"></div>
+        <div class="color-info">
+          <div class="color-name">Dark Brick</div>
+          <div class="color-hex">#7A3030 · #C07070</div>
+        </div>
+      </div>
+
+      <div class="color-option" id="acc-opt-rose2" onclick="selectAccent('rose2')">
+        <div class="color-swatch" style="background:#6E3028"></div>
+        <div class="color-info">
+          <div class="color-name">Dried Blood</div>
+          <div class="color-hex">#6E3028 · #B87060</div>
+        </div>
+      </div>
+
+      <div class="color-option" id="acc-opt-rose3" onclick="selectAccent('rose3')">
+        <div class="color-swatch" style="background:#8A3A30"></div>
+        <div class="color-info">
+          <div class="color-name">Warm Canyon</div>
+          <div class="color-hex">#8A3A30 · #C87868</div>
+        </div>
+      </div>
+
+      <div class="color-option" id="acc-opt-copper" onclick="selectAccent('copper')">
+        <div class="color-swatch" style="background:#7A4830"></div>
+        <div class="color-info">
+          <div class="color-name">Copper</div>
+          <div class="color-hex">#7A4830 · #C09070</div>
+        </div>
+      </div>
+
+      <div class="color-option" id="acc-opt-teal" onclick="selectAccent('teal')">
+        <div class="color-swatch" style="background:#286868"></div>
+        <div class="color-info">
+          <div class="color-name">Teal</div>
+          <div class="color-hex">#286868 · #50A8A8</div>
+        </div>
+      </div>
+
+      <div class="color-option" id="acc-opt-original" onclick="selectAccent('original')">
+        <div class="color-swatch" style="background:#8B4513"></div>
+        <div class="color-info">
+          <div class="color-name">Original (Saddlebrown)</div>
+          <div class="color-hex">#8B4513 · #C5B99A</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- PREVIEW -->
+  <main class="preview-area">
+    <div class="preview-modes">
+      <!-- LIGHT MODE -->
+      <div class="preview-mode">
+        <div class="preview-mode-label">Light Mode</div>
+        <div class="mock-dashboard lm" id="lm-preview"></div>
+      </div>
+      <!-- DARK MODE -->
+      <div class="preview-mode">
+        <div class="preview-mode-label">Dark Mode</div>
+        <div class="mock-dashboard dm" id="dm-preview"></div>
+      </div>
+    </div>
+
+    <!-- WCAG -->
+    <div class="wcag-section">
+      <div class="wcag-title">WCAG Contrast Ratios</div>
+      <div class="wcag-grid">
+        <div class="wcag-table-wrap">
+          <div class="wcag-table-label">Light Mode Backgrounds</div>
+          <table class="wcag-table">
+            <thead><tr><th>Color</th><th>vs #F7F5F2</th><th>vs #FFFFFF</th><th>vs #F0EBE2</th></tr></thead>
+            <tbody id="wcag-light"></tbody>
+          </table>
+        </div>
+        <div class="wcag-table-wrap">
+          <div class="wcag-table-label">Dark Mode Backgrounds</div>
+          <table class="wcag-table">
+            <thead><tr><th>Color</th><th>vs #121212</th><th>vs #1E1E1E</th><th>vs #2C2C2C</th></tr></thead>
+            <tbody id="wcag-dark"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PROMPT OUTPUT -->
+  <footer class="prompt-area">
+    <div class="prompt-header">
+      <span class="prompt-label">Generated Prompt</span>
+      <button class="copy-btn" onclick="copyPrompt()">Copy Prompt</button>
+    </div>
+    <div id="prompt-output"></div>
+  </footer>
+</div>
+
+<script>
+// === COLOR CANDIDATES ===
+const ACCENT_OPTIONS = {
+  // All dark mode values: red channel high, blue low, green middling — stays earthy not pink
+  rose1:    { light: '#7A3030', dark: '#C86050', name: 'Dark Brick',      subtleLM: 'rgba(122,48,48,0.08)',  subtleDM: 'rgba(200,96,80,0.14)'   },
+  rose2:    { light: '#6E3028', dark: '#BE5040', name: 'Dried Blood',     subtleLM: 'rgba(110,48,40,0.08)',  subtleDM: 'rgba(190,80,64,0.14)'   },
+  rose3:    { light: '#8A3A30', dark: '#D06848', name: 'Warm Canyon Red', subtleLM: 'rgba(138,58,48,0.08)',  subtleDM: 'rgba(208,104,72,0.14)'  },
+  copper:   { light: '#7A4830', dark: '#C07840', name: 'Copper',          subtleLM: 'rgba(122,72,48,0.08)',  subtleDM: 'rgba(192,120,64,0.14)'  },
+  teal:     { light: '#286868', dark: '#409898', name: 'Teal',            subtleLM: 'rgba(40,104,104,0.08)', subtleDM: 'rgba(64,152,152,0.14)'  },
+  original: { light: '#8B4513', dark: '#C5B99A', name: 'Original',        subtleLM: 'rgba(139,69,19,0.08)',  subtleDM: 'rgba(197,185,154,0.12)' },
+};
+
+const CANDIDATES = {
+  green: [
+    { hex: '#6B7A5E', name: 'Desert Sage' },
+    { hex: '#5D6D58', name: 'Shadow Sage' },
+    { hex: '#8A9E7A', name: 'Lifted Sage' },
+    { hex: '#5E7E6A', name: 'Canyon Juniper' },
+  ],
+  amber: [
+    { hex: '#B8923A', name: 'Sandstone Ochre' },
+    { hex: '#C49A45', name: 'Desert Gold' },
+    { hex: '#D4A862', name: 'Warm Sand' },
+  ],
+  red: [
+    { hex: '#A0402E', name: 'Canyon Rust' },
+    { hex: '#B85C3F', name: 'Terracotta' },
+    { hex: '#C4654A', name: 'Lifted Terracotta' },
+  ],
+};
+
+const PRESETS = {
+  desert:  { green: '#6B7A5E', amber: '#B8923A', red: '#A0402E', label: 'Desert Sage' },
+  canyon:  { green: '#5D6D58', amber: '#B8923A', red: '#A0402E', label: 'Canyon Deep' },
+  juniper: { green: '#5E7E6A', amber: '#C49A45', red: '#B85C3F', label: 'Juniper Gold' },
+  warm:    { green: '#8A9E7A', amber: '#D4A862', red: '#C4654A', label: 'Warm Lifted' },
+};
+
+const state = {
+  green: '#6B7A5E',
+  amber: '#B8923A',
+  red:   '#A0402E',
+  preset: 'desert',
+  accent: 'rose',
+};
+
+// === DARK MODE LIFTS ===
+function liftColor(hex, amount) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return '#' + [
+    Math.min(255, r + amount),
+    Math.min(255, g + amount),
+    Math.min(255, b + amount),
+  ].map(v => v.toString(16).padStart(2,'0')).join('');
+}
+
+// === WCAG CONTRAST ===
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return [r, g, b];
+}
+
+function luminance(r, g, b) {
+  const [rs, gs, bs] = [r, g, b].map(v => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function contrastRatio(hex1, hex2) {
+  const [r1,g1,b1] = hexToRgb(hex1);
+  const [r2,g2,b2] = hexToRgb(hex2);
+  const l1 = luminance(r1, g1, b1);
+  const l2 = luminance(r2, g2, b2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function wcagCell(fg, bg) {
+  const ratio = contrastRatio(fg, bg);
+  const r = ratio.toFixed(2);
+  const passAA = ratio >= 4.5;
+  const passAALarge = ratio >= 3;
+  let label, cls;
+  if (passAA) { label = `${r} AA`; cls = 'wcag-pass'; }
+  else if (passAALarge) { label = `${r} AA-lg`; cls = 'wcag-pass'; }
+  else { label = `${r} FAIL`; cls = 'wcag-fail'; }
+  return `<td class="${cls}">${label}</td>`;
+}
+
+function selectAccent(key) {
+  state.accent = key;
+  document.querySelectorAll('[id^="acc-opt-"]').forEach(el => el.classList.remove('selected'));
+  document.getElementById('acc-opt-' + key).classList.add('selected');
+  // update ui-accent CSS var for sidebar/header
+  const acc = ACCENT_OPTIONS[key];
+  document.documentElement.style.setProperty('--ui-accent', acc.dark);
+  updateAll();
+}
+
+// === BUILD OPTIONS ===
+function buildOptions() {
+  ['green', 'amber', 'red'].forEach(key => {
+    const container = document.getElementById(key + '-options');
+    container.innerHTML = CANDIDATES[key].map(c => `
+      <div class="color-option ${state[key] === c.hex ? 'selected' : ''}"
+           onclick="selectColor('${key}', '${c.hex}')" data-hex="${c.hex}">
+        <div class="color-swatch" style="background:${c.hex}"></div>
+        <div class="color-info">
+          <div class="color-name">${c.name}</div>
+          <div class="color-hex">${c.hex}</div>
+        </div>
+      </div>
+    `).join('');
+  });
+}
+
+function selectColor(key, hex) {
+  state[key] = hex;
+  state.preset = null;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  // check if matches a preset
+  Object.entries(PRESETS).forEach(([name, p]) => {
+    if (p.green === state.green && p.amber === state.amber && p.red === state.red) {
+      state.preset = name;
+      document.querySelector(`[onclick="applyPreset('${name}')"]`)?.classList.add('active');
+    }
+  });
+  document.getElementById(key + '-picker').value = hex;
+  document.getElementById(key + '-custom').value = hex;
+  updateAll();
+}
+
+function customColor(key, hex) {
+  document.getElementById(key + '-custom').value = hex;
+  selectColor(key, hex);
+}
+
+function customColorText(key, val) {
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+    document.getElementById(key + '-picker').value = val;
+    selectColor(key, val);
+  }
+}
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  state.green = p.green;
+  state.amber = p.amber;
+  state.red = p.red;
+  state.preset = name;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[onclick="applyPreset('${name}')"]`)?.classList.add('active');
+  ['green', 'amber', 'red'].forEach(k => {
+    document.getElementById(k + '-picker').value = state[k];
+    document.getElementById(k + '-custom').value = state[k];
+  });
+  updateAll();
+}
+
+// === RENDER ===
+function renderMockDashboard(container, mode) {
+  const isLight = mode === 'light';
+  const g = isLight ? state.green : liftColor(state.green, 40);
+  const a = isLight ? state.amber : liftColor(state.amber, 40);
+  const r = isLight ? state.red : liftColor(state.red, 40);
+  const accObj = ACCENT_OPTIONS[state.accent];
+  const accent = isLight ? accObj.light : accObj.dark;
+  const accentBg = isLight ? accObj.subtleLM : accObj.subtleDM;
+  const accentText = (state.accent === 'original' && isLight) ? '#fff' : '#fff';
+  // Gradient: light stop is accent at 50% brightness, dark stop is full accent
+  const accentLight = liftColor(accent, isLight ? 60 : 50);
+  const gradBorder = `linear-gradient(to right, ${accentLight}, ${accent})`;
+
+  const gBg = isLight ? hexAlpha(state.green, 0.10) : hexAlpha(g, 0.15);
+  const aBg = isLight ? hexAlpha(state.amber, 0.10) : hexAlpha(a, 0.15);
+  const rBg = isLight ? hexAlpha(state.red, 0.10) : hexAlpha(r, 0.15);
+
+  container.innerHTML = `
+    <!-- Topbar -->
+    <div class="mock-topbar" style="border-bottom: none; position:relative;">
+      <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:${gradBorder}; border-radius:0 0 2px 2px;"></div>
+      <h2>Dashboard</h2>
+      <div class="mock-btn-primary" style="background:${accent}; color:${state.accent === 'original' && !isLight ? '#1a1a1a' : '#fff'}">+ New Request</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="mock-stats-wrap" style="background: ${gradBorder};">
+      <div class="mock-stats" style="margin-bottom:0; border-radius: 6px;">
+      <div class="mock-stat"><div class="mock-stat-num">12</div><div class="mock-stat-label">Total</div></div>
+      <div class="mock-stat"><div class="mock-stat-num" style="color:${g}">5</div><div class="mock-stat-label">Active</div></div>
+      <div class="mock-stat"><div class="mock-stat-num" style="color:${r}">2</div><div class="mock-stat-label">Overdue</div></div>
+      <div class="mock-stat"><div class="mock-stat-num" style="color:${a}">3</div><div class="mock-stat-label">Pending</div></div>
+    </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="mock-badges">
+      <div class="mock-badges-title">Badges</div>
+      <span class="mock-badge badge-accent" style="background:${accentBg}; color:${accent}">NEW</span>
+      <span class="mock-badge" style="background:${gBg}; color:${g}">ACTIVE</span>
+      <span class="mock-badge" style="background:${rBg}; color:${r}">OVERDUE</span>
+      <span class="mock-badge" style="background:${aBg}; color:${a}">WARNING</span>
+      <span class="mock-badge badge-accent" style="background:${accentBg}; color:${accent}">CLOSED</span>
+      <span class="mock-badge" style="background:${gBg}; color:${g}">RESOLVED</span>
+      <span class="mock-badge" style="background:${rBg}; color:${r}">REJECTED</span>
+      <span class="mock-badge" style="background:${aBg}; color:${a}">APPEALED</span>
+    </div>
+
+    <!-- Buttons -->
+    <div class="mock-buttons">
+      <div class="mock-buttons-title">Buttons</div>
+      <div class="mock-btn" style="background:${accent}">Primary</div>
+      <div class="mock-btn" style="background:${g}">Success</div>
+      <div class="mock-btn" style="background:${a}; color:#1C1917">Warning</div>
+      <div class="mock-btn" style="background:${r}">Danger</div>
+    </div>
+
+    <!-- Deadline Banners -->
+    <div class="mock-banners">
+      <div class="mock-banner" style="background:${gBg}; border-color:${g}; color:${g}">
+        <span class="mock-banner-icon">&#10003;</span> On track — next deadline in 14 days
+      </div>
+      <div class="mock-banner" style="background:${aBg}; border-color:${a}; color:${a}">
+        <span class="mock-banner-icon">&#9888;</span> Deadline approaching — 3 days remaining
+      </div>
+      <div class="mock-banner" style="background:${rBg}; border-color:${r}; color:${r}">
+        <span class="mock-banner-icon">&#10007;</span> Overdue — response was due 5 days ago
+      </div>
+    </div>
+
+    <!-- Toasts -->
+    <div class="mock-toasts">
+      <div class="mock-toast" style="background:${gBg}; border-color:${g}; color:${g}">
+        <span class="mock-toast-icon">&#10003;</span> Request submitted successfully
+      </div>
+      <div class="mock-toast" style="background:${aBg}; border-color:${a}; color:${a}">
+        <span class="mock-toast-icon">&#9888;</span> Agency response may be delayed
+      </div>
+      <div class="mock-toast" style="background:${rBg}; border-color:${r}; color:${r}">
+        <span class="mock-toast-icon">&#10007;</span> Failed to save changes
+      </div>
+    </div>
+
+    <!-- Form Validation -->
+    <div class="mock-form">
+      <div class="mock-form-title">Form States</div>
+      <div class="mock-input-group">
+        <label class="mock-label">Agency Name</label>
+        <input class="mock-input" value="Central Intelligence Agency" style="border-color:${g}; box-shadow: 0 0 0 2px ${hexAlpha(state.green, 0.15)};" disabled>
+        <div class="mock-input-msg" style="color:${g}">&#10003; Valid agency selected</div>
+      </div>
+      <div class="mock-input-group">
+        <label class="mock-label">Description</label>
+        <input class="mock-input" value="" placeholder="Required..." style="border-color:${r}; box-shadow: 0 0 0 2px ${hexAlpha(state.red, 0.15)};" disabled>
+        <div class="mock-input-msg" style="color:${r}">&#10007; This field is required</div>
+      </div>
+      <div class="mock-input-group">
+        <label class="mock-label">Reference ID</label>
+        <input class="mock-input" value="ABC-123" style="border-color:${a}; box-shadow: 0 0 0 2px ${hexAlpha(state.amber, 0.15)};" disabled>
+        <div class="mock-input-msg" style="color:${a}">&#9888; Format may not match expected pattern</div>
+      </div>
+    </div>
+
+    <!-- Status dots -->
+    <div class="mock-form" style="padding:12px">
+      <div class="mock-form-title">Status Indicators</div>
+      <div class="mock-status-row"><div class="mock-status-dot" style="background:${g}"></div> Active — processing request</div>
+      <div class="mock-status-row"><div class="mock-status-dot" style="background:${a}"></div> Pending — awaiting agency response</div>
+      <div class="mock-status-row"><div class="mock-status-dot" style="background:${r}"></div> Overdue — past deadline</div>
+      <div class="mock-status-row"><div class="mock-status-dot" style="background:${accent}"></div> New — recently submitted</div>
+    </div>
+  `;
+}
+
+function hexAlpha(hex, alpha) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function renderWcag() {
+  const lightBgs = ['#F7F5F2', '#FFFFFF', '#F0EBE2'];
+  const darkBgs = ['#121212', '#1E1E1E', '#2C2C2C'];
+
+  const accObj = ACCENT_OPTIONS[state.accent];
+  const colors = [
+    { hex: accObj.light, name: 'Accent' },
+    { hex: state.green, name: 'Green' },
+    { hex: state.amber, name: 'Amber' },
+    { hex: state.red, name: 'Red' },
+  ];
+
+  const darkColors = [
+    { hex: accObj.dark, name: 'Accent' },
+    { hex: liftColor(state.green, 40), name: 'Green' },
+    { hex: liftColor(state.amber, 40), name: 'Amber' },
+    { hex: liftColor(state.red, 40), name: 'Red' },
+  ];
+
+  document.getElementById('wcag-light').innerHTML = colors.map(c =>
+    `<tr><td><span class="wcag-swatch" style="background:${c.hex}"></span>${c.name}<br><span style="color:var(--ui-text-dim)">${c.hex}</span></td>${lightBgs.map(bg => wcagCell(c.hex, bg)).join('')}</tr>`
+  ).join('');
+
+  document.getElementById('wcag-dark').innerHTML = darkColors.map(c =>
+    `<tr><td><span class="wcag-swatch" style="background:${c.hex}"></span>${c.name}<br><span style="color:var(--ui-text-dim)">${c.hex}</span></td>${darkBgs.map(bg => wcagCell(c.hex, bg)).join('')}</tr>`
+  ).join('');
+}
+
+function updatePrompt() {
+  const gName = findName('green', state.green);
+  const aName = findName('amber', state.amber);
+  const rName = findName('red', state.red);
+
+  const gDark = liftColor(state.green, 40);
+  const aDark = liftColor(state.amber, 40);
+  const rDark = liftColor(state.red, 40);
+
+  const accObj = ACCENT_OPTIONS[state.accent];
+  const prompt = `Update the FOIA.io primary accent and semantic colors:\n\nPrimary Accent: ${accObj.name}\n  --accent-light: ${accObj.light}\n  --accent-dark:  ${accObj.dark}\n\nLight mode semantic:\n  --green: ${state.green}${gName ? ` (${gName})` : ''}\n  --amber: ${state.amber}${aName ? ` (${aName})` : ''}\n  --red: ${state.red}${rName ? ` (${rName})` : ''}\n\nDark mode semantic (lifted):\n  --green: ${gDark}\n  --amber: ${aDark}\n  --red: ${rDark}`;
+
+  document.getElementById('prompt-output').textContent = prompt;
+}
+
+function findName(key, hex) {
+  const match = CANDIDATES[key].find(c => c.hex.toLowerCase() === hex.toLowerCase());
+  return match ? match.name : null;
+}
+
+function updateAll() {
+  buildOptions();
+  renderMockDashboard(document.getElementById('lm-preview'), 'light');
+  renderMockDashboard(document.getElementById('dm-preview'), 'dark');
+  renderWcag();
+  updatePrompt();
+}
+
+function copyPrompt() {
+  const text = document.getElementById('prompt-output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy Prompt', 1500);
+  });
+}
+
+// Init
+selectAccent('rose1');
+updateAll();
+</script>
+
+</body>
+</html>
