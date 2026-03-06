@@ -329,7 +329,7 @@ body {
     font-family: var(--font-mono);
     font-size: .7rem;
     letter-spacing: 0.06em;
-    color: var(--cyan);
+    color: var(--green);
 }
 #btnLogout {
   display: block;
@@ -606,7 +606,7 @@ td {
 }
 .td-number {
   font-family: var(--font-mono);
-  color: var(--cyan);
+  color: var(--text);
   font-size: .8rem;
   font-weight: 700;
   white-space: nowrap;
@@ -630,8 +630,8 @@ td {
   letter-spacing: .5px;
 }
 .badge-new {
-  background: rgba(192,120,64,.12);
-  color: var(--secondary);
+  background: rgba(224,224,224,.08);
+  color: var(--text-dim);
 }
 .badge-active {
   background: rgba(147,162,134,.15);
@@ -642,16 +642,16 @@ td {
   color: var(--red);
 }
 .badge-closed {
-  background: rgba(192,120,64,.15);
-  color: var(--secondary);
+  background: rgba(224,224,224,.08);
+  color: var(--text-dim);
 }
 .badge-appealed {
   background: rgba(224,186,98,.15);
   color: var(--amber);
 }
 .badge-myturn {
-  background: rgba(192,120,64,.15);
-  color: var(--secondary);
+  background: rgba(224,224,224,.08);
+  color: var(--text-dim);
 }
 .badge-theirturn {
   background: rgba(224,186,98,.15);
@@ -693,8 +693,8 @@ td {
   color: var(--text-dim);
 }
 .btn-ghost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--text);
+  color: var(--text);
 }
 .btn-danger {
   background: none;
@@ -750,9 +750,9 @@ textarea {
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  border-color: var(--cyan);
+  border-color: var(--text-dim);
   background: var(--bg2);
-  box-shadow: 0 0 0 3px rgba(192,120,64,.2);
+  box-shadow: 0 0 0 3px rgba(128,128,128,.15);
   outline: none;
 }
 input:focus:not(:focus-visible),
@@ -813,7 +813,7 @@ textarea {
 button:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--cyan);
+  outline: 2px solid var(--text-dim);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -1022,11 +1022,11 @@ a:focus-visible,
   outline: none;
 }
 .letter-pre:focus-visible {
-  border-color: var(--cyan);
-  box-shadow: 0 0 0 3px rgba(192,120,64,.2);
+  border-color: var(--text-dim);
+  box-shadow: 0 0 0 3px rgba(128,128,128,.15);
 }
 .letter-pre:focus:not(:focus-visible) {
-  border-color: var(--cyan);
+  border-color: var(--text-dim);
 }
 .copy-row {
   display: flex;
@@ -1036,7 +1036,7 @@ a:focus-visible,
   flex-wrap: wrap;
 }
 .copy-success {
-  color: var(--cyan);
+  color: var(--green);
   font-size: .8rem;
   display: none;
 }
@@ -1084,7 +1084,7 @@ a:focus-visible,
 
 }
 #aipPortalLink {
-  color: var(--cyan);
+  color: var(--text);
   font-size: .85rem;
 }
 .ai-field .ai-label {
@@ -1293,7 +1293,7 @@ a:focus-visible,
   color: var(--text-dim);
   margin-bottom: 10px;
 }
-.pricing-tier-label.highlight { color: var(--cyan); }
+.pricing-tier-label.highlight { color: var(--text); }
 .pricing-price {
   font-family: var(--font-heading);
   font-size: 2rem;
@@ -1331,7 +1331,7 @@ a:focus-visible,
   align-items: baseline;
 }
 .pricing-check {
-  color: var(--cyan);
+  color: var(--green);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -1345,8 +1345,8 @@ a:focus-visible,
   line-height: 1.5;
 }
 .pricing-popular {
-  border-color: var(--cyan);
-  box-shadow: 0 0 0 1px var(--cyan);
+  border-color: var(--text-dim);
+  box-shadow: 0 0 0 1px var(--text-dim);
 }
 .pricing-badge {
   position: absolute;
@@ -1361,7 +1361,7 @@ a:focus-visible,
 }
 .pricing-badge.popular {
   font-family: var(--font-mono);
-  background: var(--cyan);
+  background: var(--text-dim);
   color: #000;
 }
 .pricing-badge.soon {
@@ -1372,7 +1372,7 @@ a:focus-visible,
 }
 .pricing-coming-soon { opacity: .6; }
 /* Comparison table checkmark */
-.td-check { text-align: center; color: var(--cyan); }
+.td-check { text-align: center; color: var(--green); }
 .td-none  { text-align: center; color: var(--text-dim); }
 /* Sidebar footer links */
 .sidebar-links {
@@ -1396,7 +1396,7 @@ a:focus-visible,
   padding: 0;
 }
 .sidebar-link.beta {
-  color: var(--cyan);
+  color: var(--text-dim);
   font-weight: 600;
   letter-spacing: .3px;
 }
@@ -1447,7 +1447,7 @@ a:focus-visible,
 .price-tag {
   font-size: 2.5rem;
   font-weight: 800;
-  color: var(--cyan);
+  color: var(--text);
   margin: 24px 0 8px;
 }
 .price-tag span {
@@ -1472,7 +1472,7 @@ a:focus-visible,
 }
 .feature-list li::before {
   content: "✓";
-  color: var(--cyan);
+  color: var(--green);
   font-weight: 700;
 }
 /* ── Empty states ──────────────────────────────────────────── */
@@ -1544,7 +1544,7 @@ a:focus-visible,
   font-size: .85rem;
   font-weight: 600;
   margin-top: 2px;
-  color: var(--cyan);
+  color: var(--text);
 }
 .stateLawPanel-4 {
   font-size: .7rem;
@@ -2253,12 +2253,12 @@ a:focus-visible,
   white-space: nowrap;
 }
 .copy-ref-btn:hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--text-dim);
+  color: var(--text);
 }
 .copy-ref-btn.copied {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--green);
+  color: var(--green);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2333,13 +2333,13 @@ a:focus-visible,
   border-color: var(--border-light);
 }
 [data-theme="light"] .user-status {
-  color: var(--accent);
+  color: var(--green);
 }
 [data-theme="light"] .sidebar-link {
   color: var(--text-dim);
 }
 [data-theme="light"] .sidebar-link.beta {
-  color: var(--accent);
+  color: var(--text-dim);
 }
 [data-theme="light"] .org-switcher-label {
   color: var(--text-dim);
@@ -2434,9 +2434,9 @@ a:focus-visible,
   color: var(--text-dim);
 }
 [data-theme="light"] .btn-ghost:hover {
-  border-color: var(--accent-border);
-  color: var(--accent);
-  background: var(--accent-subtle);
+  border-color: var(--border);
+  color: var(--text);
+  background: var(--bg3);
 }
 [data-theme="light"] .btn-danger:hover {
   background: rgba(160,64,46,0.06);
@@ -2450,8 +2450,8 @@ a:focus-visible,
 }
 [data-theme="light"] .badge-new,
 [data-theme="light"] .badge-closed {
-  background: var(--accent-subtle);
-  color: var(--accent);
+  background: rgba(128,128,128,0.08);
+  color: var(--text-dim);
 }
 [data-theme="light"] .badge-active,
 [data-theme="light"] .badge-myturn {
@@ -2468,8 +2468,8 @@ a:focus-visible,
   color: var(--amber);
 }
 [data-theme="light"] .nav-badge {
-  background: var(--accent-subtle);
-  color: var(--accent);
+  background: rgba(128,128,128,0.08);
+  color: var(--text-dim);
 }
 
 /* ── Tables ─────────────────────────────────────────────────── */
@@ -2503,14 +2503,14 @@ a:focus-visible,
 [data-theme="light"] input:focus-visible,
 [data-theme="light"] select:focus-visible,
 [data-theme="light"] textarea:focus-visible {
-  border-color: var(--accent);
+  border-color: var(--text-dim);
   background: var(--bg2);
-  box-shadow: 0 0 0 3px var(--accent-subtle);
+  box-shadow: 0 0 0 3px rgba(128,128,128,0.10);
 }
 [data-theme="light"] input:focus:not(:focus-visible),
 [data-theme="light"] select:focus:not(:focus-visible),
 [data-theme="light"] textarea:focus:not(:focus-visible) {
-  border-color: var(--accent);
+  border-color: var(--text-dim);
   background: var(--bg2);
 }
 [data-theme="light"] input:-webkit-autofill,
@@ -2582,11 +2582,11 @@ a:focus-visible,
   border: 1px solid var(--border);
 }
 [data-theme="light"] .letter-pre:focus-visible {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-subtle);
+  border-color: var(--text-dim);
+  box-shadow: 0 0 0 3px rgba(128,128,128,0.10);
 }
 [data-theme="light"] .letter-pre:focus:not(:focus-visible) {
-  border-color: var(--accent);
+  border-color: var(--text-dim);
 }
 
 /* ── Auth Page ──────────────────────────────────────────────── */
@@ -2640,18 +2640,18 @@ a:focus-visible,
 
 /* ── Pricing ────────────────────────────────────────────────── */
 [data-theme="light"] .pricing-tier-label.highlight {
-  color: var(--accent);
+  color: var(--text);
 }
 [data-theme="light"] .pricing-popular {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  border-color: var(--text-dim);
+  box-shadow: 0 0 0 1px var(--text-dim);
 }
 [data-theme="light"] .pricing-badge.popular {
-  background: var(--accent);
+  background: var(--text-dim);
   color: #fff;
 }
 [data-theme="light"] .pricing-check {
-  color: var(--accent);
+  color: var(--green);
 }
 [data-theme="light"] .pricing-footer {
   border-top: 1px solid var(--border-light);
@@ -2692,7 +2692,7 @@ a:focus-visible,
 
 /* ── Empty States ───────────────────────────────────────────── */
 [data-theme="light"] .e-icon {
-  color: var(--accent);
+  color: var(--text-dim);
   opacity: 0.7;
 }
 [data-theme="light"] .empty-state p {
@@ -2703,22 +2703,25 @@ a:focus-visible,
 [data-theme="light"] button:focus-visible,
 [data-theme="light"] a:focus-visible,
 [data-theme="light"] [tabindex]:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--text-dim);
   outline-offset: 2px;
 }
 
 /* ── Copy Buttons ───────────────────────────────────────────── */
-[data-theme="light"] .copy-ref-btn:hover,
+[data-theme="light"] .copy-ref-btn:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
 [data-theme="light"] .copy-ref-btn.copied {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--green);
+  color: var(--green);
 }
 
 /* ── Filter Buttons ─────────────────────────────────────────── */
 [data-theme="light"] .active-filter {
-  background: var(--accent-subtle);
-  border-color: var(--accent-border);
-  color: var(--accent);
+  background: var(--bg3);
+  border-color: var(--border);
+  color: var(--text);
 }
 
 /* ── Agency Info Panel ──────────────────────────────────────── */
@@ -2728,13 +2731,13 @@ a:focus-visible,
 
 /* ── Subscribe / CTA Cards ──────────────────────────────────── */
 [data-theme="light"] .subscribe-card {
-  border: 1px solid var(--accent-border);
-  background: var(--accent-subtle);
+  border: 1px solid var(--border);
+  background: var(--bg3);
 }
 
 /* ── Comparison Table ───────────────────────────────────────── */
 [data-theme="light"] .td-check {
-  color: var(--accent);
+  color: var(--green);
 }
 </style>
 </head>
@@ -3420,7 +3423,7 @@ a:focus-visible,
                   <tr>
                     <th style="text-align:left;width:55%;">Feature</th>
                     <th style="text-align:center;">Core</th>
-                    <th style="text-align:center;color:var(--cyan);">Pro</th>
+                    <th style="text-align:center;color:var(--text);">Pro</th>
                     <th style="text-align:center;">Newsroom</th>
                   </tr>
                 </thead>
@@ -3450,7 +3453,7 @@ a:focus-visible,
 
           <!-- Tab bar -->
           <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;">
-            <button onclick="helpTab('about')" id="helpTab-about" class="btn btn-ghost btn-sm" style="border-radius:6px 6px 0 0;border-bottom:2px solid var(--cyan);">About</button>
+            <button onclick="helpTab('about')" id="helpTab-about" class="btn btn-ghost btn-sm" style="border-radius:6px 6px 0 0;border-bottom:2px solid var(--text);">About</button>
             <button onclick="helpTab('start')" id="helpTab-start" class="btn btn-ghost btn-sm" style="border-radius:6px 6px 0 0;border-bottom:2px solid transparent;">Getting Started</button>
             <button onclick="helpTab('support')" id="helpTab-support" class="btn btn-ghost btn-sm" style="border-radius:6px 6px 0 0;border-bottom:2px solid transparent;">Support</button>
           </div>
@@ -3473,27 +3476,27 @@ a:focus-visible,
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin:24px 0 12px;">Tips for Using FOIA.io</h3>
             <div style="display:flex;flex-direction:column;gap:12px;">
               <div style="display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">01</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);min-width:20px;padding-top:2px;">01</span>
                 <div><strong style="font-size:.88rem;">Update your requests daily.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">A 30-second check-in keeps your deadlines accurate and prevents missed appeal windows.</p></div>
               </div>
               <div style="display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">02</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);min-width:20px;padding-top:2px;">02</span>
                 <div><strong style="font-size:.88rem;">Log every agency communication.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">Emails, phone calls, "we're still processing," and rolling productions—they all matter later.</p></div>
               </div>
               <div style="display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">03</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);min-width:20px;padding-top:2px;">03</span>
                 <div><strong style="font-size:.88rem;">Use the notes field aggressively.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">Document what you asked for, what they said, and what you suspect they're withholding.</p></div>
               </div>
               <div style="display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">04</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);min-width:20px;padding-top:2px;">04</span>
                 <div><strong style="font-size:.88rem;">Track denials immediately.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">Appeal deadlines are short. Enter the denial date as soon as it hits your inbox.</p></div>
               </div>
               <div style="display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">05</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);min-width:20px;padding-top:2px;">05</span>
                 <div><strong style="font-size:.88rem;">Keep your portfolio clean.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">Archive closed requests so your active list stays scannable.</p></div>
               </div>
               <div style="display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);min-width:20px;padding-top:2px;">06</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);min-width:20px;padding-top:2px;">06</span>
                 <div><strong style="font-size:.88rem;">Treat FOIA.io as your institutional memory.</strong><p style="font-size:.85rem;color:var(--text-dim);margin-top:2px;line-height:1.6;">If an agency stonewalls you for six months, you'll want the full timeline at your fingertips.</p></div>
               </div>
             </div>
@@ -3506,7 +3509,7 @@ a:focus-visible,
 
             <div style="display:flex;flex-direction:column;gap:20px;">
               <div style="display:flex;gap:14px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 1</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 1</span>
                 <div>
                   <strong style="font-size:.92rem;">Add Your First Request</strong>
                   <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">Start with the basics—the request you already filed or are about to file.</p>
@@ -3521,35 +3524,35 @@ a:focus-visible,
                 </div>
               </div>
               <div style="display:flex;gap:14px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 2</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 2</span>
                 <div>
                   <strong style="font-size:.92rem;">Log Agency Responses as They Come In</strong>
                   <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">Every email, phone call, delay notice, "still processing," or rolling production belongs here. This builds your timeline—the thing you'll rely on when you appeal, escalate, or write the story.</p>
                 </div>
               </div>
               <div style="display:flex;gap:14px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 3</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 3</span>
                 <div>
                   <strong style="font-size:.92rem;">Track Deadlines and Appeal Windows</strong>
                   <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">FOIA.io calculates estimated response deadlines, appeal windows after denials, and rolling production dates. If a deadline shifts, update the request or denial date and the system recalculates automatically.</p>
                 </div>
               </div>
               <div style="display:flex;gap:14px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 4</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 4</span>
                 <div>
                   <strong style="font-size:.92rem;">Use Notes to Capture the Real Story</strong>
                   <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">The notes field is your investigative memory. Use it for what you asked for, what they claimed, what they're avoiding, and what you need to follow up on. Six months from now, you will be glad you did.</p>
                 </div>
               </div>
               <div style="display:flex;gap:14px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 5</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 5</span>
                 <div>
                   <strong style="font-size:.92rem;">Mark Requests as Closed When They're Done</strong>
                   <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">When you get the records—or the agency gives you a final determination—close it out. Closed requests stay accessible but out of your active workflow, keeping your dashboard clean.</p>
                 </div>
               </div>
               <div style="display:flex;gap:14px;align-items:flex-start;">
-                <span style="font-family:monospace;font-size:.75rem;color:var(--cyan);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 6</span>
+                <span style="font-family:monospace;font-size:.75rem;color:var(--text-dim);background:var(--bg3);border-radius:4px;padding:3px 7px;white-space:nowrap;">Step 6</span>
                 <div>
                   <strong style="font-size:.92rem;">Build a Portfolio You Can Actually Use</strong>
                   <p style="font-size:.85rem;color:var(--text-dim);margin-top:4px;line-height:1.65;">As you add more requests, FOIA.io becomes a searchable, sortable record of your reporting. Spot patterns across agencies, track chronic delays, build cases for appeals, and support future stories with past timelines.</p>
@@ -3565,7 +3568,7 @@ a:focus-visible,
 
             <div style="background:var(--bg3);border-radius:8px;padding:16px 20px;margin-bottom:20px;">
               <div style="font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Support Email</div>
-              <a href="mailto:support@subtxtpress.com" style="color:var(--cyan);font-size:1rem;font-weight:600;">support@subtxtpress.com</a>
+              <a href="mailto:support@subtxtpress.com" style="color:var(--text);font-size:1rem;font-weight:600;">support@subtxtpress.com</a>
             </div>
 
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:12px;">What to Include</h3>
@@ -3657,7 +3660,7 @@ a:focus-visible,
 
           <section>
             <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;">Contact</h3>
-            <p style="font-size:.9rem;line-height:1.7;">Questions, issues, or data concerns: <a href="mailto:support@subtxtpress.com" style="color:var(--cyan);">support@subtxtpress.com</a></p>
+            <p style="font-size:.9rem;line-height:1.7;">Questions, issues, or data concerns: <a href="mailto:support@subtxtpress.com" style="color:var(--text);">support@subtxtpress.com</a></p>
           </section>
         </div>
       </div>
@@ -3688,7 +3691,7 @@ a:focus-visible,
       </div>
       <div id="inviteResult" style="display:none;" class="card" style="background:var(--bg3);padding:10px;border-radius:6px;margin-top:4px;">
         <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:4px;">Invite link (send this to your colleague):</div>
-        <div id="inviteLinkText" style="font-size:.78rem;word-break:break-all;color:var(--cyan);"></div>
+        <div id="inviteLinkText" style="font-size:.78rem;word-break:break-all;color:var(--text);"></div>
         <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="copyInviteLink()">Copy Link</button>
       </div>
     </div>
@@ -3734,7 +3737,7 @@ a:focus-visible,
       <p style="font-size:.9rem;line-height:1.75;margin-bottom:12px;">FOIA.io is operating in a controlled beta phase.</p>
       <p style="font-size:.9rem;line-height:1.75;color:var(--text-dim);">The platform is fully functional for day‑to‑day FOIA management, but certain features are still undergoing refinement. Users may experience occasional inconsistencies or incomplete functionality. Feedback during this period is actively incorporated into development and stability improvements.</p>
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-dim);">
-        Questions or feedback: <a href="mailto:support@subtxtpress.com" style="color:var(--cyan);">support@subtxtpress.com</a>
+        Questions or feedback: <a href="mailto:support@subtxtpress.com" style="color:var(--text);">support@subtxtpress.com</a>
       </div>
     </div>
   </div>
@@ -3986,7 +3989,7 @@ async function doForgot() {
   }
   showAuthError('');
   document.getElementById('forgotForm').innerHTML =
-    '<p style="color:var(--cyan);text-align:center;padding:24px 0;">If that email is registered, a reset link has been sent. Check your inbox.</p>' +
+    '<p style="color:var(--green);text-align:center;padding:24px 0;">If that email is registered, a reset link has been sent. Check your inbox.</p>' +
     '<p style="text-align:center;margin-top:8px;"><a href="#" onclick="authTab(\'login\');return false" style="color:var(--text-dim);font-size:.85rem;">Back to Sign In</a></p>';
 }
 
@@ -4004,7 +4007,7 @@ async function doReset() {
   }
   showAuthError('');
   document.getElementById('resetForm').innerHTML =
-    '<p style="color:var(--cyan);text-align:center;padding:24px 0;">Password updated! You can now sign in.</p>' +
+    '<p style="color:var(--green);text-align:center;padding:24px 0;">Password updated! You can now sign in.</p>' +
     '<p style="text-align:center;margin-top:8px;"><a href="#" onclick="authTab(\'login\');window.history.replaceState({},\'\',\'/\');return false" style="color:var(--text-dim);font-size:.85rem;">Sign In</a></p>';
 }
 
@@ -4074,8 +4077,8 @@ async function handleInviteToken(token) {
     authWrap.style.display = '';
     // Prepend a banner to the auth box
     const banner = document.createElement('div');
-    banner.style.cssText = 'background:rgba(97,218,251,.08);border:1px solid var(--cyan);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.84rem;line-height:1.55;';
-    banner.innerHTML = `<strong style="color:var(--cyan);">Team invitation</strong><br>You've been invited to join <strong>${esc(org_name)}</strong> as <strong>${esc(role)}</strong>.<br><span style="color:var(--text-dim);">Sign in or create an account to accept.</span>`;
+    banner.style.cssText = 'background:rgba(128,128,128,.06);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.84rem;line-height:1.55;';
+    banner.innerHTML = `<strong style="color:var(--text);">Team invitation</strong><br>You've been invited to join <strong>${esc(org_name)}</strong> as <strong>${esc(role)}</strong>.<br><span style="color:var(--text-dim);">Sign in or create an account to accept.</span>`;
     const authBox = authWrap.querySelector('.auth-box');
     authBox.insertBefore(banner, authBox.querySelector('.auth-tabs'));
 
@@ -4091,7 +4094,7 @@ async function handleInviteToken(token) {
     <div style="text-align:center;padding:8px 0;">
       <div style="font-size:2rem;margin-bottom:12px;">🤝</div>
       <p style="font-size:1rem;font-weight:700;margin-bottom:6px;">You're invited to join</p>
-      <p style="font-size:1.15rem;font-weight:800;color:var(--cyan);margin-bottom:6px;">${esc(org_name)}</p>
+      <p style="font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:6px;">${esc(org_name)}</p>
       <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">as <strong>${esc(role)}</strong></p>
       <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="joinOrg('${esc(token)}')">Accept Invitation</button>
       <button class="btn btn-ghost" style="width:100%;" onclick="window.location.href='/'">Decline</button>
@@ -4273,11 +4276,11 @@ async function loadSharedDashboard() {
           <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Total</div>
         </div>
         <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--cyan);">${s.new}</div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--text);">${s.new}</div>
           <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">New</div>
         </div>
         <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--cyan);">${s.active}</div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--green);">${s.active}</div>
           <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Active</div>
         </div>
         <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
@@ -4289,7 +4292,7 @@ async function loadSharedDashboard() {
           <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Closed</div>
         </div>
         <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--accent);">${s.members}</div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--text);">${s.members}</div>
           <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Members</div>
         </div>
       </div>`;
@@ -4312,7 +4315,7 @@ async function loadSharedDashboard() {
     </tr></thead>
     <tbody>${reqs.map(r => `
       <tr style="cursor:pointer;" onclick="openDetailById(${r.id})">
-        <td style="color:var(--cyan);font-weight:600;">${esc(r.foia_number)}</td>
+        <td style="color:var(--text);font-weight:600;">${esc(r.foia_number)}</td>
         <td>${esc(r.subject||'—')}</td>
         <td>${esc(r.agency_name||'—')}</td>
         <td>${statusBadge(r)}</td>
@@ -4373,8 +4376,8 @@ async function loadTeamPage() {
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:4px;
-          background:${m.role==='owner'?'var(--accent-subtle)':'var(--bg3)'};
-          color:${m.role==='owner'?'var(--accent)':'var(--text-dim)'};">${m.role}</span>
+          background:var(--bg3);
+          color:${m.role==='owner'?'var(--text)':'var(--text-dim)'};">${m.role}</span>
         ${isOwner && m.role !== 'owner' ? `
           <select onchange="changeMemberRole(${orgId}, ${m.id}, this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:.75rem;padding:3px 6px;border-radius:4px;">
             <option value="editor" ${m.role==='editor'?'selected':''}>Editor</option>
@@ -4559,7 +4562,7 @@ async function loadActivityFeed() {
           <span style="color:var(--text-dim);"> ${esc(a.action)}</span>
         </div>
         <div style="font-size:.76rem;color:var(--text-dim);margin-top:2px;">
-          <span style="color:var(--cyan);cursor:pointer;" onclick="openDetailById(${a.request_id})">${esc(a.foia_number)}</span>
+          <span style="color:var(--text);cursor:pointer;" onclick="openDetailById(${a.request_id})">${esc(a.foia_number)}</span>
           ${a.subject ? ' — ' + esc(a.subject) : ''}
           <span style="margin-left:6px;">${when}</span>
         </div>
@@ -4739,7 +4742,7 @@ async function loadDashboard() {
   );
   document.getElementById('dashOverdueList').innerHTML =
     od.length ? renderMiniTable(od) :
-    '<p style="color:var(--cyan);padding:20px 0;text-align:center;">✓ No overdue requests</p>';
+    '<p style="color:var(--green);padding:20px 0;text-align:center;">✓ No overdue requests</p>';
 }
 
 function renderMiniTable(rows) {
@@ -4780,12 +4783,12 @@ async function loadActiveRequests() {
     if (dsd !== null) {
       if (dsd > 0)       daysTxt = `<span style="color:var(--red)">+${dsd}d overdue</span>`;
       else if (dsd === 0) daysTxt = `<span style="color:var(--red)">Due today</span>`;
-      else                daysTxt = `<span style="color:var(--cyan)">${Math.abs(dsd)}d left</span>`;
+      else                daysTxt = `<span style="color:var(--green)">${Math.abs(dsd)}d left</span>`;
     }
     const turnDropdown = `
       <select class="turn-select" onclick="event.stopPropagation()"
               onchange="quickSetTurn(${r.id}, this.value)"
-              style="background:var(--bg3);border:1px solid var(--border);color:${r.turn==='Their Turn'?'var(--cyan)':'var(--text-dim)'};
+              style="background:var(--bg3);border:1px solid var(--border);color:${r.turn==='Their Turn'?'var(--text)':'var(--text-dim)'};
                      padding:4px 8px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;outline:none;">
         <option value="My Turn"   ${r.turn!=='Their Turn'?'selected':''}>My Turn</option>
         <option value="Their Turn" ${r.turn==='Their Turn'?'selected':''}>Their Turn</option>
@@ -4848,7 +4851,7 @@ async function loadAgencyDir() {
           <div style="font-weight:600;font-size:.78rem;margin-bottom:5px;">${esc(full.name)}</div>
           <div style="margin-bottom:4px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></div>
           <div style="display:flex;align-items:center;gap:6px;">
-            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);font-size:.7rem;word-break:break-all;">${esc(email)}</a>
+            ${email ? `<a href="mailto:${esc(email)}" style="color:var(--text);font-size:.7rem;word-break:break-all;">${esc(email)}</a>
             <button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email" style="flex-shrink:0;">⎘</button>`
             : `<span style="color:var(--text-dim);font-style:italic;font-size:.7rem;">Call agency for email</span>`}
           </div>
@@ -4857,7 +4860,7 @@ async function loadAgencyDir() {
       tr.innerHTML = `
         <td style="font-weight:600;padding:8px 12px;">${esc(full.name)}</td>
         <td style="padding:8px 12px;"><span class="badge badge-active">${esc(full.abbreviation||'—')}</span></td>
-        <td style="padding:8px 12px;word-break:break-all;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--cyan);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
+        <td style="padding:8px 12px;word-break:break-all;">${email ? `<a href="mailto:${esc(email)}" style="color:var(--text);">${esc(email)}</a>` : `<span style="color:var(--text-dim);font-style:italic;">Call agency for email</span>`}</td>
         <td class="hide-mobile" style="padding:8px 12px;">${esc(full.foia_phone||'—')}</td>
         <td style="padding:8px 12px;">${email ? `<button class="copy-ref-btn" onclick="copyRef(this,'${email.replace(/'/g,"\'")}','Email copied')" title="Copy email">⎘</button>` : ''}</td>`;
     }
@@ -4985,7 +4988,7 @@ async function loadStateLaws() {
       <td style="font-weight:600;">${esc(s.state_name)}</td>
       <td><span class="badge badge-active">${esc(s.state_code)}</span></td>
       <td style="font-size:.82rem;">${esc(s.law_name)}</td>
-      <td style="font-size:.78rem;color:var(--cyan);font-family:monospace;">${esc(s.citation)}</td>
+      <td style="font-size:.78rem;color:var(--text);font-family:monospace;">${esc(s.citation)}</td>
       <td style="text-align:center;">${s.response_days || '<span style="color:var(--text-dim)">Reasonable</span>'}</td>
       <td style="text-align:center;">${s.appeal_days || '<span style="color:var(--text-dim)">—</span>'}</td>
       <td style="font-size:.78rem;color:var(--text-dim);max-width:300px;">${esc(s.notes||'')}</td>
@@ -5169,7 +5172,7 @@ async function openDetail(idOrObj) {
   document.getElementById('detailContent').innerHTML = `
     <div class="detail-header">
       <div>
-        <h2 style="font-size:1.2rem;font-weight:800;color:var(--cyan);">${esc(r.foia_number)}</h2>
+        <h2 style="font-size:1.2rem;font-weight:800;color:var(--text);">${esc(r.foia_number)}</h2>
         <div style="font-size:0.9rem;font-weight:600;margin-top:6px;">${esc(r.subject||'—')}</div>
         <div class="detail-meta">
           <div class="meta-chip"><strong>Agency:</strong> ${esc(r.agency_name||'—')}</div>
@@ -5213,7 +5216,7 @@ async function openDetail(idOrObj) {
           <div class="info-val">${fmtDate(r.deadline_date)||'—'}</div>
           ${r.secondary_contact_email ? `
           <div class="info-label" style="margin-top:10px;">2nd Contact Email</div>
-          <div class="info-val"><a href="mailto:${esc(r.secondary_contact_email)}" style="color:var(--cyan);">${esc(r.secondary_contact_email)}</a></div>` : ''}
+          <div class="info-val"><a href="mailto:${esc(r.secondary_contact_email)}" style="color:var(--text);">${esc(r.secondary_contact_email)}</a></div>` : ''}
         </div>
       </div>` : '<div></div>'}
     </div>
@@ -5708,7 +5711,7 @@ async function adminLoadCodes() {
   el.innerHTML = data.map(c => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
       <span style="font-family:monospace;font-size:.88rem;">${escapeHtml(c.code)}</span>
-      <span style="font-size:.75rem;padding:2px 8px;border-radius:4px;${c.used ? 'background:var(--bg3);color:var(--text-dim);' : 'background:rgba(0,200,150,.1);color:var(--cyan);'}">${c.used ? 'Used' : 'Available'}</span>
+      <span style="font-size:.75rem;padding:2px 8px;border-radius:4px;${c.used ? 'background:var(--bg3);color:var(--text-dim);' : 'background:rgba(0,200,150,.1);color:var(--green);'}">${c.used ? 'Used' : 'Available'}</span>
     </div>
   `).join('');
 }
@@ -5726,7 +5729,7 @@ function helpTab(tab) {
   ['about', 'start', 'support'].forEach(t => {
     document.getElementById(`helpPane-${t}`).style.display = t === tab ? '' : 'none';
     const btn = document.getElementById(`helpTab-${t}`);
-    btn.style.borderBottom = t === tab ? '2px solid var(--cyan)' : '2px solid transparent';
+    btn.style.borderBottom = t === tab ? '2px solid var(--text)' : '2px solid transparent';
     btn.style.color = t === tab ? 'var(--text)' : '';
   });
 }
@@ -5815,7 +5818,7 @@ async function loadLawEnforcementResults() {
       </div>
       <div style="font-size:.8rem;color:var(--text-dim);margin-top:4px;word-break:break-word;">📍 ${a.foia_address ? escapeHtml(a.foia_address) : '<span style="font-style:italic;">Call agency for mailing address</span>'}</div>
       ${a.foia_phone ? `<div style="font-size:.8rem;color:var(--text-dim);margin-top:2px;">📞 ${escapeHtml(a.foia_phone)}</div>` : ''}
-      ${a.foia_portal_url ? `<div style="margin-top:4px;" onclick="event.stopPropagation()"><a href="${escapeHtml(a.foia_portal_url)}" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--cyan);word-break:break-all;">🔗 Records Portal</a></div>` : ''}
+      ${a.foia_portal_url ? `<div style="margin-top:4px;" onclick="event.stopPropagation()"><a href="${escapeHtml(a.foia_portal_url)}" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--text);word-break:break-all;">🔗 Records Portal</a></div>` : ''}
     </div>
   `).join('');
   
