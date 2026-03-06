@@ -48,18 +48,18 @@
   --bg2:       #1e1e1e;
   --bg3:       #2a2a2a;
   --border:    #3a3a3a;
-  --accent:    #C5B99A;
-  --accent-dim: rgba(197,185,154,0.40);
-  --primary:   #C5B99A;
-  --secondary: #C5B99A;
+  --accent:    #C9A96E;
+  --accent-dim: rgba(201,169,110,0.40);
+  --primary:   #C9A96E;
+  --secondary: #C9A96E;
   --error:     #C86856;            /* Canyon Rust (lifted) */
-  --text:      #FFFFFF;
-  --text-dim:  #B3B3B3;
+  --text:      #F0ECE4;            /* warm off-white */
+  --text-dim:  #B3ADA4;            /* warm gray */
   --on-primary:#FFFFFF;
   --on-secondary:#FFFFFF;
   --avatar-bg: #b3b3b3;
   --avatar-text:#000000;
-  --cyan:      #C5B99A;
+  --cyan:      #C9A96E;
   --red:       #C86856;            /* Canyon Rust (lifted) */
   --green:     #93A286;            /* Desert Sage (lifted) */
   --amber:     #E0BA62;            /* Sandstone Ochre (lifted) */
@@ -71,9 +71,9 @@
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
-  --logo-grad: linear-gradient(90deg, #C5B99A 0%, #E0D5C0 50%, #C5B99A 100%);
-  --accent-subtle: rgba(197,185,154,0.12);
-  --grad-neutral: linear-gradient(to right, #C5B99A, #C5B99A);
+  --logo-grad: linear-gradient(90deg, #C9A96E 0%, #E0D5C0 50%, #C9A96E 100%);
+  --accent-subtle: rgba(201,169,110,0.12);
+  --grad-neutral: linear-gradient(to right, #C9A96E, #8B6914);
 }
 /* ── Light mode — Warm earthy palette ─────────────────────── */
 [data-theme="light"] {
@@ -249,7 +249,7 @@ body {
     color: var(--text);
 }
 .nav-item.active {
-  background: rgba(212,165,116,.12);
+  background: rgba(201,169,110,.12);
   color: var(--accent);
   font-weight: 600;
   border-left: 3px solid var(--accent);
@@ -621,7 +621,7 @@ td {
   letter-spacing: .5px;
 }
 .badge-new {
-  background: rgba(197,185,154,.12);
+  background: rgba(201,169,110,.12);
   color: var(--secondary);
 }
 .badge-active {
@@ -633,7 +633,7 @@ td {
   color: var(--red);
 }
 .badge-closed {
-  background: rgba(197,185,154,.15);
+  background: rgba(201,169,110,.15);
   color: var(--secondary);
 }
 .badge-appealed {
@@ -641,7 +641,7 @@ td {
   color: var(--amber);
 }
 .badge-myturn {
-  background: rgba(197,185,154,.15);
+  background: rgba(201,169,110,.15);
   color: var(--secondary);
 }
 .badge-theirturn {
@@ -668,15 +668,15 @@ td {
   color: #fff;
   border: 1px solid var(--cyan);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(197,185,154,0.2);
+  box-shadow: 0 2px 8px rgba(201,169,110,0.2);
   transition: all 0.2s;
 }
 .btn-primary:hover {
-  background: #D4C9AD;
-  border-color: #D4C9AD;
+  background: #D6BC86;
+  border-color: #D6BC86;
   color: #fff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(197,185,154,0.35);
+  box-shadow: 0 4px 12px rgba(201,169,110,0.35);
 }
 .btn-ghost {
   background: none;
@@ -743,7 +743,7 @@ select:focus-visible,
 textarea:focus-visible {
   border-color: var(--cyan);
   background: var(--bg2);
-  box-shadow: 0 0 0 3px rgba(197,185,154,.2);
+  box-shadow: 0 0 0 3px rgba(201,169,110,.2);
   outline: none;
 }
 input:focus:not(:focus-visible),
@@ -897,14 +897,14 @@ a:focus-visible,
   border: 1px solid var(--cyan);
   font-weight: 600;
   font-family: var(--font-body);
-  box-shadow: 0 2px 8px rgba(197,185,154,0.25);
+  box-shadow: 0 2px 8px rgba(201,169,110,0.25);
   transition: all 0.2s;
 }
 .auth-submit:hover {
-  background: #D4C9AD;
-  border-color: #D4C9AD;
+  background: #D6BC86;
+  border-color: #D6BC86;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(197,185,154,0.4);
+  box-shadow: 0 4px 12px rgba(201,169,110,0.4);
 }
 .auth-error {
   background: rgba(200,104,86,.08);
@@ -1014,7 +1014,7 @@ a:focus-visible,
 }
 .letter-pre:focus-visible {
   border-color: var(--cyan);
-  box-shadow: 0 0 0 3px rgba(197,185,154,.2);
+  box-shadow: 0 0 0 3px rgba(201,169,110,.2);
 }
 .letter-pre:focus:not(:focus-visible) {
   border-color: var(--cyan);
