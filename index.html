@@ -48,18 +48,18 @@
   --bg2:       #1E1E1E;
   --bg3:       #2C2C2C;
   --border:    rgba(255,255,255,0.10);
-  --accent:    #C5B99A;
-  --accent-dim: rgba(197,185,154,0.40);
-  --primary:   #C5B99A;
-  --secondary: #C5B99A;
+  --accent:    #C07840;
+  --accent-dim: rgba(192,120,64,0.40);
+  --primary:   #C07840;
+  --secondary: #C07840;
   --error:     #C86856;            /* Canyon Rust (lifted) */
   --text:      #E0E0E0;
   --text-dim:  #808080;
-  --on-primary:#1C1917;
-  --on-secondary:#1C1917;
+  --on-primary:#FFFFFF;
+  --on-secondary:#FFFFFF;
   --avatar-bg: #b3b3b3;
   --avatar-text:#000000;
-  --cyan:      #C5B99A;
+  --cyan:      #C07840;
   --red:       #C86856;            /* Canyon Rust (lifted) */
   --green:     #93A286;            /* Desert Sage (lifted) */
   --amber:     #E0BA62;            /* Sandstone Ochre (lifted) */
@@ -71,9 +71,9 @@
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
-  --logo-grad: linear-gradient(90deg, #C5B99A 0%, #E0D5C0 50%, #C5B99A 100%);
-  --accent-subtle: rgba(197,185,154,0.12);
-  --grad-neutral: linear-gradient(to right, #C5B99A, #8B4513);
+  --logo-grad: linear-gradient(90deg, #C07840 0%, #D49060 50%, #C07840 100%);
+  --accent-subtle: rgba(192,120,64,0.12);
+  --grad-neutral: linear-gradient(to right, #D89858, #C07840);
 }
 /* ── Light mode — Warm earthy palette ─────────────────────── */
 [data-theme="light"] {
@@ -249,7 +249,7 @@ body {
     color: var(--text);
 }
 .nav-item.active {
-  background: rgba(197,185,154,.12);
+  background: rgba(192,120,64,.12);
   color: var(--accent);
   font-weight: 600;
   border-left: 3px solid var(--accent);
@@ -630,7 +630,7 @@ td {
   letter-spacing: .5px;
 }
 .badge-new {
-  background: rgba(197,185,154,.12);
+  background: rgba(192,120,64,.12);
   color: var(--secondary);
 }
 .badge-active {
@@ -642,7 +642,7 @@ td {
   color: var(--red);
 }
 .badge-closed {
-  background: rgba(197,185,154,.15);
+  background: rgba(192,120,64,.15);
   color: var(--secondary);
 }
 .badge-appealed {
@@ -650,7 +650,7 @@ td {
   color: var(--amber);
 }
 .badge-myturn {
-  background: rgba(197,185,154,.15);
+  background: rgba(192,120,64,.15);
   color: var(--secondary);
 }
 .badge-theirturn {
@@ -677,15 +677,15 @@ td {
   color: var(--on-primary);
   border: 1px solid var(--cyan);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(197,185,154,0.2);
+  box-shadow: 0 2px 8px rgba(192,120,64,0.2);
   transition: all 0.2s;
 }
 .btn-primary:hover {
-  background: #D4C9AD;
-  border-color: #D4C9AD;
+  background: #D08A50;
+  border-color: #D08A50;
   color: var(--on-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(197,185,154,0.35);
+  box-shadow: 0 4px 12px rgba(192,120,64,0.35);
 }
 .btn-ghost {
   background: none;
@@ -752,7 +752,7 @@ select:focus-visible,
 textarea:focus-visible {
   border-color: var(--cyan);
   background: var(--bg2);
-  box-shadow: 0 0 0 3px rgba(197,185,154,.2);
+  box-shadow: 0 0 0 3px rgba(192,120,64,.2);
   outline: none;
 }
 input:focus:not(:focus-visible),
@@ -906,14 +906,14 @@ a:focus-visible,
   border: 1px solid var(--cyan);
   font-weight: 600;
   font-family: var(--font-body);
-  box-shadow: 0 2px 8px rgba(197,185,154,0.25);
+  box-shadow: 0 2px 8px rgba(192,120,64,0.25);
   transition: all 0.2s;
 }
 .auth-submit:hover {
-  background: #D4C9AD;
-  border-color: #D4C9AD;
+  background: #D08A50;
+  border-color: #D08A50;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(197,185,154,0.4);
+  box-shadow: 0 4px 12px rgba(192,120,64,0.4);
 }
 .auth-error {
   background: rgba(200,104,86,.08);
@@ -1023,7 +1023,7 @@ a:focus-visible,
 }
 .letter-pre:focus-visible {
   border-color: var(--cyan);
-  box-shadow: 0 0 0 3px rgba(197,185,154,.2);
+  box-shadow: 0 0 0 3px rgba(192,120,64,.2);
 }
 .letter-pre:focus:not(:focus-visible) {
   border-color: var(--cyan);
