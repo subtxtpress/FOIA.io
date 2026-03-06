@@ -71,7 +71,7 @@
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
-  --logo-grad: linear-gradient(90deg, #78716C 0%, #C5B99A 32.8%, #E0D5C0 52.4%, #C5B99A 72.98%, #78716C 100%);
+  --logo-grad: linear-gradient(90deg, #C5B99A 0%, #E0D5C0 50%, #C5B99A 100%);
   --accent-subtle: rgba(197,185,154,0.12);
   --grad-neutral: linear-gradient(to right, #C5B99A, #C5B99A);
 }
@@ -517,11 +517,14 @@ body {
   letter-spacing: -1px;
   line-height: 1;
 }
-.stat-num.cyan {
-  color: var(--cyan);
+.stat-num.green {
+  color: var(--green);
 }
 .stat-num.red {
   color: var(--red);
+}
+.stat-num.amber {
+  color: var(--amber);
 }
 .stat-num.muted {
   color: var(--text-dim);
@@ -3041,7 +3044,7 @@ a:focus-visible,
             <div class="stat-label">Total Requests</div>
           </div>
           <div class="stat-card">
-            <div class="stat-num cyan" id="statActive">–</div>
+            <div class="stat-num green" id="statActive">–</div>
             <div class="stat-label">Active</div>
           </div>
           <div class="stat-card">
