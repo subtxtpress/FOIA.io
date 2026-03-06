@@ -45,16 +45,16 @@
 /* ── Dark mode (default) ───────────────────────────────────── */
 :root {
   --bg:        #121212;
-  --bg2:       #1e1e1e;
-  --bg3:       #2a2a2a;
-  --border:    #3a3a3a;
+  --bg2:       #1E1E1E;
+  --bg3:       #2C2C2C;
+  --border:    rgba(255,255,255,0.10);
   --accent:    #C9A96E;
   --accent-dim: rgba(201,169,110,0.40);
   --primary:   #C9A96E;
   --secondary: #C9A96E;
   --error:     #C86856;            /* Canyon Rust (lifted) */
-  --text:      #F0ECE4;            /* warm off-white */
-  --text-dim:  #B3ADA4;            /* warm gray */
+  --text:      #E0E0E0;
+  --text-dim:  #808080;
   --on-primary:#FFFFFF;
   --on-secondary:#FFFFFF;
   --avatar-bg: #b3b3b3;
@@ -73,7 +73,7 @@
   --font-doc:  'Georgia', 'Times New Roman', serif;
   --logo-grad: linear-gradient(90deg, #C9A96E 0%, #E0D5C0 50%, #C9A96E 100%);
   --accent-subtle: rgba(201,169,110,0.12);
-  --grad-neutral: linear-gradient(to right, #C9A96E, #8B6914);
+  --grad-neutral: linear-gradient(to right, #C9A96E, #C9A96E);
 }
 /* ── Light mode — Warm earthy palette ─────────────────────── */
 [data-theme="light"] {
@@ -456,20 +456,24 @@ body {
 }
 /* ── Cards / Panels ────────────────────────────────────────── */
 .card {
-  background-color: var(--bg2);
-  background-image: var(--grad-neutral);
-  background-size: 100% 3px;
-  background-repeat: no-repeat;
-  background-position: top left;
-  background-origin: border-box;
+  position: relative;
+  background: var(--bg2);
   border: 1px solid var(--border);
-  border-top: 3px solid transparent;
   border-radius: 10px;
   padding: 24px;
   box-shadow: var(--shadow);
   max-width: 100%;
   overflow: hidden;
   transition: box-shadow .22s ease, transform .22s ease;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--grad-neutral);
 }
 .card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.5);
@@ -491,20 +495,25 @@ body {
 }
 /* ── Stats row ─────────────────────────────────────────────── */
 .stats-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0;
   margin-bottom: 28px;
   border: 1px solid var(--border);
-  border-top: 3px solid transparent;
   border-radius: 10px;
   overflow: hidden;
-  background-image: var(--grad-neutral);
-  background-size: 100% 3px;
-  background-repeat: no-repeat;
-  background-position: top left;
-  background-origin: border-box;
   box-shadow: var(--shadow);
+}
+.stats-grid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--grad-neutral);
+  z-index: 1;
 }
 .stat-card {
   background: var(--bg2);
@@ -2359,17 +2368,7 @@ a:focus-visible,
 }
 /* ── Cards ──────────────────────────────────────────────────── */
 [data-theme="light"] .card {
-  background-color: var(--bg2);
-  background-image: var(--grad-neutral);
-  background-size: 100% 3px;
-  background-repeat: no-repeat;
-  background-position: top left;
-  background-origin: border-box;
-  border: 1px solid var(--border);
-  border-top: 3px solid transparent;
-  border-radius: 10px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  transition: background .22s ease, border-top-color .22s ease, transform .22s ease, box-shadow .22s ease;
 }
 [data-theme="light"] .card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
@@ -2392,17 +2391,7 @@ a:focus-visible,
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 [data-theme="light"] .stats-grid {
-  border: 1px solid var(--border);
-  border-top: 3px solid transparent;
-  border-radius: 10px;
-  overflow: hidden;
-  background-image: var(--grad-neutral);
-  background-size: 100% 3px;
-  background-repeat: no-repeat;
-  background-position: top left;
-  background-origin: border-box;
   box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-  gap: 0;
 }
 [data-theme="light"] .stats-grid .stat-card {
   border: none;
