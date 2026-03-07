@@ -49,20 +49,20 @@
   --bg2:       #242424;/*#28231e;*/
   --bg3:       #2e2e2e;/*#332d27;*/
   --border:    rgba(197,185,154,0.16);
-  --primary:   #c47a3a;
+  --primary:    #a75740;/*#b85c3f;/*#c47a3a;*/
   --primary-dim: rgba(196,122,58,0.40);
-  --accent:    #c47a3a;
-  --accent-dim: rgba(196,122,58,0.40);
-  --accent-subtle: rgba(196,122,58,0.12);
-  --error:     #e05a48;
+  --accent:    #b85c3f;/*#c47a3a;*/
+  --accent-dim: rgba(184, 92, 63, 0.40); /*rgba(196,122,58,0.40);*/
+  --accent-subtle: rgba(184, 92, 63, 0.12);/*rgba(196,122,58,0.12);*/
+  --error:     #a0402e;/*#e05a48;*/
   --text:      #F0EAE0;
   --text-dim:  #8a8078;
   --on-primary:#FFFFFF;
   --avatar-bg: #332d27;
   --avatar-text:#F0EAE0;
-  --red:       #e05a48;
-  --green:     #7ab860;
-  --amber:     #d49838;
+  --red:       #c4654a;/*#e05a48;*/
+  --green:     #8a9e7a;/*#7ab860;*/
+  --amber:     #c49a45;/*#d49838;*/
   --radius:    10px;
   --shadow:    0 2px 8px rgba(0,0,0,0.4);
   --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
@@ -71,11 +71,11 @@
   --font-mono:    'IBM Plex Mono', monospace;
   --font-body:    'Inter', sans-serif;
   --font-doc:  'Georgia', 'Times New Roman', serif;
-  --logo-grad: linear-gradient(90deg, #C5B99A, #c47a3a);
-  --grad-neutral: linear-gradient(to right, #C5B99A, #c47a3a);
+  --logo-grad: linear-gradient(90deg, #C5B99A, #b85c3f/*#c47a3a*/);
+  --grad-neutral: linear-gradient(to right, #C5B99A, #b85c3f/*#c47a3a*/);
   --grad-header:  linear-gradient(160deg, #28231e 0%, #1e1a16 100%);
-  --grad-accent:  linear-gradient(180deg, #C5B99A 0%, #c47a3a 100%);
-  --grad-timeline: linear-gradient(to bottom, #F0EAE0, #C5B99A, #c47a3a);
+  --grad-accent:  linear-gradient(180deg, #C5B99A 0%, #b85c3f/*#c47a3a*/ 100%);
+  --grad-timeline: linear-gradient(to bottom, #F0EAE0, #C5B99A, #b85c3f/*#c47a3a*/);
   --surface-page:     #1e1a16;
   --surface-card:     #28231e;
   --surface-elevated: #332d27;
@@ -90,7 +90,7 @@
   --palette-lightest: #1e1a16;
   --palette-light:    #28231e;
   --palette-mid:      #C5B99A;
-  --palette-accent:   #c47a3a;
+  --palette-accent:   #b85c3f;/*#c47a3a;*/
   --palette-dark:     #F0EAE0;
 }
 /* ── Light mode — Boilerplate warm earthy palette ──────────── */
@@ -99,7 +99,7 @@
   --bg2:       #FFFFFF;
   --bg3:       #F0EBE2;
   --border:    rgba(139,100,60,0.20);
-  --primary:   #8B4513;
+  --primary:   #a04c2e;
   --primary-dim: rgba(139,69,19,0.40);
   --accent:    #8B4513;
   --accent-dim: rgba(139,69,19,0.40);
@@ -450,7 +450,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text);
+  color: var(--text-dim);/*var(--text);*/
 }
 .hamburger {
   display: none;
