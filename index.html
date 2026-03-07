@@ -421,7 +421,6 @@ body {
   padding-right: 0;
 }
 .topbar {
-  border-bottom: 1px solid var(--border);
   padding: 18px 40px;
   display: flex;
   align-items: center;
@@ -437,9 +436,9 @@ body {
 .topbar::after {
   content: '';
   position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
+  bottom: 0;
+  left: 40px;
+  right: 40px;
   height: 2px;
   background: var(--grad-neutral);
   pointer-events: none;
@@ -1719,6 +1718,10 @@ a:focus-visible,
     box-sizing: border-box;
     margin: 0;
   }
+  .topbar::after {
+    left: 16px;
+    right: 16px;
+  }
   .topbar-title {
     font-size: 1rem;
     flex: 1;
@@ -2237,6 +2240,10 @@ a:focus-visible,
   .topbar {
     padding: 10px 8px;
   }
+  .topbar::after {
+    left: 8px;
+    right: 8px;
+  }
   .card {
     padding: 10px 8px;
   }
@@ -2309,6 +2316,13 @@ a:focus-visible,
   .content {
     max-width: 1800px;
     padding: 28px 60px;
+  }
+  .topbar {
+    padding: 18px 60px;
+  }
+  .topbar::after {
+    left: 60px;
+    right: 60px;
   }
   .stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -2444,19 +2458,7 @@ a:focus-visible,
 /* ── Topbar ─────────────────────────────────────────────────── */
 [data-theme="light"] .topbar {
   background: var(--grad-header);
-  border-bottom: 1px solid var(--border-light);
   position: relative;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
-}
-[data-theme="light"] .topbar::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--grad-neutral);
-  pointer-events: none;
 }
 /* ── Cards ──────────────────────────────────────────────────── */
 [data-theme="light"] .card {
