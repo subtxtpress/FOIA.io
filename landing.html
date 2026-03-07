@@ -49,17 +49,17 @@
       --bg2:       #242424;/*#28231e;*/
       --bg3:       #2e2e2e;/*#332d27;*/
       --border:    rgba(197,185,154,0.16);
-      --primary:   #c47a3a;
-      --primary-dim:  rgba(196,122,58,0.12);
-      --primary-glow: rgba(196,122,58,0.22);
-      --accent:    #c47a3a;
-      --accent-dim:  rgba(197,185,154,0.10);
-      --accent-glow: rgba(196,122,58,0.22);
+      --primary:   #a75740;/*#c47a3a;*/
+      --primary-dim:  rgba(167, 87, 64, 0.12);/*rgba(196,122,58,0.12);*/
+      --primary-glow: rgba(167, 87, 64, 0.22);/*rgba(196,122,58,0.22);*/
+      --accent:    #b85c3f;/*#c47a3a;*/
+      --accent-dim:  rgba(184, 92, 63, 0.10);/*rgba(197,185,154,0.10);*/
+      --accent-glow: rgba(184, 92, 63, 0.22);/*rgba(196,122,58,0.22);*/
       --text:      #F0EAE0;
       --text-dim:  #8a8078;
-      --red:       #e05a48;
-      --green:     #7ab860;
-      --amber:     #d49838;
+      --red:       #c4654a;/*#e05a48;*/
+      --green:     #8a9e7a;/*#7ab860;*/
+      --amber:     #c49a45;/*#d49838;*/
       --radius:    6px;
       --shadow:    0 2px 8px rgba(0,0,0,0.4);
       --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
@@ -71,7 +71,7 @@
       --palette-lightest: #F7F5F2;
       --palette-light:    #E8E2D9;
       --palette-mid:      #C5B99A;
-      --palette-accent:   #c47a3a;
+      --palette-accent:   #b85c3f;/*#c47a3a;*/
       --palette-dark:     #1C1917;
       /* surface tokens */
       --surface-page:     #1a1a1a;/*#1e1a16;*/
@@ -79,8 +79,8 @@
       --surface-elevated: #2e2e2e;/*#332d27;*/
       /* gradients */
       --grad-header: linear-gradient(160deg, #242424/*#28231e*/ 0%, #1a1a1a/*#1e1a16*/ 100%);
-      --grad-neutral: linear-gradient(to right, #C5B99A, #c47a3a);
-      --logo-grad: linear-gradient(90deg, #C5B99A, #c47a3a);
+      --grad-neutral: linear-gradient(to right, #C5B99A, #b85c3f/*#c47a3a*/);
+      --logo-grad: linear-gradient(90deg, #C5B99A, #b85c3f/*#c47a3a*/);
       /* accent subtle */
       --accent-subtle: rgba(196,122,58,0.12);
       --border-light:  rgba(197,185,154,0.16);
@@ -242,7 +242,7 @@
       font-size: 1.1rem;
       font-weight: 700;
       letter-spacing: -0.03em;
-      background: var(--logo-grad);
+      background: var(--grad-neutral);/*var(--logo-grad);*/
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -347,14 +347,14 @@
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
-      background: var(--accent-subtle);
+      background: var(--grad-neutral);/*var(--accent-subtle);*/
       border: 1px solid var(--accent-dim);
       border-radius: 100px;
       font-size: 0.78rem;
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--accent);
+      color: var(--grad-neutral);/*var(--accent);*/
       margin-bottom: 28px;
     }
 
