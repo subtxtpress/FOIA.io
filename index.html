@@ -336,20 +336,26 @@ body {
     color: var(--bg);
 }
 .sidebar-footer {
-  padding: 16px;
+  padding: 10px 12px;
   border-top: 1px solid var(--border);
+}
+.sidebar-footer-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 .user-pill {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--bg3);
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
 }
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--avatar-bg);
   color: var(--avatar-text);
@@ -357,12 +363,12 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: .85rem;
-  flex-shrink: 1;
+  font-size: .75rem;
+  flex-shrink: 0;
 }
 .user-name {
     font-family: var(--font-body);
-    font-size: .85rem;
+    font-size: .8rem;
     font-weight: 600;
 }
 .user-status {
@@ -372,17 +378,15 @@ body {
     color: var(--green);
 }
 #btnLogout {
-  display: block;
-  width: 100%;
-  margin-top: 8px;
+  flex: 1;
   background: none;
   border: 1px solid var(--border);
   color: var(--text-dim);
-  padding: 7px;
-  border-radius: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: .7rem;
+  font-size: .65rem;
   letter-spacing: 0.08em;
   transition: all .15s;
 }
@@ -392,20 +396,20 @@ body {
 }
 /* Sidebar footer */
 #btnTheme {
-  width:100%;
-  background:var(--bg3);
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:8px 14px;
-  border-radius:8px;
-  cursor:pointer;
-  font-family:var(--font-mono);
-  font-size:.7rem;
-  letter-spacing:0.08em;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:8px;
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   transition: background .2s;
 }
 /* Main content */
@@ -1209,6 +1213,50 @@ a:focus-visible,
   justify-content: space-between;
   margin-bottom: 20px;
 }
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.detail-actions .btn {
+  border: 1px solid var(--border);
+}
+.detail-actions .btn-ghost {
+  border-color: var(--text-dim);
+  color: var(--text-dim);
+}
+.detail-actions .btn-ghost:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+.detail-actions .btn-danger {
+  background: none;
+  border-color: var(--text-dim);
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.detail-actions .btn-danger:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(200,104,86,.08);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: stretch;
+}
+.detail-grid > .card {
+  margin-top: 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+.detail-grid > .card > p,
+.detail-grid > .card > .form-info {
+  flex: 1;
+}
 .detail-meta {
   font-family: var(--font-mono);
   font-size: .7rem;
@@ -1465,10 +1513,9 @@ a:focus-visible,
 /* Sidebar footer links */
 .sidebar-links {
   display: flex;
-  gap: 8px;
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid var(--border);
+  gap: 6px;
+  margin-top: 0;
+  padding-top: 0;
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
@@ -1992,24 +2039,23 @@ a:focus-visible,
     min-width: 18px;
   }
   .sidebar-footer {
-    padding: 12px;
+    padding: 8px 10px;
   }
   .user-pill {
-    padding: 8px 10px;
-    gap: 8px;
+    padding: 6px 8px;
+    gap: 6px;
   }
   .user-avatar {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
+    width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
   }
   .user-name {
     font-size: 0.8rem;
   }
   #btnLogout {
-    margin-top: 6px;
-    padding: 6px;
-    font-size: 0.75rem;
+    padding: 5px 8px;
+    font-size: 0.6rem;
   }
   /* Card spacing */
   .card + .card {
@@ -2293,15 +2339,14 @@ a:focus-visible,
     padding: 10px 14px 8px;
   }
   .sidebar-footer {
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
   .user-pill {
-    padding: 7px 9px;
+    padding: 5px 7px;
   }
   #btnLogout {
-    padding: 5px;
-    font-size: .72rem;
-    margin-top: 6px;
+    padding: 4px 6px;
+    font-size: .6rem;
   }
   .discard-save,
   .modal-body > .form-actions:last-child {
@@ -2998,10 +3043,6 @@ a:focus-visible,
     </div>
     </div><!-- /.sidebar-nav-wrap -->
     <div class="sidebar-footer">
-      <button id="btnTheme" onclick="toggleTheme()" aria-label="Toggle color theme">
-        <span id="themeIcon">☼</span>
-        <span id="themeLabel">Light Mode</span>
-      </button>
       <div class="user-pill">
         <div class="user-avatar" id="userAvatar">?</div>
         <div>
@@ -3009,7 +3050,13 @@ a:focus-visible,
           <div class="user-status" id="userStatus">● Active</div>
         </div>
       </div>
-      <button id="btnLogout" onclick="doLogout()" aria-label="Sign out of your account">Sign Out</button>
+      <div class="sidebar-footer-row">
+        <button id="btnTheme" onclick="toggleTheme()" aria-label="Toggle color theme">
+          <span id="themeIcon">☼</span>
+          <span id="themeLabel">Light Mode</span>
+        </button>
+        <button id="btnLogout" onclick="doLogout()" aria-label="Sign out of your account">Sign Out</button>
+      </div>
       <div class="sidebar-links">
         <button class="sidebar-link" onclick="nav('help')">Help</button>
         <span class="sidebar-sep">·</span>
@@ -5273,16 +5320,16 @@ async function openDetail(idOrObj) {
           ${r.org_id ? `<div class="meta-chip" id="assignChip-${r.id}"><strong>Assigned to:</strong> ${r.assigned_to_username ? esc(r.assigned_to_username) : '<span style="color:var(--text-dim)">Unassigned</span>'} <button class="btn btn-ghost btn-sm" style="padding:1px 6px;font-size:.7rem;margin-left:4px;" onclick="openAssignModal(${r.id})">Change</button></div>` : ''}
         </div>
       </div>
-      <div class="detail-actions" style="display:flex;flex-wrap:wrap;gap:6px;">
+      <div class="detail-actions">
         ${isNew ? `<button class="btn btn-primary btn-sm" onclick="openLetter(${r.id})">📄 View/Send Letter</button>` : ''}
         ${isActive ? `
           <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
           <button class="btn btn-primary btn-sm" onclick="openUpdateModal(${r.id})">Update Request</button>
-          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--red);color:var(--red);">File Appeal</button>
+          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">File Appeal</button>
           <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
         ${r.status === 'appealed' ? `
           <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
-          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--red);color:var(--red);">View Appeal</button>
+          <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View Appeal</button>
           <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
         ${!isClosed ? `<button class="btn btn-danger btn-sm" onclick="deleteReq(${r.id})">Delete</button>` : ''}
       </div>
@@ -5290,7 +5337,7 @@ async function openDetail(idOrObj) {
 
     ${deadlineBanner}
 
-    <div class="detail-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="detail-grid">
       <div class="card">
         <div class="card-title">Notes</div>
         <p style="font-size:.9rem;color:var(--text-dim);white-space:pre-wrap;">${esc(r.notes)||'No notes.'}</p>
