@@ -4085,8 +4085,8 @@ a:focus-visible,
         <button type="button" class="upd-type-pill" data-type="followup" onclick="setUpdateType('followup')">
           <span class="upd-pill-icon">📤</span> Sent Follow-up
         </button>
-        <button type="button" class="upd-type-pill" data-type="note" onclick="setUpdateType('note')">
-          <span class="upd-pill-icon">📝</span> Add Notes
+        <button type="button" class="upd-type-pill" data-type="edit" onclick="setUpdateType('edit')">
+          <span class="upd-pill-icon">✏️</span> Edit Details
         </button>
       </div>
 
@@ -5898,6 +5898,8 @@ async function saveLetter() {
 // ─────────────────────────────────────────────────────────────
 let _currentUpdateType = 'response';
 
+let _pendingUpdateRequest = null;  // store fetched request for setUpdateType
+
 function setUpdateType(type) {
   _currentUpdateType = type;
   // Toggle active pill
@@ -5909,31 +5911,48 @@ function setUpdateType(type) {
   const fsFollowup  = document.getElementById('updFieldsetFollowup');
   const fsNextSteps = document.getElementById('updFieldsetNextSteps');
   const fsDetails   = document.getElementById('updFieldsetDetails');
+  const r = _pendingUpdateRequest || {};
 
   if (type === 'response') {
+    // LOG a new response — event fields start blank
     fsResponse.style.display  = '';
     fsFollowup.style.display  = 'none';
     fsNextSteps.style.display = '';
     fsDetails.style.display   = '';
-    // Auto-set turn: they responded, ball is in my court
+    document.getElementById('updResponseDate').value    = '';
+    document.getElementById('updResponseSummary').value = '';
+    refreshDateInputs(document.getElementById('updFieldsetResponse'));
     document.getElementById('updTurn').value = 'My Turn';
   } else if (type === 'followup') {
+    // LOG a new follow-up — event fields start blank
     fsResponse.style.display  = 'none';
     fsFollowup.style.display  = '';
     fsNextSteps.style.display = '';
     fsDetails.style.display   = '';
-    // Auto-default follow-up date to today
-    const fupDate = document.getElementById('updFollowupDate');
-    if (!fupDate.value) fupDate.value = new Date().toISOString().split('T')[0];
+    document.getElementById('updFollowupDate').value    = new Date().toISOString().split('T')[0];
+    document.getElementById('updFollowupMethod').value  = 'Email';
+    document.getElementById('updFollowupSummary').value = '';
     refreshDateInputs(document.getElementById('updFieldsetFollowup'));
-    // Auto-set: I sent something, ball is in their court
-    document.getElementById('updTurn').value = 'Their Turn';
+    document.getElementById('updTurn').value    = 'Their Turn';
     document.getElementById('updNextStep').value = 'Await response';
-  } else if (type === 'note') {
-    fsResponse.style.display  = 'none';
+  } else if (type === 'edit') {
+    // EDIT existing record — all fields pre-filled from DB
+    fsResponse.style.display  = '';
     fsFollowup.style.display  = 'none';
-    fsNextSteps.style.display = 'none';
+    fsNextSteps.style.display = '';
     fsDetails.style.display   = '';
+    document.getElementById('updResponseDate').value    = r.response_received_date || '';
+    document.getElementById('updResponseSummary').value = r.response_summary || '';
+    refreshDateInputs(document.getElementById('updFieldsetResponse'));
+    document.getElementById('updTurn').value             = r.turn || 'My Turn';
+    document.getElementById('updNextStep').value         = r.next_step || '';
+    document.getElementById('updNextStepDate').value     = r.next_step_date || '';
+    refreshDateInputs(document.getElementById('updFieldsetNextSteps'));
+    document.getElementById('updNotes').value            = r.notes || '';
+    document.getElementById('updDeadline').value         = r.deadline_date || '';
+    document.getElementById('updSecName').value          = r.secondary_contact_name || '';
+    document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
+    refreshDateInputs(document.getElementById('updFieldsetDetails'));
   }
 }
 
@@ -5941,15 +5960,9 @@ async function openUpdateModal(id) {
   pendingUpdateId = id;
   const { data } = await api('GET', `/api/requests/${id}`);
   const r = data.request || data;
+  _pendingUpdateRequest = r;  // store for setUpdateType to access
 
-  // EVENT fields — always start blank (each update is a new log entry)
-  document.getElementById('updResponseDate').value    = '';
-  document.getElementById('updResponseSummary').value = '';
-  document.getElementById('updFollowupDate').value    = '';
-  document.getElementById('updFollowupMethod').value  = 'Email';
-  document.getElementById('updFollowupSummary').value = '';
-
-  // STATE fields — pre-fill with current values (persistent data)
+  // STATE fields — pre-fill with current values
   document.getElementById('updNextStep').value        = r.next_step || '';
   document.getElementById('updNextStepDate').value    = r.next_step_date || '';
   document.getElementById('updNotes').value            = r.notes || '';
@@ -5958,7 +5971,7 @@ async function openUpdateModal(id) {
   document.getElementById('updSecName').value          = r.secondary_contact_name || '';
   document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
 
-  // Default to "response" type and sync pickers
+  // Default to "response" type (blanks event fields), sync pickers
   setUpdateType('response');
   refreshDateInputs(document.getElementById('updateModal'));
   upgradeDateInputs(document.getElementById('updFieldsetFollowup'));
@@ -5986,14 +5999,16 @@ async function saveUpdate() {
     payload.followup_date    = document.getElementById('updFollowupDate').value || undefined;
     payload.followup_method  = document.getElementById('updFollowupMethod').value || 'Email';
     payload.followup_summary = document.getElementById('updFollowupSummary').value || undefined;
+  } else if (_currentUpdateType === 'edit') {
+    // Edit existing record — send response fields as DB updates
+    payload.response_received_date = document.getElementById('updResponseDate').value || undefined;
+    payload.response_summary       = document.getElementById('updResponseSummary').value || undefined;
   }
 
-  // Turn + Next Steps (visible for response + followup)
-  if (_currentUpdateType !== 'note') {
-    payload.turn           = document.getElementById('updTurn').value;
-    payload.next_step      = document.getElementById('updNextStep').value || undefined;
-    payload.next_step_date = document.getElementById('updNextStepDate').value || undefined;
-  }
+  // Turn + Next Steps (always visible for all three types)
+  payload.turn           = document.getElementById('updTurn').value;
+  payload.next_step      = document.getElementById('updNextStep').value || undefined;
+  payload.next_step_date = document.getElementById('updNextStepDate').value || undefined;
 
   // Details (always visible)
   payload.notes                   = document.getElementById('updNotes').value;
@@ -6003,7 +6018,7 @@ async function saveUpdate() {
 
   const { status, data } = await api('POST', `/api/requests/${pendingUpdateId}/update`, payload);
   if (status !== 200) { toast(data.error || 'Update failed', 'error'); return; }
-  const msgs = { response: '✓ Response logged', followup: '✓ Follow-up logged', note: '✓ Notes updated' };
+  const msgs = { response: '✓ Response logged', followup: '✓ Follow-up logged', edit: '✓ Request updated' };
   toast(msgs[_currentUpdateType] || '✓ Request updated', 'success');
   const updatedId = pendingUpdateId;
   closeUpdateModal();

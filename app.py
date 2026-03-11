@@ -2317,8 +2317,9 @@ def update_request(req_id):
             note_parts.append(summary)
         note = " — ".join(note_parts) if note_parts else None
     else:
-        action = "Notes updated"
-        note = ", ".join(k for k in data if k in allowed) or None
+        action = "Request edited"
+        changed = [k for k in data if k in allowed]
+        note = ", ".join(changed) if changed else None
 
     log_action(req_id, session["user_id"], action, note)
     return jsonify({"ok": True})
