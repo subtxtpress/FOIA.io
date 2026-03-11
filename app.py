@@ -323,6 +323,23 @@ def init_db():
     except Exception:
         pass  # column already exists
 
+    # ── Migration: add response tracking & metadata fields ──────────────
+    for col, col_type in [
+        ("outcome", "TEXT"),
+        ("exemptions_cited", "TEXT"),
+        ("fees", "TEXT"),
+        ("fee_dispute", "INTEGER DEFAULT 0"),
+        ("method_filed", "TEXT"),
+        ("priority", "TEXT"),
+        ("agency_status", "TEXT"),
+        ("phone", "TEXT"),
+    ]:
+        try:
+            db.execute(f"ALTER TABLE requests ADD COLUMN {col} {col_type}")
+            db.commit()
+        except Exception:
+            pass  # column already exists
+
     # ── Migration: fix Missouri appeal_days (was 0, should be 7 per RSMo § 610.027.3)
     try:
         db.execute(
@@ -1989,15 +2006,17 @@ def create_request():
     req_id = db.insert("""
         INSERT INTO requests
         (user_id, foia_number, created_date, agency_type, agency_id, agency_name,
-         state_code, foia_officer_title, subject, notes, status, org_id)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+         state_code, foia_officer_title, subject, notes, status, org_id,
+         method_filed, priority)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """, (
         session["user_id"], foia_number, created_date,
         data.get("agency_type", "Federal"),
         agency_id, agency_name,
         state_code, foia_officer,
         data.get("subject", ""), data.get("notes", ""),
-        "new", active_org_id
+        "new", active_org_id,
+        data.get("method_filed"), data.get("priority", "Standard")
     ))
     db.commit()
     db.close()
@@ -2235,7 +2254,9 @@ def update_request(req_id):
         "deadline_date", "response_days",
         "response_received_date", "response_summary",
         "next_step", "next_step_date",
-        "appeal_saved_at", "appeal_deadline"
+        "appeal_saved_at", "appeal_deadline",
+        "outcome", "exemptions_cited", "fees", "fee_dispute",
+        "method_filed", "priority", "agency_status", "phone"
     ]
     for field in allowed:
         if field in data:

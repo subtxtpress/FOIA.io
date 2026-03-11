@@ -746,6 +746,17 @@ td {
   background: rgba(224,186,98,.15);
   color: var(--amber);
 }
+/* ── Priority dots ─────────────────────────────────────────── */
+.priority-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.priority-critical { background: var(--red); }
+.priority-low      { background: var(--text-dim); opacity: .45; }
 /* ── Buttons ───────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
@@ -3418,6 +3429,27 @@ a:focus-visible,
             <textarea id="nrNotes" placeholder="Investigation context, related cases, prior requests…"></textarea>
           </div>
 
+          <div class="form-row">
+            <div class="form-group">
+              <label>Method Filed</label>
+              <select id="nrMethodFiled">
+                <option value="">— Select —</option>
+                <option value="Email">Email</option>
+                <option value="Portal">Online Portal</option>
+                <option value="Letter">Letter / Mail</option>
+                <option value="Fax">Fax</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Priority</label>
+              <select id="nrPriority">
+                <option value="Standard" selected>Standard</option>
+                <option value="Critical">Critical</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+          </div>
+
           <div class="form-actions">
             <button class="btn btn-danger" onclick="clearNewRequestForm()">Discard</button>
             <button class="btn btn-primary" onclick="saveNewRequest()">Save Request</button>
@@ -4101,6 +4133,48 @@ a:focus-visible,
           <label>Response Summary</label>
           <textarea id="updResponseSummary" rows="2" placeholder="e.g., Partial disclosure — 12 pages released, 3 withheld citing exemption 7(C)…"></textarea>
         </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Outcome</label>
+            <select id="updOutcome">
+              <option value="">— Select —</option>
+              <option value="Granted">Granted</option>
+              <option value="Partial Disclosure">Partial Disclosure</option>
+              <option value="Denied In Part">Denied In Part</option>
+              <option value="Denied In Full">Denied In Full</option>
+              <option value="No Records Found">No Records Found</option>
+              <option value="Referred">Referred</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Agency Status</label>
+            <select id="updAgencyStatus">
+              <option value="">— Select —</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Acknowledged">Acknowledged</option>
+              <option value="Assigned">Assigned</option>
+              <option value="In-Process">In-Process</option>
+              <option value="Decided">Decided</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Exemptions Cited</label>
+          <input type="text" id="updExemptions" placeholder="e.g., RSMo 610.021(13), 5 U.S.C. § 552(b)(7)(C)…">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fees Charged</label>
+            <input type="text" id="updFees" placeholder="e.g. 125.00" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label>Fee Dispute</label>
+            <select id="updFeeDispute">
+              <option value="0">No</option>
+              <option value="1">Yes — Disputing fees</option>
+            </select>
+          </div>
+        </div>
       </fieldset>
 
       <!-- Follow-up Sent fieldset -->
@@ -4181,6 +4255,33 @@ a:focus-visible,
           <div class="form-group">
             <label>Secondary Contact Email</label>
             <input type="email" id="updSecEmail" placeholder="email@agency.gov">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Contact Phone</label>
+            <input type="tel" id="updPhone" placeholder="e.g. 573-555-1234">
+          </div>
+          <div class="form-group">
+            <label>Method Filed</label>
+            <select id="updMethodFiled">
+              <option value="">— Select —</option>
+              <option value="Email">Email</option>
+              <option value="Portal">Online Portal</option>
+              <option value="Letter">Letter / Mail</option>
+              <option value="Fax">Fax</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="updPriority">
+              <option value="">— Select —</option>
+              <option value="Critical">Critical</option>
+              <option value="Standard">Standard</option>
+              <option value="Low">Low</option>
+            </select>
           </div>
         </div>
       </fieldset>
@@ -4693,7 +4794,7 @@ async function loadSharedDashboard() {
     </tr></thead>
     <tbody>${reqs.map(r => `
       <tr style="cursor:pointer;" onclick="openDetailById(${r.id})">
-        <td style="color:var(--text);font-weight:600;">${esc(r.foia_number)}</td>
+        <td style="color:var(--text);font-weight:600;">${priorityDot(r)}${esc(r.foia_number)}</td>
         <td>${esc(r.subject||'—')}</td>
         <td>${esc(r.agency_name||'—')}</td>
         <td>${statusBadge(r)}</td>
@@ -5132,7 +5233,7 @@ function renderMiniTable(rows) {
     <thead><tr><th>FOIA #</th><th>Agency</th><th>Status</th></tr></thead>
     <tbody>${rows.map(r => `
       <tr onclick="openDetail(${r.id})">
-        <td class="td-number">${esc(r.foia_number)}</td>
+        <td class="td-number">${priorityDot(r)}${esc(r.foia_number)}</td>
         <td class="td-agency">${esc(r.agency_name||'—')}</td>
         <td>${statusBadge(r)}</td>
       </tr>`).join('')}
@@ -5147,7 +5248,7 @@ async function loadAllRequests(filter = 'all') {
   const tbody = document.getElementById('allRequestsBody');
   tbody.innerHTML = rows.map(r => `
     <tr onclick="openDetail(${r.id})">
-      <td class="td-number">${esc(r.foia_number)}</td>
+      <td class="td-number">${priorityDot(r)}${esc(r.foia_number)}</td>
       <td class="td-agency">${esc(r.agency_name||'—')}</td>
       <td class="td-subject">${esc(r.subject||'—')}</td>
       <td>${statusBadge(r)}</td>
@@ -5176,7 +5277,7 @@ async function loadActiveRequests() {
         <option value="Their Turn" ${r.turn==='Their Turn'?'selected':''}>Their Turn</option>
       </select>`;
     return `<tr onclick="openDetail(${r.id})">
-      <td class="td-number">${esc(r.foia_number)}</td>
+      <td class="td-number">${priorityDot(r)}${esc(r.foia_number)}</td>
       <td class="td-agency">${esc(r.agency_name||'—')}</td>
       <td>${fmtDate(r.deadline_date)}</td>
       <td>${turnDropdown}</td>
@@ -5191,7 +5292,7 @@ async function loadClosedRequests() {
   const tbody = document.getElementById('closedRequestsBody');
   tbody.innerHTML = rows.map(r => `
     <tr onclick="openDetail(${r.id})">
-      <td class="td-number">${esc(r.foia_number)}</td>
+      <td class="td-number">${priorityDot(r)}${esc(r.foia_number)}</td>
       <td class="td-agency">${esc(r.agency_name||'—')}</td>
       <td class="td-subject">${esc(r.subject||'—')}</td>
       <td>${fmtDate(r.closed_date)}</td>
@@ -5284,6 +5385,8 @@ async function initNewRequestForm() {
   if (localA) localA.value = '';
   const localS = document.getElementById('nrLocalState');
   if (localS) localS.value = '';
+  document.getElementById('nrMethodFiled').value = '';
+  document.getElementById('nrPriority').value    = 'Standard';
   await loadAgencies();
   await loadStatesDropdown();
 }
@@ -5472,6 +5575,9 @@ async function saveNewRequest() {
     finalStateCode = localStateCode;
   }
 
+  const methodFiled = document.getElementById('nrMethodFiled').value || undefined;
+  const priority    = document.getElementById('nrPriority').value || 'Standard';
+
   const payload = {
     agency_type: finalAgencyType,
     agency_id: agencyId ? parseInt(agencyId) : null,
@@ -5479,7 +5585,9 @@ async function saveNewRequest() {
     state_code: finalStateCode,
     foia_officer_title: agencyType === 'State' ? (stateOfficer || 'Custodian of Records') : undefined,
     subject, notes,
-    filed_date: filedDate
+    filed_date: filedDate,
+    method_filed: methodFiled,
+    priority: priority
   };
 
   const { status, data } = await api('POST', '/api/requests', payload);
@@ -5576,6 +5684,9 @@ async function openDetail(idOrObj) {
           </div>
           <div class="meta-chip"><strong>Status:</strong> ${statusBadge(r)}</div>
           ${isActive ? `<div class="meta-chip"><strong>Turn:</strong> ${r.turn||'My Turn'}</div>` : ''}
+          ${r.priority && r.priority !== 'Standard' ? `<div class="meta-chip" style="${r.priority==='Critical'?'border-color:var(--red);color:var(--red);':''}"><strong>Priority:</strong> ${esc(r.priority)}</div>` : ''}
+          ${r.method_filed ? `<div class="meta-chip"><strong>Filed via:</strong> ${esc(r.method_filed)}</div>` : ''}
+          ${r.phone ? `<div class="meta-chip"><strong>Phone:</strong> <a href="tel:${esc(r.phone)}" style="color:var(--text);">${esc(r.phone)}</a></div>` : ''}
           ${r.secondary_contact_name ? `<div class="meta-chip"><strong>2nd Contact:</strong> ${esc(r.secondary_contact_name)}</div>` : ''}
           ${r.last_action_date ? `<div class="meta-chip"><strong>Last Action:</strong> ${fmtDateTime(r.last_action_date)}</div>` : ''}
           ${r.org_id ? `<div class="meta-chip"><strong>Filed by:</strong> ${esc(r.filed_by||'—')}</div>` : ''}
@@ -5600,13 +5711,17 @@ async function openDetail(idOrObj) {
 
     ${deadlineBanner}
 
-    ${(r.next_step || r.response_received_date) ? `
+    ${(r.next_step || r.response_received_date || r.outcome || r.agency_status) ? `
     <div class="card" style="margin-bottom:16px;border-color:var(--amber);">
       <div class="card-title">📋 Status &amp; Next Steps</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         ${r.response_received_date ? `<div class="meta-chip"><strong>Response Received:</strong> ${fmtDate(r.response_received_date)}</div>` : ''}
+        ${r.outcome ? `<div class="meta-chip"><strong>Outcome:</strong> ${esc(r.outcome)}</div>` : ''}
+        ${r.agency_status ? `<div class="meta-chip"><strong>Agency Status:</strong> ${esc(r.agency_status)}</div>` : ''}
         ${r.next_step ? `<div class="meta-chip"><strong>Next Step:</strong> ${esc(r.next_step)}</div>` : ''}
         ${r.next_step_date ? `<div class="meta-chip"><strong>Follow-up By:</strong> ${fmtDate(r.next_step_date)}</div>` : ''}
+        ${r.exemptions_cited ? `<div class="meta-chip"><strong>Exemptions:</strong> ${esc(r.exemptions_cited)}</div>` : ''}
+        ${r.fees ? `<div class="meta-chip"><strong>Fees:</strong> $${esc(r.fees)}${r.fee_dispute ? ' <span style="color:var(--red);font-weight:700;">DISPUTED</span>' : ''}</div>` : ''}
       </div>
       ${r.response_summary ? `<p style="font-size:.85rem;color:var(--text-dim);margin-top:10px;white-space:pre-wrap;">${esc(r.response_summary)}</p>` : ''}
     </div>` : ''}
@@ -5921,6 +6036,11 @@ function setUpdateType(type) {
     fsDetails.style.display   = '';
     document.getElementById('updResponseDate').value    = '';
     document.getElementById('updResponseSummary').value = '';
+    document.getElementById('updOutcome').value         = '';
+    document.getElementById('updAgencyStatus').value    = '';
+    document.getElementById('updExemptions').value      = '';
+    document.getElementById('updFees').value            = '';
+    document.getElementById('updFeeDispute').value      = '0';
     refreshDateInputs(document.getElementById('updFieldsetResponse'));
     document.getElementById('updTurn').value = 'My Turn';
   } else if (type === 'followup') {
@@ -5943,6 +6063,11 @@ function setUpdateType(type) {
     fsDetails.style.display   = '';
     document.getElementById('updResponseDate').value    = r.response_received_date || '';
     document.getElementById('updResponseSummary').value = r.response_summary || '';
+    document.getElementById('updOutcome').value         = r.outcome || '';
+    document.getElementById('updAgencyStatus').value    = r.agency_status || '';
+    document.getElementById('updExemptions').value      = r.exemptions_cited || '';
+    document.getElementById('updFees').value            = r.fees || '';
+    document.getElementById('updFeeDispute').value      = r.fee_dispute ? '1' : '0';
     refreshDateInputs(document.getElementById('updFieldsetResponse'));
     document.getElementById('updTurn').value             = r.turn || 'My Turn';
     document.getElementById('updNextStep').value         = r.next_step || '';
@@ -5952,6 +6077,9 @@ function setUpdateType(type) {
     document.getElementById('updDeadline').value         = r.deadline_date || '';
     document.getElementById('updSecName').value          = r.secondary_contact_name || '';
     document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
+    document.getElementById('updPhone').value            = r.phone || '';
+    document.getElementById('updMethodFiled').value      = r.method_filed || '';
+    document.getElementById('updPriority').value         = r.priority || '';
     refreshDateInputs(document.getElementById('updFieldsetDetails'));
   }
 }
@@ -5970,6 +6098,9 @@ async function openUpdateModal(id) {
   document.getElementById('updTurn').value             = r.turn || 'My Turn';
   document.getElementById('updSecName').value          = r.secondary_contact_name || '';
   document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
+  document.getElementById('updPhone').value            = r.phone || '';
+  document.getElementById('updMethodFiled').value      = r.method_filed || '';
+  document.getElementById('updPriority').value         = r.priority || '';
 
   // Default to "response" type (blanks event fields), sync pickers
   setUpdateType('response');
@@ -5994,15 +6125,28 @@ async function saveUpdate() {
     // Log a response received — event fields
     payload.response_received_date = document.getElementById('updResponseDate').value || undefined;
     payload.response_summary       = document.getElementById('updResponseSummary').value || undefined;
+    payload.outcome                = document.getElementById('updOutcome').value || undefined;
+    payload.agency_status          = document.getElementById('updAgencyStatus').value || undefined;
+    payload.exemptions_cited       = document.getElementById('updExemptions').value || undefined;
+    payload.fees                   = document.getElementById('updFees').value || undefined;
+    payload.fee_dispute            = parseInt(document.getElementById('updFeeDispute').value) || 0;
   } else if (_currentUpdateType === 'followup') {
     // Log a follow-up sent — event fields
     payload.followup_date    = document.getElementById('updFollowupDate').value || undefined;
     payload.followup_method  = document.getElementById('updFollowupMethod').value || 'Email';
     payload.followup_summary = document.getElementById('updFollowupSummary').value || undefined;
   } else if (_currentUpdateType === 'edit') {
-    // Edit existing record — send response fields as DB updates
+    // Edit existing record — send response + detail fields as DB updates
     payload.response_received_date = document.getElementById('updResponseDate').value || undefined;
     payload.response_summary       = document.getElementById('updResponseSummary').value || undefined;
+    payload.outcome                = document.getElementById('updOutcome').value || undefined;
+    payload.agency_status          = document.getElementById('updAgencyStatus').value || undefined;
+    payload.exemptions_cited       = document.getElementById('updExemptions').value || undefined;
+    payload.fees                   = document.getElementById('updFees').value || undefined;
+    payload.fee_dispute            = parseInt(document.getElementById('updFeeDispute').value) || 0;
+    payload.phone                  = document.getElementById('updPhone').value || undefined;
+    payload.method_filed           = document.getElementById('updMethodFiled').value || undefined;
+    payload.priority               = document.getElementById('updPriority').value || undefined;
   }
 
   // Turn + Next Steps (always visible for all three types)
@@ -6415,6 +6559,12 @@ function statusBadge(r) {
     return `<span class="badge badge-active">Active</span>`;
   }
   return `<span class="badge badge-new">${esc(r.status)}</span>`;
+}
+
+function priorityDot(r) {
+  if (r.priority === 'Critical') return '<span class="priority-dot priority-critical" title="Critical"></span>';
+  if (r.priority === 'Low')      return '<span class="priority-dot priority-low" title="Low"></span>';
+  return '';
 }
 
 // ─────────────────────────────────────────────────────────────
