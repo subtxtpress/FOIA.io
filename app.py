@@ -102,7 +102,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS requests (
             id              {pk},
             user_id         INTEGER NOT NULL,
-            foia_number     TEXT    NOT NULL UNIQUE,
+            foia_number     TEXT    NOT NULL,
             created_date    TEXT    NOT NULL,
             agency_type     TEXT    NOT NULL DEFAULT 'Federal',
             agency_id       INTEGER,
@@ -1081,17 +1081,18 @@ def subscription_required(f):
 
 
 # ─────────────────────────────────────────────
-# FOIA number generator
+# FOIA number generator (per-user, derived from actual request count)
 # ─────────────────────────────────────────────
-def next_foia_number():
+def next_foia_number(user_id):
     year = datetime.now().year
     db = get_db()
-    db.insert_or_ignore("foia_sequence", ["year", "last_seq"], (year, 0))
-    db.execute("UPDATE foia_sequence SET last_seq = last_seq + 1 WHERE year=?", (year,))
-    row = db.execute("SELECT last_seq FROM foia_sequence WHERE year=?", (year,)).fetchone()
-    db.commit()
+    row = db.execute(
+        "SELECT COUNT(*) as cnt FROM requests WHERE user_id=? AND foia_number LIKE ?",
+        (user_id, f"{year}-%")
+    ).fetchone()
     db.close()
-    return f"{year}-{row['last_seq']:03d}"
+    seq = (row["cnt"] if row else 0) + 1
+    return f"{year}-{seq:03d}"
 
 
 # ─────────────────────────────────────────────
@@ -1870,10 +1871,11 @@ def preview_number():
     year = datetime.now().year
     db = get_db()
     row = db.execute(
-        "SELECT last_seq FROM foia_sequence WHERE year=?", (year,)
+        "SELECT COUNT(*) as cnt FROM requests WHERE user_id=? AND foia_number LIKE ?",
+        (session["user_id"], f"{year}-%")
     ).fetchone()
     db.close()
-    seq = (row["last_seq"] if row else 0) + 1
+    seq = (row["cnt"] if row else 0) + 1
     return jsonify({"foia_number": f"{year}-{seq:03d}", "date": date.today().isoformat()})
 
 
@@ -1919,7 +1921,7 @@ def create_request():
     if state_code:
         state_code = state_code.upper()
 
-    foia_number  = next_foia_number()
+    foia_number  = next_foia_number(session["user_id"])
 
     # Use user-provided filed date or default to today
     filed_date = data.get("filed_date")
@@ -2014,9 +2016,27 @@ def delete_request(req_id):
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
+    # Capture owner and year before deleting so we can renumber
+    owner_id = row["user_id"]
+    foia_num = row["foia_number"] or ""
+    year_prefix = foia_num.split("-")[0] if "-" in foia_num else None
+
     try:
         db.execute("DELETE FROM action_log WHERE request_id=?", (req_id,))
         db.execute("DELETE FROM requests WHERE id=?", (req_id,))
+
+        # Renumber remaining requests for this user/year to stay sequential
+        if year_prefix:
+            remaining = db.execute(
+                "SELECT id FROM requests WHERE user_id=? AND foia_number LIKE ? ORDER BY created_date, id",
+                (owner_id, f"{year_prefix}-%")
+            ).fetchall()
+            for i, r in enumerate(remaining, 1):
+                db.execute(
+                    "UPDATE requests SET foia_number=? WHERE id=?",
+                    (f"{year_prefix}-{i:03d}", r["id"])
+                )
+
         db.commit()
     except Exception:
         db.rollback()
