@@ -2866,6 +2866,114 @@ a:focus-visible,
 [data-theme="light"] .td-check {
   color: var(--green);
 }
+
+/* ── Date Picker ──────────────────────────────────────────── */
+.dp-wrap { position: relative; display: inline-block; }
+.dp-trigger {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: .85rem;
+  min-width: 120px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dp-trigger::after { content: '▾'; font-size: .65rem; color: var(--text-dim); margin-left: auto; }
+.meta-chip .dp-trigger { padding: 2px 6px; min-width: auto; font-size: .82rem; border: none; background: transparent; }
+.meta-chip .dp-trigger:hover { background: var(--bg3); }
+.info-val .dp-trigger { padding: 3px 8px; }
+.dp-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 9999;
+  background: var(--surface-elevated, var(--bg2));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  padding: 12px;
+  width: 280px;
+  display: none;
+}
+.dp-popup.open { display: block; }
+.dp-popup.above { top: auto; bottom: calc(100% + 4px); }
+.dp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.dp-header button {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.dp-header button:hover { background: var(--bg3); }
+.dp-month-year {
+  font-weight: 600;
+  font-size: .85rem;
+  color: var(--text);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.dp-month-year:hover { background: var(--bg3); }
+.dp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: .65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 4px;
+}
+.dp-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.dp-day {
+  text-align: center;
+  padding: 6px 0;
+  font-size: .8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text);
+  border: none;
+  background: none;
+}
+.dp-day:hover { background: var(--bg3); }
+.dp-day.other { color: var(--text-dim); opacity: .4; }
+.dp-day.today { font-weight: 700; box-shadow: inset 0 0 0 1px var(--text-dim); }
+.dp-day.selected { background: var(--accent); color: #fff; font-weight: 600; }
+.dp-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.dp-footer button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.dp-footer button:hover { background: var(--bg3); }
 </style>
 </head>
 <body>
@@ -4334,6 +4442,10 @@ async function bootApp(username, subStatus, orgs, activeOrgIdFromServer) {
   document.getElementById('userAvatar').textContent = username[0].toUpperCase();
   initTheme();
 
+  // Upgrade all static date inputs (in modals and new-request form) to calendar pickers
+  upgradeDateInputs(document.getElementById('updateModal'));
+  upgradeDateInputs(document.getElementById('page-new-request'));
+
   // Newsroom: load orgs into sidebar
   currentOrgs = orgs || [];
   activeOrgId = activeOrgIdFromServer || null;
@@ -5049,6 +5161,8 @@ async function initNewRequestForm() {
   const { data } = await api('GET', '/api/requests/new-number');
   document.getElementById('nrFoiaNum').value = data.foia_number || '';
   document.getElementById('nrDate').value    = data.date || new Date().toISOString().split('T')[0];
+  // Sync calendar picker trigger for the filed date
+  refreshDateInputs(document.getElementById('page-new-request'));
   document.getElementById('nrType').value    = '';
   document.getElementById('nrSubject').value = '';
   document.getElementById('nrNotes').value   = '';
@@ -5362,9 +5476,7 @@ async function openDetail(idOrObj) {
         <div class="detail-meta">
           <div class="meta-chip"><strong>Agency:</strong> ${esc(r.agency_name||'—')}</div>
           <div class="meta-chip"><strong>Created:</strong>
-            <span id="createdDateDisplay" onclick="startEditCreatedDate(${r.id})" style="cursor:pointer;" title="Click to edit">${fmtDate(r.created_date)}</span>
-            <input id="createdDateInput" type="date" value="${r.created_date||''}" style="display:none;font-size:.82rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 4px;"
-              onblur="saveCreatedDate(${r.id})" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.style.display='none';document.getElementById('createdDateDisplay').style.display='';}">
+            <span class="dp-wrap"><button type="button" class="dp-trigger" id="createdDateTrigger">${fmtDate(r.created_date)}</button></span>
           </div>
           <div class="meta-chip"><strong>Status:</strong> ${statusBadge(r)}</div>
           ${isActive ? `<div class="meta-chip"><strong>Turn:</strong> ${r.turn||'My Turn'}</div>` : ''}
@@ -5428,14 +5540,7 @@ async function openDetail(idOrObj) {
             <button class="btn btn-ghost btn-sm" onclick="cancelEditRespDays()">✕</button>
           </div>
           <div class="info-label" style="margin-top:10px;">Deadline Date</div>
-          <div class="info-val" id="deadlineDisplay" onclick="startEditDeadline()" style="cursor:pointer;" title="Click to edit">
-            ${fmtDate(r.deadline_date)||'—'} <span class="edit-hint" style="font-size:.7rem;color:var(--text-dim);margin-left:4px;">✎</span>
-          </div>
-          <div id="deadlineEdit" style="display:none;margin-bottom:8px;">
-            <input type="date" id="deadlineInput" value="${r.deadline_date ? r.deadline_date.split('T')[0] : ''}" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);">
-            <button class="btn btn-sm" onclick="saveDeadline()" style="margin-left:4px;">Save</button>
-            <button class="btn btn-ghost btn-sm" onclick="cancelEditDeadline()">✕</button>
-          </div>
+          <div class="info-val"><span class="dp-wrap"><button type="button" class="dp-trigger" id="deadlineTrigger">${fmtDate(r.deadline_date)||'—'}</button></span></div>
           ${r.secondary_contact_email ? `
           <div class="info-label" style="margin-top:10px;">2nd Contact Email</div>
           <div class="info-val"><a href="mailto:${esc(r.secondary_contact_email)}" style="color:var(--text);">${esc(r.secondary_contact_email)}</a></div>` : ''}
@@ -5448,29 +5553,15 @@ async function openDetail(idOrObj) {
       <div class="card-title" style="color:var(--red);">⚖️ Appeal on File</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="meta-chip"><strong>Type:</strong> ${esc(appealTypeLabel(r.appeal_type))}</div>
-        <div class="meta-chip" style="cursor:pointer;" onclick="startEditAppealDate()" title="Click to edit">
+        <div class="meta-chip">
           <strong>Filed:</strong>
-          <span id="appealDateDisplay">${fmtDateTime(r.appeal_saved_at)}</span>
-          <span style="font-size:.7rem;color:var(--text-dim);margin-left:3px;">✎</span>
-        </div>
-        <div id="appealDateEdit" style="display:none;align-items:center;gap:4px;">
-          <strong style="font-size:.8rem;">Filed:</strong>
-          <input type="date" id="appealDateInput" value="${r.appeal_saved_at ? r.appeal_saved_at.split('T')[0].split(' ')[0] : ''}" style="padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:.8rem;">
-          <button class="btn btn-sm" onclick="saveAppealDate()" style="padding:2px 8px;">Save</button>
-          <button class="btn btn-ghost btn-sm" onclick="cancelEditAppealDate()" style="padding:2px 6px;">✕</button>
+          <span class="dp-wrap"><button type="button" class="dp-trigger" id="appealDateTrigger">${fmtDateTime(r.appeal_saved_at)}</button></span>
         </div>
         ${r.appeal_exemption ? `<div class="meta-chip"><strong>Exemption:</strong> ${esc(r.appeal_exemption)}</div>` : ''}
         ${r.appeal_deadline ? `
-        <div class="meta-chip" style="cursor:pointer;border-color:var(--red);" onclick="startEditAppealDeadline()" title="Click to edit">
+        <div class="meta-chip" style="border-color:var(--red);">
           <strong>Appeal Deadline:</strong>
-          <span id="appealDeadlineDisplay">${fmtDate(r.appeal_deadline)}</span>
-          <span style="font-size:.7rem;color:var(--text-dim);margin-left:3px;">✎</span>
-        </div>
-        <div id="appealDeadlineEdit" style="display:none;align-items:center;gap:4px;">
-          <strong style="font-size:.8rem;">Appeal Deadline:</strong>
-          <input type="date" id="appealDeadlineInput" value="${r.appeal_deadline ? r.appeal_deadline.split('T')[0].split(' ')[0] : ''}" style="padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:.8rem;">
-          <button class="btn btn-sm" onclick="saveAppealDeadline()" style="padding:2px 8px;">Save</button>
-          <button class="btn btn-ghost btn-sm" onclick="cancelEditAppealDeadline()" style="padding:2px 6px;">✕</button>
+          <span class="dp-wrap"><button type="button" class="dp-trigger" id="appealDeadlineTrigger">${fmtDate(r.appeal_deadline)}</button></span>
         </div>` : ''}
       </div>
       <div style="display:flex;gap:6px;">
@@ -5499,6 +5590,9 @@ async function openDetail(idOrObj) {
 
   // Load attachments after rendering
   loadAttachments(r.id);
+
+  // Initialize calendar date pickers on detail view
+  initDetailDatePickers(r);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -5689,6 +5783,8 @@ async function openUpdateModal(id) {
   document.getElementById('updTurn').value             = r.turn || 'My Turn';
   document.getElementById('updSecName').value          = r.secondary_contact_name || '';
   document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
+  // Sync calendar picker triggers with newly set values
+  refreshDateInputs(document.getElementById('updateModal'));
   document.getElementById('updateModal').classList.add('open');
 }
 
@@ -5765,23 +5861,71 @@ async function saveFoiaNum(id) {
   toast('FOIA number updated', 'success');
   refreshAllData();
 }
-function startEditCreatedDate(id) {
-  document.getElementById('createdDateDisplay').style.display = 'none';
-  const inp = document.getElementById('createdDateInput');
-  inp.style.display = '';
-  inp.focus();
-}
-async function saveCreatedDate(id) {
-  const inp = document.getElementById('createdDateInput');
-  const disp = document.getElementById('createdDateDisplay');
-  const val = inp.value;
-  if (!val) { inp.style.display = 'none'; disp.style.display = ''; return; }
-  const { status, data } = await api('POST', `/api/requests/${id}/update`, { created_date: val });
-  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); inp.style.display = 'none'; disp.style.display = ''; return; }
-  disp.textContent = fmtDate(val);
-  inp.style.display = 'none'; disp.style.display = '';
-  toast('Filed date updated', 'success');
-  refreshAllData();
+// Initialize calendar date pickers on the detail view
+function initDetailDatePickers(r) {
+  // Created Date
+  const createdTrigger = document.getElementById('createdDateTrigger');
+  if (createdTrigger) {
+    new DatePicker(createdTrigger, {
+      value: r.created_date || '',
+      async onChange(val) {
+        if (!val) return;
+        const { status, data } = await api('POST', `/api/requests/${r.id}/update`, { created_date: val });
+        if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+        toast('Filed date updated', 'success');
+        await openDetail(currentRequestId);
+        refreshAllData();
+      }
+    });
+  }
+
+  // Deadline Date
+  const deadlineTrigger = document.getElementById('deadlineTrigger');
+  if (deadlineTrigger) {
+    new DatePicker(deadlineTrigger, {
+      value: r.deadline_date ? r.deadline_date.split('T')[0] : '',
+      async onChange(val) {
+        if (!val) return;
+        const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { deadline_date: val });
+        if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+        toast('Deadline date updated', 'success');
+        await openDetail(currentRequestId);
+        refreshAllData();
+      }
+    });
+  }
+
+  // Appeal Filed Date
+  const appealDateTrigger = document.getElementById('appealDateTrigger');
+  if (appealDateTrigger) {
+    new DatePicker(appealDateTrigger, {
+      value: r.appeal_saved_at ? r.appeal_saved_at.split('T')[0].split(' ')[0] : '',
+      async onChange(val) {
+        if (!val) return;
+        const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { appeal_saved_at: val });
+        if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+        toast('Appeal filed date updated', 'success');
+        await openDetail(currentRequestId);
+        refreshAllData();
+      }
+    });
+  }
+
+  // Appeal Deadline
+  const appealDeadlineTrigger = document.getElementById('appealDeadlineTrigger');
+  if (appealDeadlineTrigger) {
+    new DatePicker(appealDeadlineTrigger, {
+      value: r.appeal_deadline ? r.appeal_deadline.split('T')[0].split(' ')[0] : '',
+      async onChange(val) {
+        if (!val) return;
+        const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { appeal_deadline: val });
+        if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+        toast('Appeal deadline updated', 'success');
+        await openDetail(currentRequestId);
+        refreshAllData();
+      }
+    });
+  }
 }
 
 // ── Inline-edit: Notes ────────────────────────────────────────
@@ -5826,67 +5970,173 @@ async function saveRespDays() {
   refreshAllData();
 }
 
-// ── Inline-edit: Deadline Date ───────────────────────────────
-function startEditDeadline() {
-  document.getElementById('deadlineDisplay').style.display = 'none';
-  document.getElementById('deadlineEdit').style.display = '';
-  document.getElementById('deadlineInput').focus();
-}
-function cancelEditDeadline() {
-  document.getElementById('deadlineEdit').style.display = 'none';
-  document.getElementById('deadlineDisplay').style.display = '';
-}
-async function saveDeadline() {
-  const val = document.getElementById('deadlineInput').value;
-  if (!val) { cancelEditDeadline(); return; }
-  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { deadline_date: val });
-  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
-  cancelEditDeadline();
-  toast('Deadline date updated', 'success');
-  await openDetail(currentRequestId);
-  refreshAllData();
+// (Inline-edit functions for Deadline, Appeal Date, and Appeal Deadline
+//  are now handled by DatePicker instances in initDetailDatePickers())
+
+// ─────────────────────────────────────────────────────────────
+// Date Picker Component
+// ─────────────────────────────────────────────────────────────
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY_ABBR = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+class DatePicker {
+  constructor(triggerEl, opts = {}) {
+    this.trigger = triggerEl;
+    this.value = opts.value || '';
+    this.onChange = opts.onChange || (() => {});
+    this.viewDate = this.value ? new Date(this.value + 'T00:00:00') : new Date();
+    this.popup = null;
+    this._build();
+    this.trigger.addEventListener('click', e => { e.stopPropagation(); this.toggle(); });
+    this._updateTrigger();
+  }
+
+  _build() {
+    this.popup = document.createElement('div');
+    this.popup.className = 'dp-popup';
+    this.popup.addEventListener('click', e => e.stopPropagation());
+    this.trigger.parentElement.style.position = 'relative';
+    this.trigger.parentElement.appendChild(this.popup);
+  }
+
+  _render() {
+    const y = this.viewDate.getFullYear(), m = this.viewDate.getMonth();
+    const firstDay = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const daysInPrev = new Date(y, m, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const selDate = this.value ? new Date(this.value + 'T00:00:00') : null;
+
+    let daysHtml = '';
+    // Previous month fill
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const d = daysInPrev - i;
+      daysHtml += `<button class="dp-day other" data-date="${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}" data-action="prev-day">${d}</button>`;
+    }
+    // Current month
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const dt = new Date(y, m, d);
+      let cls = 'dp-day';
+      if (dt.getTime() === today.getTime()) cls += ' today';
+      if (selDate && dt.getTime() === selDate.getTime()) cls += ' selected';
+      daysHtml += `<button class="${cls}" data-date="${dateStr}">${d}</button>`;
+    }
+    // Next month fill
+    const totalCells = firstDay + daysInMonth;
+    const remaining = (7 - (totalCells % 7)) % 7;
+    for (let d = 1; d <= remaining; d++) {
+      daysHtml += `<button class="dp-day other" data-action="next-day">${d}</button>`;
+    }
+
+    this.popup.innerHTML = `
+      <div class="dp-header">
+        <button data-action="prev-month">‹</button>
+        <span class="dp-month-year">${MONTH_NAMES[m]} ${y}</span>
+        <button data-action="next-month">›</button>
+      </div>
+      <div class="dp-weekdays">${DAY_ABBR.map(d => `<span>${d}</span>`).join('')}</div>
+      <div class="dp-days">${daysHtml}</div>
+      <div class="dp-footer">
+        <button data-action="today">Today</button>
+        <button data-action="clear">Clear</button>
+      </div>`;
+
+    // Event delegation
+    this.popup.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        if (action === 'prev-month') { this.viewDate.setMonth(m - 1); this._render(); }
+        else if (action === 'next-month') { this.viewDate.setMonth(m + 1); this._render(); }
+        else if (action === 'today') { this._select(this._fmt(new Date())); }
+        else if (action === 'clear') { this._select(''); }
+        else if (action === 'prev-day') { this.viewDate.setMonth(m - 1); this._render(); }
+        else if (action === 'next-day') { this.viewDate.setMonth(m + 1); this._render(); }
+      });
+    });
+    this.popup.querySelectorAll('.dp-day:not(.other)').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); this._select(btn.dataset.date); });
+    });
+  }
+
+  _fmt(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+  _select(dateStr) {
+    this.value = dateStr;
+    this._updateTrigger();
+    this.close();
+    this.onChange(dateStr);
+  }
+
+  _updateTrigger() {
+    this.trigger.textContent = this.value ? fmtDate(this.value) : 'Select date…';
+  }
+
+  open() {
+    if (this.value) this.viewDate = new Date(this.value + 'T00:00:00');
+    this._render();
+    this.popup.classList.add('open');
+    // Flip above if near bottom of viewport
+    const rect = this.popup.getBoundingClientRect();
+    if (rect.bottom > window.innerHeight - 10) this.popup.classList.add('above');
+    else this.popup.classList.remove('above');
+    // Close on outside click
+    this._outsideHandler = () => this.close();
+    setTimeout(() => document.addEventListener('click', this._outsideHandler), 0);
+  }
+
+  close() {
+    this.popup.classList.remove('open');
+    document.removeEventListener('click', this._outsideHandler);
+  }
+
+  toggle() { this.popup.classList.contains('open') ? this.close() : this.open(); }
+
+  setValue(v) { this.value = v || ''; this._updateTrigger(); }
 }
 
-// ── Inline-edit: Appeal Filed Date ────────────────────────────
-function startEditAppealDate() {
-  document.getElementById('appealDateDisplay').parentElement.style.display = 'none';
-  document.getElementById('appealDateEdit').style.display = 'flex';
-  document.getElementById('appealDateInput').focus();
-}
-function cancelEditAppealDate() {
-  document.getElementById('appealDateEdit').style.display = 'none';
-  document.getElementById('appealDateDisplay').parentElement.style.display = '';
-}
-async function saveAppealDate() {
-  const val = document.getElementById('appealDateInput').value;
-  if (!val) { cancelEditAppealDate(); return; }
-  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { appeal_saved_at: val });
-  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
-  cancelEditAppealDate();
-  toast('Appeal filed date updated', 'success');
-  await openDetail(currentRequestId);
-  refreshAllData();
+// Upgrade all <input type="date"> in modals to calendar pickers on focus
+function upgradeDateInputs(container) {
+  container.querySelectorAll('input[type="date"]:not([data-dp-init])').forEach(inp => {
+    inp.setAttribute('data-dp-init', '1');
+    // Wrap in dp-wrap
+    const wrap = document.createElement('span');
+    wrap.className = 'dp-wrap';
+    inp.parentNode.insertBefore(wrap, inp);
+    // Create trigger button
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'dp-trigger';
+    trigger.textContent = inp.value ? fmtDate(inp.value) : 'Select date…';
+    wrap.appendChild(trigger);
+    // Hide original input but keep it for form data
+    inp.style.display = 'none';
+    wrap.appendChild(inp);
+    // Create picker and store reference on the input
+    const picker = new DatePicker(trigger, {
+      value: inp.value || '',
+      onChange(val) {
+        inp.value = val;
+        inp.dispatchEvent(new Event('change', { bubbles: true }));
+        trigger.textContent = val ? fmtDate(val) : 'Select date…';
+      }
+    });
+    inp._datePicker = picker;
+    inp._dpTrigger = trigger;
+  });
 }
 
-// ── Inline-edit: Appeal Deadline ──────────────────────────────
-function startEditAppealDeadline() {
-  document.getElementById('appealDeadlineDisplay').parentElement.style.display = 'none';
-  document.getElementById('appealDeadlineEdit').style.display = 'flex';
-  document.getElementById('appealDeadlineInput').focus();
-}
-function cancelEditAppealDeadline() {
-  document.getElementById('appealDeadlineEdit').style.display = 'none';
-  document.getElementById('appealDeadlineDisplay').parentElement.style.display = '';
-}
-async function saveAppealDeadline() {
-  const val = document.getElementById('appealDeadlineInput').value;
-  if (!val) { cancelEditAppealDeadline(); return; }
-  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { appeal_deadline: val });
-  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
-  cancelEditAppealDeadline();
-  toast('Appeal deadline updated', 'success');
-  await openDetail(currentRequestId);
-  refreshAllData();
+// Sync trigger text with current input values (call after programmatically setting .value)
+function refreshDateInputs(container) {
+  container.querySelectorAll('input[type="date"][data-dp-init]').forEach(inp => {
+    if (inp._datePicker) {
+      inp._datePicker.setValue(inp.value);
+    }
+    if (inp._dpTrigger) {
+      inp._dpTrigger.textContent = inp.value ? fmtDate(inp.value) : 'Select date…';
+    }
+  });
 }
 
 // ─────────────────────────────────────────────────────────────
