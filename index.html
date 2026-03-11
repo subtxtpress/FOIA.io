@@ -5404,16 +5404,37 @@ async function openDetail(idOrObj) {
 
     <div class="detail-grid">
       <div class="card">
-        <div class="card-title">Notes</div>
-        <p style="font-size:.9rem;color:var(--text-dim);white-space:pre-wrap;">${esc(r.notes)||'No notes.'}</p>
+        <div class="card-title">Notes <span class="edit-hint" onclick="startEditNotes()" style="cursor:pointer;font-size:.7rem;color:var(--text-dim);margin-left:6px;">✎ edit</span></div>
+        <div id="notesDisplay" onclick="startEditNotes()" style="cursor:pointer;font-size:.9rem;color:var(--text-dim);white-space:pre-wrap;">${esc(r.notes)||'Click to add notes…'}</div>
+        <div id="notesEdit" style="display:none;">
+          <textarea id="notesInput" rows="4" style="width:100%;font-size:.85rem;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);resize:vertical;">${esc(r.notes||'')}</textarea>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="btn btn-sm" onclick="saveNotes()">Save</button>
+            <button class="btn btn-ghost btn-sm" onclick="cancelEditNotes()">Cancel</button>
+          </div>
+        </div>
       </div>
       ${(isActive || isAppealed) ? `<div class="card">
         <div class="card-title">Deadline Info</div>
         <div class="form-info">
           <div class="info-label">Response Days</div>
-          <div class="info-val">${r.response_days||20} business days</div>
+          <div class="info-val" id="respDaysDisplay" onclick="startEditRespDays()" style="cursor:pointer;" title="Click to edit">
+            ${r.response_days||20} business days <span class="edit-hint" style="font-size:.7rem;color:var(--text-dim);margin-left:4px;">✎</span>
+          </div>
+          <div id="respDaysEdit" style="display:none;margin-bottom:8px;">
+            <input type="number" id="respDaysInput" value="${r.response_days||20}" min="1" style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);">
+            <button class="btn btn-sm" onclick="saveRespDays()" style="margin-left:4px;">Save</button>
+            <button class="btn btn-ghost btn-sm" onclick="cancelEditRespDays()">✕</button>
+          </div>
           <div class="info-label" style="margin-top:10px;">Deadline Date</div>
-          <div class="info-val">${fmtDate(r.deadline_date)||'—'}</div>
+          <div class="info-val" id="deadlineDisplay" onclick="startEditDeadline()" style="cursor:pointer;" title="Click to edit">
+            ${fmtDate(r.deadline_date)||'—'} <span class="edit-hint" style="font-size:.7rem;color:var(--text-dim);margin-left:4px;">✎</span>
+          </div>
+          <div id="deadlineEdit" style="display:none;margin-bottom:8px;">
+            <input type="date" id="deadlineInput" value="${r.deadline_date ? r.deadline_date.split('T')[0] : ''}" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);">
+            <button class="btn btn-sm" onclick="saveDeadline()" style="margin-left:4px;">Save</button>
+            <button class="btn btn-ghost btn-sm" onclick="cancelEditDeadline()">✕</button>
+          </div>
           ${r.secondary_contact_email ? `
           <div class="info-label" style="margin-top:10px;">2nd Contact Email</div>
           <div class="info-val"><a href="mailto:${esc(r.secondary_contact_email)}" style="color:var(--text);">${esc(r.secondary_contact_email)}</a></div>` : ''}
@@ -5737,6 +5758,69 @@ async function saveCreatedDate(id) {
   disp.textContent = fmtDate(val);
   inp.style.display = 'none'; disp.style.display = '';
   toast('Filed date updated', 'success');
+  refreshAllData();
+}
+
+// ── Inline-edit: Notes ────────────────────────────────────────
+function startEditNotes() {
+  document.getElementById('notesDisplay').style.display = 'none';
+  const ed = document.getElementById('notesEdit');
+  ed.style.display = '';
+  document.getElementById('notesInput').focus();
+}
+function cancelEditNotes() {
+  document.getElementById('notesEdit').style.display = 'none';
+  document.getElementById('notesDisplay').style.display = '';
+}
+async function saveNotes() {
+  const val = document.getElementById('notesInput').value;
+  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { notes: val });
+  if (status !== 200) { toast(data.error || 'Failed to save notes', 'error'); return; }
+  document.getElementById('notesDisplay').textContent = val || 'Click to add notes…';
+  cancelEditNotes();
+  toast('Notes updated', 'success');
+  refreshAllData();
+}
+
+// ── Inline-edit: Response Days ───────────────────────────────
+function startEditRespDays() {
+  document.getElementById('respDaysDisplay').style.display = 'none';
+  document.getElementById('respDaysEdit').style.display = '';
+  document.getElementById('respDaysInput').focus();
+}
+function cancelEditRespDays() {
+  document.getElementById('respDaysEdit').style.display = 'none';
+  document.getElementById('respDaysDisplay').style.display = '';
+}
+async function saveRespDays() {
+  const val = parseInt(document.getElementById('respDaysInput').value, 10);
+  if (!val || val < 1) { toast('Enter a valid number of days', 'error'); return; }
+  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { response_days: val });
+  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+  cancelEditRespDays();
+  toast('Response days updated', 'success');
+  await openDetail(currentRequestId);
+  refreshAllData();
+}
+
+// ── Inline-edit: Deadline Date ───────────────────────────────
+function startEditDeadline() {
+  document.getElementById('deadlineDisplay').style.display = 'none';
+  document.getElementById('deadlineEdit').style.display = '';
+  document.getElementById('deadlineInput').focus();
+}
+function cancelEditDeadline() {
+  document.getElementById('deadlineEdit').style.display = 'none';
+  document.getElementById('deadlineDisplay').style.display = '';
+}
+async function saveDeadline() {
+  const val = document.getElementById('deadlineInput').value;
+  if (!val) { cancelEditDeadline(); return; }
+  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { deadline_date: val });
+  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+  cancelEditDeadline();
+  toast('Deadline date updated', 'success');
+  await openDetail(currentRequestId);
   refreshAllData();
 }
 
