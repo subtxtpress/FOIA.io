@@ -5307,11 +5307,19 @@ async function openDetail(idOrObj) {
   document.getElementById('detailContent').innerHTML = `
     <div class="detail-header">
       <div>
-        <h2 style="font-size:1.2rem;font-weight:800;color:var(--text);">${esc(r.foia_number)}</h2>
+        <h2 style="font-size:1.2rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px;">
+          <span id="foiaNumDisplay" onclick="startEditFoiaNum(${r.id})" style="cursor:pointer;" title="Click to edit">${esc(r.foia_number)}</span>
+          <input id="foiaNumInput" type="text" value="${esc(r.foia_number)}" style="display:none;font-size:1.2rem;font-weight:800;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 6px;width:10ch;"
+            onblur="saveFoiaNum(${r.id})" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.style.display='none';document.getElementById('foiaNumDisplay').style.display='';}">
+        </h2>
         <div style="font-size:0.9rem;font-weight:600;margin-top:6px;">${esc(r.subject||'—')}</div>
         <div class="detail-meta">
           <div class="meta-chip"><strong>Agency:</strong> ${esc(r.agency_name||'—')}</div>
-          <div class="meta-chip"><strong>Created:</strong> ${fmtDate(r.created_date)}</div>
+          <div class="meta-chip"><strong>Created:</strong>
+            <span id="createdDateDisplay" onclick="startEditCreatedDate(${r.id})" style="cursor:pointer;" title="Click to edit">${fmtDate(r.created_date)}</span>
+            <input id="createdDateInput" type="date" value="${r.created_date||''}" style="display:none;font-size:.82rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 4px;"
+              onblur="saveCreatedDate(${r.id})" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.style.display='none';document.getElementById('createdDateDisplay').style.display='';}">
+          </div>
           <div class="meta-chip"><strong>Status:</strong> ${statusBadge(r)}</div>
           ${isActive ? `<div class="meta-chip"><strong>Turn:</strong> ${r.turn||'My Turn'}</div>` : ''}
           ${r.secondary_contact_name ? `<div class="meta-chip"><strong>2nd Contact:</strong> ${esc(r.secondary_contact_name)}</div>` : ''}
@@ -5619,6 +5627,50 @@ async function deleteReq(id) {
   toast('Request deleted', '');
   await refreshAllData();
   nav('all-requests');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Inline edit: FOIA number & created date
+// ─────────────────────────────────────────────────────────────
+function startEditFoiaNum(id) {
+  document.getElementById('foiaNumDisplay').style.display = 'none';
+  const inp = document.getElementById('foiaNumInput');
+  inp.style.display = '';
+  inp.focus();
+  inp.select();
+}
+async function saveFoiaNum(id) {
+  const inp = document.getElementById('foiaNumInput');
+  const disp = document.getElementById('foiaNumDisplay');
+  const val = inp.value.trim();
+  if (!val || val === disp.textContent.trim()) {
+    inp.style.display = 'none'; disp.style.display = ''; return;
+  }
+  const { status, data } = await api('POST', `/api/requests/${id}/update`, { foia_number: val });
+  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); inp.style.display = 'none'; disp.style.display = ''; return; }
+  disp.textContent = val;
+  document.getElementById('topbarTitle').textContent = val;
+  inp.style.display = 'none'; disp.style.display = '';
+  toast('FOIA number updated', 'success');
+  refreshAllData();
+}
+function startEditCreatedDate(id) {
+  document.getElementById('createdDateDisplay').style.display = 'none';
+  const inp = document.getElementById('createdDateInput');
+  inp.style.display = '';
+  inp.focus();
+}
+async function saveCreatedDate(id) {
+  const inp = document.getElementById('createdDateInput');
+  const disp = document.getElementById('createdDateDisplay');
+  const val = inp.value;
+  if (!val) { inp.style.display = 'none'; disp.style.display = ''; return; }
+  const { status, data } = await api('POST', `/api/requests/${id}/update`, { created_date: val });
+  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); inp.style.display = 'none'; disp.style.display = ''; return; }
+  disp.textContent = fmtDate(val);
+  inp.style.display = 'none'; disp.style.display = '';
+  toast('Filed date updated', 'success');
+  refreshAllData();
 }
 
 // ─────────────────────────────────────────────────────────────

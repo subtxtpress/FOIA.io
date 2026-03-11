@@ -2148,8 +2148,9 @@ def update_request(req_id):
     fields = []
     values = []
     allowed = [
-        "notes", "turn", "secondary_contact_name",
-        "secondary_contact_email", "deadline_date", "response_days"
+        "foia_number", "created_date", "notes", "turn",
+        "secondary_contact_name", "secondary_contact_email",
+        "deadline_date", "response_days"
     ]
     for field in allowed:
         if field in data:
