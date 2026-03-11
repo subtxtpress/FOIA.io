@@ -4004,6 +4004,10 @@ a:focus-visible,
         <a id="foiaGovLink" href="https://www.foia.gov/create-a-request" target="_blank" rel="noopener"
            class="btn btn-ghost btn-sm">🌐 Open FOIA.gov Portal</a>
       </div>
+      <div id="letterDateRow" style="display:none;align-items:center;gap:10px;margin-bottom:12px;">
+        <label style="font-size:.85rem;font-weight:600;color:var(--text);white-space:nowrap;">Filed Date:</label>
+        <input type="date" id="letterFiledDate" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:.85rem;">
+      </div>
       <div class="form-actions discard-save">
         <button class="btn btn-danger" onclick="discardLetter()">Discard Letter</button>
         <button class="btn btn-primary" onclick="saveLetter()">Save Letter → Move to Active</button>
@@ -5703,6 +5707,23 @@ async function openLetter(id) {
     portalLink.style.display = (r.jurisdiction === 'Federal') ? '' : 'none';
   }
 
+  // Show filed-date picker for new requests (not yet active)
+  const dateRow = document.getElementById('letterDateRow');
+  if (r.status !== 'active') {
+    const dateInp = document.getElementById('letterFiledDate');
+    dateInp.value = r.created_date || new Date().toISOString().split('T')[0];
+    dateRow.style.display = 'flex';
+    // Upgrade to calendar picker (only once)
+    upgradeDateInputs(dateRow);
+    refreshDateInputs(dateRow);
+  } else {
+    dateRow.style.display = 'none';
+  }
+
+  // Hide discard/save buttons for already-active requests
+  const discardSave = document.querySelector('.discard-save');
+  if (discardSave) discardSave.style.display = r.status === 'active' ? 'none' : 'flex';
+
   const overlay = document.getElementById('letterModal');
   overlay.classList.add('open');
   // Scroll modal content to top
@@ -5756,8 +5777,10 @@ function copyLetter() {
 async function saveLetter() {
   if (!pendingLetterId) return;
   const text = document.getElementById('letterText').innerText;
+  const filedDate = document.getElementById('letterFiledDate').value || null;
   const { status, data } = await api('POST', `/api/requests/${pendingLetterId}/save-letter`, {
-    letter_text: text
+    letter_text: text,
+    filed_date: filedDate
   });
   if (status !== 200) { toast(data.error || 'Save failed', 'error'); return; }
   toast(`✓ Letter saved — moved to Active. Deadline: ${fmtDate(data.deadline_date)}`, 'success');

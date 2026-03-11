@@ -2099,12 +2099,19 @@ def delete_request(req_id):
 def save_letter(req_id):
     data = request.get_json()
     letter_text = data.get("letter_text", "")
+    filed_date = data.get("filed_date")  # optional override for created_date
 
     db = get_db()
     row = _can_access_request(db, req_id, session["user_id"])
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
+
+    # If a filed_date was provided, update created_date first
+    created_date = row["created_date"]
+    if filed_date:
+        created_date = filed_date
+        db.execute("UPDATE requests SET created_date=? WHERE id=?", (filed_date, req_id))
 
     # Calculate deadline — look up state law response_days if not already set
     rd = row["response_days"]
@@ -2116,7 +2123,7 @@ def save_letter(req_id):
         if state_law and state_law["response_days"]:
             rd = state_law["response_days"]
     rd = rd or 20  # default to 20 federal business days
-    deadline = add_business_days(row["created_date"], rd)
+    deadline = add_business_days(created_date, rd)
 
     db.execute("""
         UPDATE requests SET
