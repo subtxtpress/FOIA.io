@@ -5956,6 +5956,9 @@ async function openUpdateModal(id) {
   setUpdateType('response');
   refreshDateInputs(document.getElementById('updateModal'));
   upgradeDateInputs(document.getElementById('updFieldsetFollowup'));
+  // Reset scroll so pill selector is always visible at top
+  const modalBody = document.querySelector('#updateModal .modal-body');
+  if (modalBody) modalBody.scrollTop = 0;
   document.getElementById('updateModal').classList.add('open');
 }
 
