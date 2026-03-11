@@ -5634,7 +5634,8 @@ async function saveLetter() {
 // ─────────────────────────────────────────────────────────────
 async function openUpdateModal(id) {
   pendingUpdateId = id;
-  const { data: r } = await api('GET', `/api/requests/${id}`);
+  const { data } = await api('GET', `/api/requests/${id}`);
+  const r = data.request || data;
   document.getElementById('updResponseDate').value    = r.response_received_date || '';
   document.getElementById('updResponseSummary').value = r.response_summary || '';
   document.getElementById('updNextStep').value        = r.next_step || '';
