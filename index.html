@@ -4320,6 +4320,10 @@ a:focus-visible,
           <input type="text" id="appealExemption" placeholder="e.g. 5, 7(C), 7(E)…">
         </div>
       </div>
+      <div id="appealDateRow" style="display:none;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:var(--bg3);border-radius:8px;">
+        <span style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Date of Appeal</span>
+        <input type="date" id="appealFiledDate">
+      </div>
       <div
         id="appealText"
         class="letter-pre"
@@ -4329,6 +4333,7 @@ a:focus-visible,
       ></div>
       <div class="copy-row copy-to-clipboard">
         <button class="btn btn-ghost btn-sm" onclick="copyAppeal()">Copy to Clipboard</button>
+        <button class="btn btn-ghost btn-sm" id="btnDownloadAppealPdf" onclick="downloadAppealPdf()">Download PDF</button>
         <span class="copy-success" id="appealCopySuccess">✓ Copied</span>
         <button class="btn btn-ghost btn-sm regenerate-btn" onclick="regenerateAppeal()">Regenerate</button>
       </div>
@@ -6592,7 +6597,8 @@ function onAppealTypeChange() {
 
 async function openAppealModal(id) {
   pendingAppealId = id;
-  const { data: r } = await api('GET', `/api/requests/${id}`);
+  const { data } = await api('GET', `/api/requests/${id}`);
+  const r = data.request || data;
 
   // Pre-select type and exemption if appeal already saved
   if (r.appeal_type) {
@@ -6606,17 +6612,66 @@ async function openAppealModal(id) {
   }
 
   // Load saved appeal text or generate fresh
-  if (r.appeal_text) {
+  const hasSavedAppeal = !!r.appeal_text;
+  if (hasSavedAppeal) {
     document.getElementById('appealText').textContent = r.appeal_text;
   } else {
     await regenerateAppeal();
   }
 
+  // Subtitle
   const isState = ['State', 'Local', 'University'].includes(r.agency_type);
   document.getElementById('appealModalSub').textContent = isState
     ? `${r.foia_number} — State/Local appeal`
     : `${r.foia_number} — Federal appeal to DOJ Office of Information Policy`;
-  document.getElementById('appealModal').classList.add('open');
+
+  // Date picker row — show only for new appeals (not yet saved)
+  const dateRow     = document.getElementById('appealDateRow');
+  const discardSave = document.querySelector('#appealModal .discard-save');
+  const regenBtn    = document.querySelector('#appealModal .regenerate-btn');
+  const pdfBtn      = document.getElementById('btnDownloadAppealPdf');
+  const appealTypeRow = document.querySelector('#appealModal .appeal-type');
+
+  if (!hasSavedAppeal) {
+    // New appeal — show date picker, type selector, regenerate, save buttons
+    if (discardSave) discardSave.style.display = '';
+    if (regenBtn)    regenBtn.style.display = '';
+    if (pdfBtn)      pdfBtn.style.display = 'none';
+    if (appealTypeRow) appealTypeRow.style.display = '';
+    const dateInp = document.getElementById('appealFiledDate');
+    dateInp.value = new Date().toISOString().split('T')[0];
+    dateRow.style.display = 'flex';
+    upgradeDateInputs(dateRow);
+    refreshDateInputs(dateRow);
+    // When date changes, update the first line of the appeal text
+    if (!dateInp._appealSync) {
+      dateInp._appealSync = true;
+      dateInp.addEventListener('change', function() {
+        const appealEl = document.getElementById('appealText');
+        const lines = appealEl.innerText.split('\n');
+        if (lines.length && this.value) {
+          const d = new Date(this.value + 'T12:00:00');
+          lines[0] = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          appealEl.innerText = lines.join('\n');
+        }
+      });
+    }
+    document.getElementById('appealText').contentEditable = 'true';
+  } else {
+    // Saved appeal — show PDF download, hide save/regenerate/type/date
+    dateRow.style.display = 'none';
+    if (discardSave)   discardSave.style.display = 'none';
+    if (regenBtn)      regenBtn.style.display = 'none';
+    if (pdfBtn)        pdfBtn.style.display = '';
+    if (appealTypeRow) appealTypeRow.style.display = 'none';
+    document.getElementById('appealText').contentEditable = 'true';
+  }
+
+  // Scroll modal to top
+  const overlay = document.getElementById('appealModal');
+  overlay.classList.add('open');
+  const modalEl = overlay.querySelector('.modal');
+  if (modalEl) modalEl.scrollTop = 0;
 }
 
 async function regenerateAppeal() {
@@ -6644,6 +6699,12 @@ function copyAppeal() {
 
 function copyAppealText(text) {
   navigator.clipboard.writeText(text).then(() => toast('✓ Appeal copied', 'success'));
+}
+
+function downloadAppealPdf() {
+  if (!pendingAppealId) return;
+  toast('Generating PDF…', '');
+  window.location.href = `/api/requests/${pendingAppealId}/download-appeal-pdf`;
 }
 
 async function saveAppeal() {

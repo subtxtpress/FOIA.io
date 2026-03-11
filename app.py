@@ -2836,6 +2836,49 @@ def download_pdf(req_id):
     )
 
 
+@app.route("/api/requests/<int:req_id>/download-appeal-pdf")
+@subscription_required
+def download_appeal_pdf(req_id):
+    """Generate and stream a PDF of the appeal letter."""
+    import tempfile
+    from fpdf import FPDF
+
+    db = get_db()
+    access = _can_access_request(db, req_id, session["user_id"])
+    if not access:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+    row = db.execute("SELECT * FROM requests WHERE id=?", (req_id,)).fetchone()
+    db.close()
+
+    appeal_text = row["appeal_text"]
+    if not appeal_text:
+        return jsonify({"error": "No appeal saved yet"}), 400
+
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=25)
+    pdf.add_page()
+    pdf.set_font("Times", size=12)
+    pdf.set_margins(25, 25, 25)
+
+    for line in appeal_text.split("\n"):
+        pdf.multi_cell(0, 6, line)
+        pdf.ln(2)
+
+    tmpdir = tempfile.mkdtemp()
+    fname = f"{row['foia_number']}-appeal.pdf"
+    out_path = os.path.join(tmpdir, fname)
+    pdf.output(out_path)
+
+    log_action(req_id, session["user_id"], "Appeal PDF downloaded")
+    return send_file(
+        out_path,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=fname
+    )
+
+
 # ─────────────────────────────────────────────
 # Newsroom / Organization routes
 # ─────────────────────────────────────────────
