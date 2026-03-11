@@ -1146,6 +1146,8 @@ a:focus-visible,
   padding-left: 28px;
   padding-right: 28px;
   border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
 }
 .modal-body > .form-actions:last-child {
   position: sticky;
@@ -4004,13 +4006,15 @@ a:focus-visible,
         <a id="foiaGovLink" href="https://www.foia.gov/create-a-request" target="_blank" rel="noopener"
            class="btn btn-ghost btn-sm">🌐 Open FOIA.gov Portal</a>
       </div>
-      <div id="letterDateRow" style="display:none;align-items:center;gap:10px;margin-bottom:12px;">
-        <label style="font-size:.85rem;font-weight:600;color:var(--text);white-space:nowrap;">Filed Date:</label>
-        <input type="date" id="letterFiledDate" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:.85rem;">
-      </div>
       <div class="form-actions discard-save">
-        <button class="btn btn-danger" onclick="discardLetter()">Discard Letter</button>
-        <button class="btn btn-primary" onclick="saveLetter()">Save Letter → Move to Active</button>
+        <div id="letterDateRow" style="display:none;align-items:center;gap:8px;">
+          <span style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Filed</span>
+          <input type="date" id="letterFiledDate">
+        </div>
+        <div style="display:flex;gap:10px;margin-left:auto;">
+          <button class="btn btn-danger" onclick="discardLetter()">Discard Letter</button>
+          <button class="btn btn-primary" onclick="saveLetter()">Save Letter → Move to Active</button>
+        </div>
       </div>
     </div>
   </div>
@@ -5707,22 +5711,19 @@ async function openLetter(id) {
     portalLink.style.display = (r.jurisdiction === 'Federal') ? '' : 'none';
   }
 
-  // Show filed-date picker for new requests (not yet active)
+  // Show/hide action bar (filed date + discard/save) based on status
+  const discardSave = document.querySelector('.discard-save');
   const dateRow = document.getElementById('letterDateRow');
   if (r.status !== 'active') {
+    if (discardSave) discardSave.style.display = 'flex';
     const dateInp = document.getElementById('letterFiledDate');
     dateInp.value = r.created_date || new Date().toISOString().split('T')[0];
     dateRow.style.display = 'flex';
-    // Upgrade to calendar picker (only once)
     upgradeDateInputs(dateRow);
     refreshDateInputs(dateRow);
   } else {
-    dateRow.style.display = 'none';
+    if (discardSave) discardSave.style.display = 'none';
   }
-
-  // Hide discard/save buttons for already-active requests
-  const discardSave = document.querySelector('.discard-save');
-  if (discardSave) discardSave.style.display = r.status === 'active' ? 'none' : 'flex';
 
   const overlay = document.getElementById('letterModal');
   overlay.classList.add('open');
