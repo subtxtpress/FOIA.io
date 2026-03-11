@@ -5668,8 +5668,9 @@ async function saveUpdate() {
   const { status, data } = await api('POST', `/api/requests/${pendingUpdateId}/update`, payload);
   if (status !== 200) { toast(data.error || 'Update failed', 'error'); return; }
   toast('✓ Request updated', 'success');
+  const updatedId = pendingUpdateId;
   closeUpdateModal();
-  await openDetail(pendingUpdateId);
+  await openDetail(updatedId);
   await refreshAllData();
 }
 
