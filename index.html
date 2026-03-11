@@ -2887,9 +2887,7 @@ a:focus-visible,
 .meta-chip .dp-trigger:hover { background: var(--bg3); }
 .info-val .dp-trigger { padding: 3px 8px; }
 .dp-popup {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
+  position: fixed;
   z-index: 9999;
   background: var(--surface-elevated, var(--bg2));
   border: 1px solid var(--border);
@@ -2900,7 +2898,6 @@ a:focus-visible,
   display: none;
 }
 .dp-popup.open { display: block; }
-.dp-popup.above { top: auto; bottom: calc(100% + 4px); }
 .dp-header {
   display: flex;
   align-items: center;
@@ -5863,10 +5860,14 @@ async function saveFoiaNum(id) {
 }
 // Initialize calendar date pickers on the detail view
 function initDetailDatePickers(r) {
+  // Destroy any previous detail pickers (prevents orphaned popups on body)
+  _detailDatePickers.forEach(p => p.destroy());
+  _detailDatePickers = [];
+
   // Created Date
   const createdTrigger = document.getElementById('createdDateTrigger');
   if (createdTrigger) {
-    new DatePicker(createdTrigger, {
+    _detailDatePickers.push(new DatePicker(createdTrigger, {
       value: r.created_date || '',
       async onChange(val) {
         if (!val) return;
@@ -5876,13 +5877,13 @@ function initDetailDatePickers(r) {
         await openDetail(currentRequestId);
         refreshAllData();
       }
-    });
+    }));
   }
 
   // Deadline Date
   const deadlineTrigger = document.getElementById('deadlineTrigger');
   if (deadlineTrigger) {
-    new DatePicker(deadlineTrigger, {
+    _detailDatePickers.push(new DatePicker(deadlineTrigger, {
       value: r.deadline_date ? r.deadline_date.split('T')[0] : '',
       async onChange(val) {
         if (!val) return;
@@ -5892,13 +5893,13 @@ function initDetailDatePickers(r) {
         await openDetail(currentRequestId);
         refreshAllData();
       }
-    });
+    }));
   }
 
   // Appeal Filed Date
   const appealDateTrigger = document.getElementById('appealDateTrigger');
   if (appealDateTrigger) {
-    new DatePicker(appealDateTrigger, {
+    _detailDatePickers.push(new DatePicker(appealDateTrigger, {
       value: r.appeal_saved_at ? r.appeal_saved_at.split('T')[0].split(' ')[0] : '',
       async onChange(val) {
         if (!val) return;
@@ -5908,13 +5909,13 @@ function initDetailDatePickers(r) {
         await openDetail(currentRequestId);
         refreshAllData();
       }
-    });
+    }));
   }
 
   // Appeal Deadline
   const appealDeadlineTrigger = document.getElementById('appealDeadlineTrigger');
   if (appealDeadlineTrigger) {
-    new DatePicker(appealDeadlineTrigger, {
+    _detailDatePickers.push(new DatePicker(appealDeadlineTrigger, {
       value: r.appeal_deadline ? r.appeal_deadline.split('T')[0].split(' ')[0] : '',
       async onChange(val) {
         if (!val) return;
@@ -5924,7 +5925,7 @@ function initDetailDatePickers(r) {
         await openDetail(currentRequestId);
         refreshAllData();
       }
-    });
+    }));
   }
 }
 
@@ -5995,8 +5996,8 @@ class DatePicker {
     this.popup = document.createElement('div');
     this.popup.className = 'dp-popup';
     this.popup.addEventListener('click', e => e.stopPropagation());
-    this.trigger.parentElement.style.position = 'relative';
-    this.trigger.parentElement.appendChild(this.popup);
+    // Append to body so it's never clipped by overflow:hidden ancestors
+    document.body.appendChild(this.popup);
   }
 
   _render() {
@@ -6077,10 +6078,23 @@ class DatePicker {
     if (this.value) this.viewDate = new Date(this.value + 'T00:00:00');
     this._render();
     this.popup.classList.add('open');
-    // Flip above if near bottom of viewport
-    const rect = this.popup.getBoundingClientRect();
-    if (rect.bottom > window.innerHeight - 10) this.popup.classList.add('above');
-    else this.popup.classList.remove('above');
+    // Position relative to trigger using fixed coords (avoids overflow clipping)
+    const trigRect = this.trigger.getBoundingClientRect();
+    const popH = this.popup.offsetHeight;
+    const spaceBelow = window.innerHeight - trigRect.bottom - 8;
+    if (spaceBelow >= popH || spaceBelow >= trigRect.top - 8) {
+      // Open below
+      this.popup.style.top = (trigRect.bottom + 4) + 'px';
+    } else {
+      // Open above
+      this.popup.style.top = (trigRect.top - popH - 4) + 'px';
+    }
+    this.popup.style.left = trigRect.left + 'px';
+    // Keep popup from going off right edge
+    const popRight = trigRect.left + 280;
+    if (popRight > window.innerWidth - 8) {
+      this.popup.style.left = Math.max(8, window.innerWidth - 288) + 'px';
+    }
     // Close on outside click
     this._outsideHandler = () => this.close();
     setTimeout(() => document.addEventListener('click', this._outsideHandler), 0);
@@ -6088,13 +6102,23 @@ class DatePicker {
 
   close() {
     this.popup.classList.remove('open');
+    this.popup.style.top = '';
+    this.popup.style.left = '';
     document.removeEventListener('click', this._outsideHandler);
   }
 
   toggle() { this.popup.classList.contains('open') ? this.close() : this.open(); }
 
   setValue(v) { this.value = v || ''; this._updateTrigger(); }
+
+  destroy() {
+    this.close();
+    if (this.popup && this.popup.parentNode) this.popup.parentNode.removeChild(this.popup);
+  }
 }
+
+// Track detail-view date pickers so we can clean them up on re-render
+let _detailDatePickers = [];
 
 // Upgrade all <input type="date"> in modals to calendar pickers on focus
 function upgradeDateInputs(container) {
