@@ -122,6 +122,11 @@ def init_db():
             turn            TEXT    DEFAULT 'My Turn',
             secondary_contact_name  TEXT,
             secondary_contact_email TEXT,
+            -- response tracking
+            response_received_date TEXT,
+            response_summary       TEXT,
+            next_step              TEXT,
+            next_step_date         TEXT,
             -- closed
             closed_date     TEXT,
             -- appeal
@@ -293,6 +298,19 @@ def init_db():
     for col, col_type in [("city_name", "TEXT"), ("website", "TEXT")]:
         try:
             db.execute(f"ALTER TABLE state_local_agencies ADD COLUMN {col} {col_type}")
+            db.commit()
+        except Exception:
+            pass  # column already exists
+
+    # ── Migration: add response tracking columns ────────────────────────
+    for col, col_type in [
+        ("response_received_date", "TEXT"),
+        ("response_summary", "TEXT"),
+        ("next_step", "TEXT"),
+        ("next_step_date", "TEXT"),
+    ]:
+        try:
+            db.execute(f"ALTER TABLE requests ADD COLUMN {col} {col_type}")
             db.commit()
         except Exception:
             pass  # column already exists
@@ -2180,7 +2198,9 @@ def update_request(req_id):
     allowed = [
         "foia_number", "created_date", "notes", "turn",
         "secondary_contact_name", "secondary_contact_email",
-        "deadline_date", "response_days"
+        "deadline_date", "response_days",
+        "response_received_date", "response_summary",
+        "next_step", "next_step_date"
     ]
     for field in allowed:
         if field in data:

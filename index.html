@@ -518,6 +518,9 @@ body {
   box-shadow: var(--shadow);
   max-width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   transition: box-shadow .22s ease, transform .22s ease;
 }
 .card::before {
@@ -1198,11 +1201,12 @@ a:focus-visible,
 }
 /* ── Detail panel ──────────────────────────────────────────── */
 #backButton {
-  margin-left: 5%;
+  margin-left: clamp(16px, 5%, 48px);
 }
 #detailContent {
-  padding: 5%;
+  padding: 24px clamp(16px, 5%, 48px);
   margin: 0;
+  max-width: 960px;
 }
 .detail-header {
   font-family: var(--font-heading);
@@ -1252,6 +1256,7 @@ a:focus-visible,
   margin-top: 0 !important;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 .detail-grid > .card > p,
 .detail-grid > .card > .form-info {
@@ -3913,33 +3918,74 @@ a:focus-visible,
       <button class="modal-close" aria-label="Close dialog" onclick="closeUpdateModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label>Additional Notes</label>
-        <textarea id="updNotes" rows="4" placeholder="Log responses, follow-ups, exemptions cited…"></textarea>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Override Deadline Date</label>
-          <input type="date" id="updDeadline">
+      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
+        <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Response Received</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date Response Received</label>
+            <input type="date" id="updResponseDate">
+          </div>
+          <div class="form-group">
+            <label>Turn</label>
+            <select id="updTurn">
+              <option value="My Turn">My Turn</option>
+              <option value="Their Turn">Their Turn</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
-          <label>Turn</label>
-          <select id="updTurn">
-            <option value="My Turn">My Turn</option>
-            <option value="Their Turn">Their Turn</option>
-          </select>
+          <label>Response Summary</label>
+          <textarea id="updResponseSummary" rows="2" placeholder="e.g., Partial disclosure — 12 pages released, 3 withheld citing exemption 7(C)…"></textarea>
         </div>
-      </div>
-      <div class="form-row">
+      </fieldset>
+
+      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
+        <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Next Steps</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Next Action</label>
+            <select id="updNextStep">
+              <option value="">— None —</option>
+              <option value="Follow up with agency">Follow up with agency</option>
+              <option value="File appeal">File appeal</option>
+              <option value="Review released records">Review released records</option>
+              <option value="Request fee waiver">Request fee waiver</option>
+              <option value="Narrow/clarify request">Narrow/clarify request</option>
+              <option value="Await response">Await response</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Follow-up By</label>
+            <input type="date" id="updNextStepDate">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
+        <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Details</legend>
         <div class="form-group">
-          <label>Secondary Contact Name</label>
-          <input type="text" id="updSecName" placeholder="Name">
+          <label>Notes</label>
+          <textarea id="updNotes" rows="3" placeholder="Log responses, follow-ups, exemptions cited…"></textarea>
         </div>
-        <div class="form-group">
-          <label>Secondary Contact Email</label>
-          <input type="email" id="updSecEmail" placeholder="email@agency.gov">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Override Deadline Date</label>
+            <input type="date" id="updDeadline">
+          </div>
         </div>
-      </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Secondary Contact Name</label>
+            <input type="text" id="updSecName" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label>Secondary Contact Email</label>
+            <input type="email" id="updSecEmail" placeholder="email@agency.gov">
+          </div>
+        </div>
+      </fieldset>
+
       <div class="form-actions">
         <button class="btn btn-ghost" onclick="closeUpdateModal()">Discard</button>
         <button class="btn btn-primary" onclick="saveUpdate()">Save Updates</button>
@@ -5345,6 +5391,17 @@ async function openDetail(idOrObj) {
 
     ${deadlineBanner}
 
+    ${(r.next_step || r.response_received_date) ? `
+    <div class="card" style="margin-bottom:16px;border-color:var(--amber);">
+      <div class="card-title">📋 Status &amp; Next Steps</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        ${r.response_received_date ? `<div class="meta-chip"><strong>Response Received:</strong> ${fmtDate(r.response_received_date)}</div>` : ''}
+        ${r.next_step ? `<div class="meta-chip"><strong>Next Step:</strong> ${esc(r.next_step)}</div>` : ''}
+        ${r.next_step_date ? `<div class="meta-chip"><strong>Follow-up By:</strong> ${fmtDate(r.next_step_date)}</div>` : ''}
+      </div>
+      ${r.response_summary ? `<p style="font-size:.85rem;color:var(--text-dim);margin-top:10px;white-space:pre-wrap;">${esc(r.response_summary)}</p>` : ''}
+    </div>` : ''}
+
     <div class="detail-grid">
       <div class="card">
         <div class="card-title">Notes</div>
@@ -5578,11 +5635,15 @@ async function saveLetter() {
 async function openUpdateModal(id) {
   pendingUpdateId = id;
   const { data: r } = await api('GET', `/api/requests/${id}`);
-  document.getElementById('updNotes').value    = r.notes || '';
-  document.getElementById('updDeadline').value = r.deadline_date || '';
-  document.getElementById('updTurn').value     = r.turn || 'My Turn';
-  document.getElementById('updSecName').value  = r.secondary_contact_name || '';
-  document.getElementById('updSecEmail').value = r.secondary_contact_email || '';
+  document.getElementById('updResponseDate').value    = r.response_received_date || '';
+  document.getElementById('updResponseSummary').value = r.response_summary || '';
+  document.getElementById('updNextStep').value        = r.next_step || '';
+  document.getElementById('updNextStepDate').value    = r.next_step_date || '';
+  document.getElementById('updNotes').value            = r.notes || '';
+  document.getElementById('updDeadline').value         = r.deadline_date || '';
+  document.getElementById('updTurn').value             = r.turn || 'My Turn';
+  document.getElementById('updSecName').value          = r.secondary_contact_name || '';
+  document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
   document.getElementById('updateModal').classList.add('open');
 }
 
@@ -5594,6 +5655,10 @@ function closeUpdateModal() {
 async function saveUpdate() {
   if (!pendingUpdateId) return;
   const payload = {
+    response_received_date:  document.getElementById('updResponseDate').value || undefined,
+    response_summary:        document.getElementById('updResponseSummary').value || undefined,
+    next_step:               document.getElementById('updNextStep').value || undefined,
+    next_step_date:          document.getElementById('updNextStepDate').value || undefined,
     notes:                   document.getElementById('updNotes').value,
     deadline_date:           document.getElementById('updDeadline').value || undefined,
     turn:                    document.getElementById('updTurn').value,
