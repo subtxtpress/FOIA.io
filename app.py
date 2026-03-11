@@ -2256,7 +2256,8 @@ def update_request(req_id):
         "next_step", "next_step_date",
         "appeal_saved_at", "appeal_deadline",
         "outcome", "exemptions_cited", "fees", "fee_dispute",
-        "method_filed", "priority", "agency_status", "phone"
+        "method_filed", "priority", "agency_status", "phone",
+        "agency_name", "agency_type", "state_code"
     ]
     for field in allowed:
         if field in data:

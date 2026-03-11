@@ -4237,6 +4237,23 @@ a:focus-visible,
       <!-- Details fieldset -->
       <fieldset id="updFieldsetDetails" style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
         <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Details</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Agency Name</label>
+            <input type="text" id="updAgencyName" placeholder="e.g. Jefferson City Police Department">
+          </div>
+          <div class="form-group">
+            <label>Jurisdiction</label>
+            <select id="updAgencyType">
+              <option value="">— Select —</option>
+              <option value="Federal">Federal</option>
+              <option value="State">State</option>
+              <option value="Local">Local</option>
+              <option value="University">University</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
         <div class="form-group">
           <label>Notes</label>
           <textarea id="updNotes" rows="3" placeholder="Log responses, follow-ups, exemptions cited…"></textarea>
@@ -6085,6 +6102,8 @@ function setUpdateType(type) {
     document.getElementById('updPhone').value            = r.phone || '';
     document.getElementById('updMethodFiled').value      = r.method_filed || '';
     document.getElementById('updPriority').value         = r.priority || '';
+    document.getElementById('updAgencyName').value       = r.agency_name || '';
+    document.getElementById('updAgencyType').value       = r.agency_type || '';
     refreshDateInputs(document.getElementById('updFieldsetDetails'));
   }
 }
@@ -6106,6 +6125,8 @@ async function openUpdateModal(id) {
   document.getElementById('updPhone').value            = r.phone || '';
   document.getElementById('updMethodFiled').value      = r.method_filed || '';
   document.getElementById('updPriority').value         = r.priority || '';
+  document.getElementById('updAgencyName').value       = r.agency_name || '';
+  document.getElementById('updAgencyType').value       = r.agency_type || '';
 
   // Default to "response" type (blanks event fields), sync pickers
   setUpdateType('response');
@@ -6152,6 +6173,8 @@ async function saveUpdate() {
     payload.phone                  = document.getElementById('updPhone').value || undefined;
     payload.method_filed           = document.getElementById('updMethodFiled').value || undefined;
     payload.priority               = document.getElementById('updPriority').value || undefined;
+    payload.agency_name            = document.getElementById('updAgencyName').value || undefined;
+    payload.agency_type            = document.getElementById('updAgencyType').value || undefined;
   }
 
   // Turn + Next Steps (always visible for all three types)
