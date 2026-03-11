@@ -4341,10 +4341,6 @@ a:focus-visible,
         <button class="btn btn-danger" onclick="closeAppealModal()">Discard</button>
         <button class="btn btn-primary" id="appealSaveBtn" onclick="saveAppeal()">Save Appeal → Mark as Appealed</button>
       </div>
-      <div class="form-actions" id="appealViewActions" style="display:none;">
-        <button class="btn btn-ghost" onclick="enableAppealEdit()">✏️ Edit Appeal</button>
-        <button class="btn btn-ghost" onclick="closeAppealModal()">Close</button>
-      </div>
     </div>
   </div>
 </div>
@@ -6629,18 +6625,28 @@ async function openAppealModal(id) {
     ? `${r.foia_number} — State/Local appeal`
     : `${r.foia_number} — Federal appeal to DOJ Office of Information Policy`;
 
-  // Date picker row — show only for new appeals (not yet saved)
+  // Always show type selector, date picker, editable text, and save — matching letter modal
   const dateRow     = document.getElementById('appealDateRow');
   const discardSave = document.querySelector('#appealModal .discard-save');
-  const regenBtn    = document.querySelector('#appealModal .regenerate-btn');
   const pdfBtn      = document.getElementById('btnDownloadAppealPdf');
-  const appealTypeRow = document.querySelector('#appealModal .appeal-type');
-
-  const viewActions = document.getElementById('appealViewActions');
   const saveBtn     = document.getElementById('appealSaveBtn');
+  const viewActions = document.getElementById('appealViewActions');
+  if (viewActions)  viewActions.style.display = 'none';
+  if (discardSave)  discardSave.style.display = '';
+
+  // Date picker — always shown; pre-fill from appeal text date or today
+  const dateInp = document.getElementById('appealFiledDate');
+  if (hasSavedAppeal && r.appeal_saved_at) {
+    // Extract date from the first line of saved appeal text, or use appeal_saved_at
+    dateInp.value = r.appeal_saved_at.split('T')[0].split(' ')[0];
+  } else {
+    dateInp.value = new Date().toISOString().split('T')[0];
+  }
+  dateRow.style.display = 'flex';
+  upgradeDateInputs(dateRow);
+  refreshDateInputs(dateRow);
 
   // Wire up date sync listener once
-  const dateInp = document.getElementById('appealFiledDate');
   if (!dateInp._appealSync) {
     dateInp._appealSync = true;
     dateInp.addEventListener('change', function() {
@@ -6654,29 +6660,15 @@ async function openAppealModal(id) {
     });
   }
 
-  if (!hasSavedAppeal) {
-    // New appeal — show date picker, type selector, regenerate, save buttons
-    if (discardSave) discardSave.style.display = '';
-    if (viewActions)  viewActions.style.display = 'none';
-    if (regenBtn)    regenBtn.style.display = '';
-    if (pdfBtn)      pdfBtn.style.display = 'none';
-    if (appealTypeRow) appealTypeRow.style.display = '';
-    if (saveBtn)     saveBtn.textContent = 'Save Appeal → Mark as Appealed';
-    dateInp.value = new Date().toISOString().split('T')[0];
-    dateRow.style.display = 'flex';
-    upgradeDateInputs(dateRow);
-    refreshDateInputs(dateRow);
-    document.getElementById('appealText').contentEditable = 'true';
-  } else {
-    // Saved appeal — view mode: show PDF download + Edit button
-    dateRow.style.display = 'none';
-    if (discardSave)   discardSave.style.display = 'none';
-    if (viewActions)    viewActions.style.display = '';
-    if (regenBtn)      regenBtn.style.display = 'none';
-    if (pdfBtn)        pdfBtn.style.display = '';
-    if (appealTypeRow) appealTypeRow.style.display = 'none';
-    document.getElementById('appealText').contentEditable = 'false';
-  }
+  // PDF download only available for saved appeals
+  if (pdfBtn) pdfBtn.style.display = hasSavedAppeal ? '' : 'none';
+
+  // Save button label
+  if (saveBtn) saveBtn.textContent = hasSavedAppeal
+    ? 'Save Changes'
+    : 'Save Appeal → Mark as Appealed';
+
+  document.getElementById('appealText').contentEditable = 'true';
 
   // Scroll modal to top
   const overlay = document.getElementById('appealModal');
@@ -6710,23 +6702,6 @@ function copyAppeal() {
 
 function copyAppealText(text) {
   navigator.clipboard.writeText(text).then(() => toast('✓ Appeal copied', 'success'));
-}
-
-function enableAppealEdit() {
-  // Switch appeal modal from view mode to edit mode
-  const discardSave  = document.querySelector('#appealModal .discard-save');
-  const viewActions  = document.getElementById('appealViewActions');
-  const regenBtn     = document.querySelector('#appealModal .regenerate-btn');
-  const appealTypeRow = document.querySelector('#appealModal .appeal-type');
-  const saveBtn      = document.getElementById('appealSaveBtn');
-
-  if (discardSave)   discardSave.style.display = '';
-  if (viewActions)    viewActions.style.display = 'none';
-  if (regenBtn)      regenBtn.style.display = '';
-  if (appealTypeRow) appealTypeRow.style.display = '';
-  if (saveBtn)       saveBtn.textContent = 'Save Changes';
-  document.getElementById('appealText').contentEditable = 'true';
-  document.getElementById('appealText').focus();
 }
 
 function downloadAppealPdf() {
