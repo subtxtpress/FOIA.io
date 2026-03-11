@@ -2200,7 +2200,8 @@ def update_request(req_id):
         "secondary_contact_name", "secondary_contact_email",
         "deadline_date", "response_days",
         "response_received_date", "response_summary",
-        "next_step", "next_step_date"
+        "next_step", "next_step_date",
+        "appeal_saved_at"
     ]
     for field in allowed:
         if field in data:

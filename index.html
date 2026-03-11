@@ -5448,7 +5448,17 @@ async function openDetail(idOrObj) {
       <div class="card-title" style="color:var(--red);">⚖️ Appeal on File</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="meta-chip"><strong>Type:</strong> ${esc(appealTypeLabel(r.appeal_type))}</div>
-        <div class="meta-chip"><strong>Filed:</strong> ${fmtDateTime(r.appeal_saved_at)}</div>
+        <div class="meta-chip" style="cursor:pointer;" onclick="startEditAppealDate()" title="Click to edit">
+          <strong>Filed:</strong>
+          <span id="appealDateDisplay">${fmtDateTime(r.appeal_saved_at)}</span>
+          <span style="font-size:.7rem;color:var(--text-dim);margin-left:3px;">✎</span>
+        </div>
+        <div id="appealDateEdit" style="display:none;align-items:center;gap:4px;">
+          <strong style="font-size:.8rem;">Filed:</strong>
+          <input type="date" id="appealDateInput" value="${r.appeal_saved_at ? r.appeal_saved_at.split('T')[0].split(' ')[0] : ''}" style="padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:.8rem;">
+          <button class="btn btn-sm" onclick="saveAppealDate()" style="padding:2px 8px;">Save</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelEditAppealDate()" style="padding:2px 6px;">✕</button>
+        </div>
         ${r.appeal_exemption ? `<div class="meta-chip"><strong>Exemption:</strong> ${esc(r.appeal_exemption)}</div>` : ''}
       </div>
       <div style="display:flex;gap:6px;">
@@ -5821,6 +5831,27 @@ async function saveDeadline() {
   if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
   cancelEditDeadline();
   toast('Deadline date updated', 'success');
+  await openDetail(currentRequestId);
+  refreshAllData();
+}
+
+// ── Inline-edit: Appeal Filed Date ────────────────────────────
+function startEditAppealDate() {
+  document.getElementById('appealDateDisplay').parentElement.style.display = 'none';
+  document.getElementById('appealDateEdit').style.display = 'flex';
+  document.getElementById('appealDateInput').focus();
+}
+function cancelEditAppealDate() {
+  document.getElementById('appealDateEdit').style.display = 'none';
+  document.getElementById('appealDateDisplay').parentElement.style.display = '';
+}
+async function saveAppealDate() {
+  const val = document.getElementById('appealDateInput').value;
+  if (!val) { cancelEditAppealDate(); return; }
+  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { appeal_saved_at: val });
+  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+  cancelEditAppealDate();
+  toast('Appeal filed date updated', 'success');
   await openDetail(currentRequestId);
   refreshAllData();
 }
