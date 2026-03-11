@@ -5460,6 +5460,18 @@ async function openDetail(idOrObj) {
           <button class="btn btn-ghost btn-sm" onclick="cancelEditAppealDate()" style="padding:2px 6px;">✕</button>
         </div>
         ${r.appeal_exemption ? `<div class="meta-chip"><strong>Exemption:</strong> ${esc(r.appeal_exemption)}</div>` : ''}
+        ${r.appeal_deadline ? `
+        <div class="meta-chip" style="cursor:pointer;border-color:var(--red);" onclick="startEditAppealDeadline()" title="Click to edit">
+          <strong>Appeal Deadline:</strong>
+          <span id="appealDeadlineDisplay">${fmtDate(r.appeal_deadline)}</span>
+          <span style="font-size:.7rem;color:var(--text-dim);margin-left:3px;">✎</span>
+        </div>
+        <div id="appealDeadlineEdit" style="display:none;align-items:center;gap:4px;">
+          <strong style="font-size:.8rem;">Appeal Deadline:</strong>
+          <input type="date" id="appealDeadlineInput" value="${r.appeal_deadline ? r.appeal_deadline.split('T')[0].split(' ')[0] : ''}" style="padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:.8rem;">
+          <button class="btn btn-sm" onclick="saveAppealDeadline()" style="padding:2px 8px;">Save</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelEditAppealDeadline()" style="padding:2px 6px;">✕</button>
+        </div>` : ''}
       </div>
       <div style="display:flex;gap:6px;">
         <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--red);color:var(--red);">View / Edit Appeal</button>
@@ -5852,6 +5864,27 @@ async function saveAppealDate() {
   if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
   cancelEditAppealDate();
   toast('Appeal filed date updated', 'success');
+  await openDetail(currentRequestId);
+  refreshAllData();
+}
+
+// ── Inline-edit: Appeal Deadline ──────────────────────────────
+function startEditAppealDeadline() {
+  document.getElementById('appealDeadlineDisplay').parentElement.style.display = 'none';
+  document.getElementById('appealDeadlineEdit').style.display = 'flex';
+  document.getElementById('appealDeadlineInput').focus();
+}
+function cancelEditAppealDeadline() {
+  document.getElementById('appealDeadlineEdit').style.display = 'none';
+  document.getElementById('appealDeadlineDisplay').parentElement.style.display = '';
+}
+async function saveAppealDeadline() {
+  const val = document.getElementById('appealDeadlineInput').value;
+  if (!val) { cancelEditAppealDeadline(); return; }
+  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { appeal_deadline: val });
+  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+  cancelEditAppealDeadline();
+  toast('Appeal deadline updated', 'success');
   await openDetail(currentRequestId);
   refreshAllData();
 }

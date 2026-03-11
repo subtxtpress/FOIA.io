@@ -134,6 +134,7 @@ def init_db():
             appeal_text     TEXT,
             appeal_saved_at TEXT,
             appeal_exemption TEXT,
+            appeal_deadline TEXT,
             -- last action
             last_action_date TEXT,
             last_action_note TEXT,
@@ -314,6 +315,22 @@ def init_db():
             db.commit()
         except Exception:
             pass  # column already exists
+
+    # ── Migration: add appeal_deadline column ───────────────────────────
+    try:
+        db.execute("ALTER TABLE requests ADD COLUMN appeal_deadline TEXT")
+        db.commit()
+    except Exception:
+        pass  # column already exists
+
+    # ── Migration: fix Missouri appeal_days (was 0, should be 7 per RSMo § 610.027.3)
+    try:
+        db.execute(
+            "UPDATE state_laws SET appeal_days=7, notes='3 business days to provide records, deny, or provide records on a longer but reasonable timeline with written explanation. Agency has 7 business days to respond to appeal per RSMo § 610.027.3.' WHERE state_code='MO' AND appeal_days=0"
+        )
+        db.commit()
+    except Exception:
+        pass
 
     # ── Migration: drop UNIQUE constraint on foia_number ─────────────────
     # FOIA numbers are now per-user, so different users can share the same number.
@@ -993,7 +1010,7 @@ STATE_LAWS = [
     ("Michigan",      "MI", "Michigan FOIA",                             "MCL 15.235",                       5, 180, "5 business days to respond; can extend 10 additional business days with detailed written justification."),
     ("Minnesota",     "MN", "Minnesota Government Data Practices Act",   "Minn. Stat. § 13.03",             10, 60,  "10 business days to respond; must provide data or explain when available 'as soon as reasonably possible.'"),
     ("Mississippi",   "MS", "Mississippi Public Records Act",            "Miss. Code § 25-61-5",             7,  7,  "7 working days to provide records or written statement of grounds for denial."),
-    ("Missouri",      "MO", "Missouri Sunshine Law",                     "RSMo § 610.023",                   3,  0,  "3 business days to provide records, deny, or provide records on a longer but reasonable timeline with written explanation. No appeal deadline specified."),
+    ("Missouri",      "MO", "Missouri Sunshine Law",                     "RSMo § 610.023",                   3,  7,  "3 business days to provide records, deny, or provide records on a longer but reasonable timeline with written explanation. Agency has 7 business days to respond to appeal per RSMo § 610.027.3."),
     ("Montana",       "MT", "Montana Right to Know Act",                 "MCA 2-6-1003",                     5, 60,  "5 business days to respond with records or explain delay."),
     ("Nebraska",      "NE", "Nebraska Public Records Law",               "Neb. Rev. Stat. § 84-712",         4, 30,  "4 business days to respond with determination and timeline."),
     ("Nevada",        "NV", "Nevada Public Records Act",                 "NRS 239.0107",                     5, 30,  "5 business days to respond; must produce within reasonable time."),
@@ -2089,8 +2106,16 @@ def save_letter(req_id):
         db.close()
         return jsonify({"error": "Not found"}), 404
 
-    # Calculate deadline
-    rd = row["response_days"] or 20
+    # Calculate deadline — look up state law response_days if not already set
+    rd = row["response_days"]
+    if not rd and row["agency_type"] in ("State", "Local", "University") and row["state_code"]:
+        state_law = db.execute(
+            "SELECT response_days FROM state_laws WHERE state_code=?",
+            (row["state_code"],)
+        ).fetchone()
+        if state_law and state_law["response_days"]:
+            rd = state_law["response_days"]
+    rd = rd or 20  # default to 20 federal business days
     deadline = add_business_days(row["created_date"], rd)
 
     db.execute("""
@@ -2201,7 +2226,7 @@ def update_request(req_id):
         "deadline_date", "response_days",
         "response_received_date", "response_summary",
         "next_step", "next_step_date",
-        "appeal_saved_at"
+        "appeal_saved_at", "appeal_deadline"
     ]
     for field in allowed:
         if field in data:
@@ -2211,6 +2236,39 @@ def update_request(req_id):
     if not fields:
         db.close()
         return jsonify({"error": "Nothing to update"}), 400
+
+    # Auto-recalculate appeal deadline when appeal_saved_at is changed
+    if "appeal_saved_at" in data and "appeal_deadline" not in data:
+        appeal_date = data["appeal_saved_at"]
+        if appeal_date and row["state_code"]:
+            state_law = db.execute(
+                "SELECT appeal_days FROM state_laws WHERE state_code=?",
+                (row["state_code"],)
+            ).fetchone()
+            if state_law and state_law["appeal_days"]:
+                new_deadline = add_business_days(appeal_date, state_law["appeal_days"]).isoformat()
+                fields.append("appeal_deadline=?")
+                values.append(new_deadline)
+        elif appeal_date and row["agency_type"] == "Federal":
+            new_deadline = add_business_days(appeal_date, 20).isoformat()
+            fields.append("appeal_deadline=?")
+            values.append(new_deadline)
+
+    # Auto-recalculate request deadline when created_date or response_days changes
+    if "created_date" in data or "response_days" in data:
+        cd = data.get("created_date", row["created_date"])
+        rd = data.get("response_days", row["response_days"])
+        if not rd and row["state_code"]:
+            state_law = db.execute(
+                "SELECT response_days FROM state_laws WHERE state_code=?",
+                (row["state_code"],)
+            ).fetchone()
+            rd = (state_law["response_days"] if state_law else None) or 20
+        rd = rd or 20
+        new_deadline = add_business_days(cd, int(rd)).isoformat()
+        if "deadline_date" not in data:
+            fields.append("deadline_date=?")
+            values.append(new_deadline)
 
     now = datetime.now().isoformat(sep=" ", timespec="seconds")
     fields.append("updated_at=?")
@@ -2436,17 +2494,35 @@ def save_appeal(req_id):
         return jsonify({"error": "Not found"}), 404
 
     now = datetime.now().isoformat(sep=" ", timespec="seconds")
+
+    # Auto-calculate appeal deadline from state law appeal_days
+    appeal_deadline = None
+    appeal_days_used = None
+    if row["agency_type"] in ("State", "Local", "University") and row["state_code"]:
+        state_law = db.execute(
+            "SELECT appeal_days FROM state_laws WHERE state_code=?",
+            (row["state_code"],)
+        ).fetchone()
+        if state_law and state_law["appeal_days"]:
+            appeal_days_used = state_law["appeal_days"]
+            appeal_deadline = add_business_days(now, appeal_days_used).isoformat()
+    elif row["agency_type"] == "Federal":
+        # Federal FOIA: 20 business days for appeal response
+        appeal_days_used = 20
+        appeal_deadline = add_business_days(now, 20).isoformat()
+
     db.execute("""
         UPDATE requests SET
             appeal_type=?, appeal_text=?, appeal_exemption=?,
-            appeal_saved_at=?, status='appealed', updated_at=?
+            appeal_saved_at=?, appeal_deadline=?,
+            status='appealed', updated_at=?
         WHERE id=?
-    """, (appeal_type, appeal_text, exemption, now, now, req_id))
+    """, (appeal_type, appeal_text, exemption, now, appeal_deadline, now, req_id))
     db.commit()
     db.close()
     log_action(req_id, session["user_id"], "Appeal saved — marked as Appealed",
-               f"Type: {appeal_type}")
-    return jsonify({"ok": True})
+               f"Type: {appeal_type}" + (f", Deadline: {appeal_deadline}" if appeal_deadline else ""))
+    return jsonify({"ok": True, "appeal_deadline": appeal_deadline})
 
 
 # ─────────────────────────────────────────────
