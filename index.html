@@ -1146,8 +1146,6 @@ a:focus-visible,
   padding-left: 28px;
   padding-right: 28px;
   border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
 }
 .modal-body > .form-actions:last-child {
   position: sticky;
@@ -3992,6 +3990,10 @@ a:focus-visible,
       <button class="modal-close" aria-label="Close dialog" onclick="closeLetter()">✕</button>
     </div>
     <div class="modal-body">
+      <div id="letterDateRow" style="display:none;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:var(--bg3);border-radius:8px;">
+        <span style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Date of Letter</span>
+        <input type="date" id="letterFiledDate">
+      </div>
       <div
         id="letterText"
         class="letter-pre"
@@ -4007,10 +4009,6 @@ a:focus-visible,
            class="btn btn-ghost btn-sm">🌐 Open FOIA.gov Portal</a>
       </div>
       <div class="form-actions discard-save">
-        <div id="letterDateRow" style="display:none;align-items:center;gap:8px;">
-          <span style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Filed</span>
-          <input type="date" id="letterFiledDate">
-        </div>
         <div style="display:flex;gap:10px;margin-left:auto;">
           <button class="btn btn-danger" onclick="discardLetter()">Discard Letter</button>
           <button class="btn btn-primary" onclick="saveLetter()">Save Letter → Move to Active</button>
@@ -5711,17 +5709,31 @@ async function openLetter(id) {
     portalLink.style.display = (r.jurisdiction === 'Federal') ? '' : 'none';
   }
 
-  // Show/hide action bar (filed date + discard/save) based on status
+  // Show/hide date picker + action bar based on status
   const discardSave = document.querySelector('.discard-save');
   const dateRow = document.getElementById('letterDateRow');
   if (r.status !== 'active') {
-    if (discardSave) discardSave.style.display = 'flex';
+    if (discardSave) discardSave.style.display = '';
     const dateInp = document.getElementById('letterFiledDate');
     dateInp.value = r.created_date || new Date().toISOString().split('T')[0];
     dateRow.style.display = 'flex';
     upgradeDateInputs(dateRow);
     refreshDateInputs(dateRow);
+    // When date changes, update the first line of the letter text (wire once)
+    if (!dateInp._letterSync) {
+      dateInp._letterSync = true;
+      dateInp.addEventListener('change', function() {
+        const letterEl = document.getElementById('letterText');
+        const lines = letterEl.innerText.split('\n');
+        if (lines.length && this.value) {
+          const d = new Date(this.value + 'T12:00:00');
+          lines[0] = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          letterEl.innerText = lines.join('\n');
+        }
+      });
+    }
   } else {
+    dateRow.style.display = 'none';
     if (discardSave) discardSave.style.display = 'none';
   }
 
