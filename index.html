@@ -174,11 +174,11 @@ body {
 /* ── Layout ────────────────────────────────────────────────── */
 #app {
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   align-items: stretch;
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 /* Sidebar */
 #sidebar {
@@ -188,10 +188,6 @@ body {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
   overflow: hidden;
   transition: transform .3s;
   z-index: 100;
@@ -1201,12 +1197,11 @@ a:focus-visible,
 }
 /* ── Detail panel ──────────────────────────────────────────── */
 #backButton {
-  margin-left: clamp(16px, 5%, 48px);
+  margin-left: 24px;
 }
 #detailContent {
-  padding: 24px clamp(16px, 5%, 48px);
+  padding: 24px;
   margin: 0;
-  max-width: 960px;
 }
 .detail-header {
   font-family: var(--font-heading);
@@ -4835,7 +4830,11 @@ async function nav(page) {
   if (page === 'org-settings')      await loadOrgSettings();
 }
 
-function goBack() { nav(previousPage === 'detail' ? 'all-requests' : previousPage); }
+function goBack() {
+  // If previousPage is 'detail' (e.g. after save→reopen), fall back to 'all-requests'
+  const target = (!previousPage || previousPage === 'detail') ? 'all-requests' : previousPage;
+  nav(target);
+}
 
 // ─────────────────────────────────────────────────────────────
 // Sidebar (mobile)
@@ -5311,7 +5310,8 @@ async function openDetail(idOrObj) {
   const { data: logData } = await api('GET', `/api/requests/${currentRequestId}/log`);
   log = logData;
 
-  previousPage = currentPage;
+  // Only update previousPage if we're NOT already on detail (prevents losing the real previous page)
+  if (currentPage !== 'detail') previousPage = currentPage;
   currentPage = 'detail';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-detail').classList.add('active');
@@ -5870,9 +5870,10 @@ async function saveAppeal() {
   if (status !== 200) { toast(data.error || 'Save failed', 'error'); return; }
 
   toast('✓ Appeal saved — request marked as Appealed', 'success');
+  const appealedId = pendingAppealId;
   closeAppealModal();
+  await openDetail(appealedId);
   await refreshAllData();
-  await openDetail(pendingAppealId);
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
