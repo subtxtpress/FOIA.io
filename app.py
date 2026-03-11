@@ -297,6 +297,16 @@ def init_db():
         except Exception:
             pass  # column already exists
 
+    # ── Migration: drop UNIQUE constraint on foia_number ─────────────────
+    # FOIA numbers are now per-user, so different users can share the same number.
+    if db.is_postgres:
+        try:
+            db.execute("ALTER TABLE requests DROP CONSTRAINT IF EXISTS requests_foia_number_key")
+            db.commit()
+        except Exception:
+            pass
+    # (SQLite UNIQUE was already removed via table rebuild for local dev)
+
     db.commit()
     db.close()
     _seed_agencies()
