@@ -2225,6 +2225,8 @@ def update_request(req_id):
         db.close()
         return jsonify({"error": "Not found"}), 404
 
+    update_type = data.get("update_type", "response")  # response | followup | note
+
     fields = []
     values = []
     allowed = [
@@ -2239,6 +2241,12 @@ def update_request(req_id):
         if field in data:
             fields.append(f"{field}=?")
             values.append(data[field])
+
+    # For follow-up type with no other DB fields, ensure we have
+    # at least the turn change so there is something to update
+    if not fields and update_type == "followup":
+        fields.append("turn=?")
+        values.append("Their Turn")
 
     if not fields:
         db.close()
@@ -2285,8 +2293,34 @@ def update_request(req_id):
     db.execute(f"UPDATE requests SET {', '.join(fields)} WHERE id=?", values)
     db.commit()
     db.close()
-    log_action(req_id, session["user_id"], "Request updated",
-               ", ".join(k for k in data if k in allowed))
+
+    # Build descriptive action log entry based on update type
+    if update_type == "followup":
+        method = data.get("followup_method", "Email")
+        summary = data.get("followup_summary", "")
+        fup_date = data.get("followup_date", "")
+        action = f"Sent follow-up via {method}"
+        note_parts = []
+        if fup_date:
+            note_parts.append(fup_date)
+        if summary:
+            note_parts.append(summary)
+        note = " — ".join(note_parts) if note_parts else None
+    elif update_type == "response":
+        summary = data.get("response_summary", "")
+        resp_date = data.get("response_received_date", "")
+        action = "Response received"
+        note_parts = []
+        if resp_date:
+            note_parts.append(resp_date)
+        if summary:
+            note_parts.append(summary)
+        note = " — ".join(note_parts) if note_parts else None
+    else:
+        action = "Notes updated"
+        note = ", ".join(k for k in data if k in allowed) or None
+
+    log_action(req_id, session["user_id"], action, note)
     return jsonify({"ok": True})
 
 # ─────────────────────────────────────────────

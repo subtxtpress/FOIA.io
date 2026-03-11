@@ -1335,6 +1335,46 @@ a:focus-visible,
   color: var(--text-dim);
   font-size: .8rem;
 }
+
+/* –– Update Type Pills –––––––––––––––––––––––––––––––––––––– */
+.upd-type-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 4px;
+  background: var(--bg2);
+  border-radius: 10px;
+}
+.upd-type-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+.upd-type-pill:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
+.upd-type-pill.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99,102,241,.25);
+}
+.upd-pill-icon {
+  font-size: .85rem;
+}
 /* –– Administrative Appeals –––––––––––––––––––––––––––––––––– */
 #appealModalSub {
   font-size: .8rem;
@@ -2232,6 +2272,17 @@ a:focus-visible,
   }
   .al-note {
     font-size: 0.75rem;
+  }
+  .upd-type-bar {
+    flex-wrap: wrap;
+  }
+  .upd-type-pill {
+    font-size: .7rem;
+    padding: 6px 6px;
+    gap: 4px;
+  }
+  .upd-pill-icon {
+    font-size: .75rem;
   }
   /* Subscribe page refinements */
   .subscribe-card {
@@ -4026,7 +4077,21 @@ a:focus-visible,
       <button class="modal-close" aria-label="Close dialog" onclick="closeUpdateModal()">✕</button>
     </div>
     <div class="modal-body">
-      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
+      <!-- Update Type Selector -->
+      <div class="upd-type-bar">
+        <button type="button" class="upd-type-pill active" data-type="response" onclick="setUpdateType('response')">
+          <span class="upd-pill-icon">📥</span> Received Response
+        </button>
+        <button type="button" class="upd-type-pill" data-type="followup" onclick="setUpdateType('followup')">
+          <span class="upd-pill-icon">📤</span> Sent Follow-up
+        </button>
+        <button type="button" class="upd-type-pill" data-type="note" onclick="setUpdateType('note')">
+          <span class="upd-pill-icon">📝</span> Add Notes
+        </button>
+      </div>
+
+      <!-- Response Received fieldset -->
+      <fieldset id="updFieldsetResponse" style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
         <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Response Received</legend>
         <div class="form-row">
           <div class="form-group">
@@ -4047,7 +4112,34 @@ a:focus-visible,
         </div>
       </fieldset>
 
-      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
+      <!-- Follow-up Sent fieldset -->
+      <fieldset id="updFieldsetFollowup" style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;display:none;">
+        <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Follow-up Sent</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date Sent</label>
+            <input type="date" id="updFollowupDate">
+          </div>
+          <div class="form-group">
+            <label>Method</label>
+            <select id="updFollowupMethod">
+              <option value="Email">Email</option>
+              <option value="Letter">Letter / Mail</option>
+              <option value="Phone">Phone</option>
+              <option value="Fax">Fax</option>
+              <option value="Online Portal">Online Portal</option>
+              <option value="In Person">In Person</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Follow-up Summary</label>
+          <textarea id="updFollowupSummary" rows="2" placeholder="e.g., Sent reminder requesting status update on March 1 request…"></textarea>
+        </div>
+      </fieldset>
+
+      <!-- Next Steps fieldset -->
+      <fieldset id="updFieldsetNextSteps" style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
         <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Next Steps</legend>
         <div class="form-row">
           <div class="form-group">
@@ -4070,7 +4162,8 @@ a:focus-visible,
         </div>
       </fieldset>
 
-      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
+      <!-- Details fieldset -->
+      <fieldset id="updFieldsetDetails" style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
         <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Details</legend>
         <div class="form-group">
           <label>Notes</label>
@@ -5805,6 +5898,43 @@ async function saveLetter() {
 // ─────────────────────────────────────────────────────────────
 // Update Request modal
 // ─────────────────────────────────────────────────────────────
+let _currentUpdateType = 'response';
+
+function setUpdateType(type) {
+  _currentUpdateType = type;
+  // Toggle active pill
+  document.querySelectorAll('.upd-type-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === type);
+  });
+  // Show/hide fieldsets based on type
+  const fsResponse  = document.getElementById('updFieldsetResponse');
+  const fsFollowup  = document.getElementById('updFieldsetFollowup');
+  const fsNextSteps = document.getElementById('updFieldsetNextSteps');
+  const fsDetails   = document.getElementById('updFieldsetDetails');
+  if (type === 'response') {
+    fsResponse.style.display  = '';
+    fsFollowup.style.display  = 'none';
+    fsNextSteps.style.display = '';
+    fsDetails.style.display   = '';
+  } else if (type === 'followup') {
+    fsResponse.style.display  = 'none';
+    fsFollowup.style.display  = '';
+    fsNextSteps.style.display = '';
+    fsDetails.style.display   = '';
+    // Auto-default follow-up date to today
+    const fupDate = document.getElementById('updFollowupDate');
+    if (!fupDate.value) fupDate.value = new Date().toISOString().split('T')[0];
+    // Auto-set next action to "Await response"
+    document.getElementById('updNextStep').value = 'Await response';
+    refreshDateInputs(document.getElementById('updFieldsetFollowup'));
+  } else if (type === 'note') {
+    fsResponse.style.display  = 'none';
+    fsFollowup.style.display  = 'none';
+    fsNextSteps.style.display = 'none';
+    fsDetails.style.display   = '';
+  }
+}
+
 async function openUpdateModal(id) {
   pendingUpdateId = id;
   const { data } = await api('GET', `/api/requests/${id}`);
@@ -5818,8 +5948,14 @@ async function openUpdateModal(id) {
   document.getElementById('updTurn').value             = r.turn || 'My Turn';
   document.getElementById('updSecName').value          = r.secondary_contact_name || '';
   document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
-  // Sync calendar picker triggers with newly set values
+  // Reset follow-up fields
+  document.getElementById('updFollowupDate').value    = '';
+  document.getElementById('updFollowupMethod').value  = 'Email';
+  document.getElementById('updFollowupSummary').value = '';
+  // Default to "response" type and sync pickers
+  setUpdateType('response');
   refreshDateInputs(document.getElementById('updateModal'));
+  upgradeDateInputs(document.getElementById('updFieldsetFollowup'));
   document.getElementById('updateModal').classList.add('open');
 }
 
@@ -5830,20 +5966,37 @@ function closeUpdateModal() {
 
 async function saveUpdate() {
   if (!pendingUpdateId) return;
-  const payload = {
-    response_received_date:  document.getElementById('updResponseDate').value || undefined,
-    response_summary:        document.getElementById('updResponseSummary').value || undefined,
-    next_step:               document.getElementById('updNextStep').value || undefined,
-    next_step_date:          document.getElementById('updNextStepDate').value || undefined,
-    notes:                   document.getElementById('updNotes').value,
-    deadline_date:           document.getElementById('updDeadline').value || undefined,
-    turn:                    document.getElementById('updTurn').value,
-    secondary_contact_name:  document.getElementById('updSecName').value,
-    secondary_contact_email: document.getElementById('updSecEmail').value,
-  };
+  const payload = { update_type: _currentUpdateType };
+
+  if (_currentUpdateType === 'response') {
+    // Log a response received
+    payload.response_received_date = document.getElementById('updResponseDate').value || undefined;
+    payload.response_summary       = document.getElementById('updResponseSummary').value || undefined;
+    payload.turn                   = document.getElementById('updTurn').value;
+  } else if (_currentUpdateType === 'followup') {
+    // Log a follow-up sent — auto-flip turn to Their Turn
+    payload.followup_date    = document.getElementById('updFollowupDate').value || undefined;
+    payload.followup_method  = document.getElementById('updFollowupMethod').value || 'Email';
+    payload.followup_summary = document.getElementById('updFollowupSummary').value || undefined;
+    payload.turn             = 'Their Turn';
+  }
+
+  // Next Steps (visible for response + followup)
+  if (_currentUpdateType !== 'note') {
+    payload.next_step      = document.getElementById('updNextStep').value || undefined;
+    payload.next_step_date = document.getElementById('updNextStepDate').value || undefined;
+  }
+
+  // Details (always visible)
+  payload.notes                   = document.getElementById('updNotes').value;
+  payload.deadline_date           = document.getElementById('updDeadline').value || undefined;
+  payload.secondary_contact_name  = document.getElementById('updSecName').value;
+  payload.secondary_contact_email = document.getElementById('updSecEmail').value;
+
   const { status, data } = await api('POST', `/api/requests/${pendingUpdateId}/update`, payload);
   if (status !== 200) { toast(data.error || 'Update failed', 'error'); return; }
-  toast('✓ Request updated', 'success');
+  const msgs = { response: '✓ Response logged', followup: '✓ Follow-up logged', note: '✓ Notes updated' };
+  toast(msgs[_currentUpdateType] || '✓ Request updated', 'success');
   const updatedId = pendingUpdateId;
   closeUpdateModal();
   await openDetail(updatedId);
