@@ -5383,6 +5383,7 @@ async function openDetail(idOrObj) {
           <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
         ${r.status === 'appealed' ? `
           <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
+          <button class="btn btn-primary btn-sm" onclick="openUpdateModal(${r.id})">Update Request</button>
           <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View Appeal</button>
           <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
         ${!isClosed ? `<button class="btn btn-danger btn-sm" onclick="deleteReq(${r.id})">Delete</button>` : ''}
