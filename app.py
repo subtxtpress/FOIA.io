@@ -2014,9 +2014,14 @@ def delete_request(req_id):
     if not row:
         db.close()
         return jsonify({"error": "Not found"}), 404
-    db.execute("DELETE FROM requests WHERE id=?", (req_id,))
-    db.execute("DELETE FROM action_log WHERE request_id=?", (req_id,))
-    db.commit()
+    try:
+        db.execute("DELETE FROM action_log WHERE request_id=?", (req_id,))
+        db.execute("DELETE FROM requests WHERE id=?", (req_id,))
+        db.commit()
+    except Exception:
+        db.rollback()
+        db.close()
+        return jsonify({"error": "Failed to delete request"}), 500
     db.close()
     return jsonify({"ok": True})
 
