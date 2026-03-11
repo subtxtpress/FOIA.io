@@ -1177,7 +1177,7 @@ FEDERAL_HOLIDAYS = {
 def add_business_days(start_date, days):
     """Return the date that is `days` business days after start_date."""
     if isinstance(start_date, str):
-        start_date = date.fromisoformat(start_date)
+        start_date = date.fromisoformat(start_date.split("T")[0].split(" ")[0])
     current = start_date
     counted = 0
     while counted < days:
@@ -1190,7 +1190,7 @@ def add_business_days(start_date, days):
 def days_since(target_date):
     """Positive = overdue by N days, negative = N days remaining."""
     if isinstance(target_date, str):
-        target_date = date.fromisoformat(target_date)
+        target_date = date.fromisoformat(target_date.split("T")[0].split(" ")[0])
     return (date.today() - target_date).days
 
 
