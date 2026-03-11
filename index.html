@@ -4093,18 +4093,9 @@ a:focus-visible,
       <!-- Response Received fieldset -->
       <fieldset id="updFieldsetResponse" style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
         <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Response Received</legend>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date Response Received</label>
-            <input type="date" id="updResponseDate">
-          </div>
-          <div class="form-group">
-            <label>Turn</label>
-            <select id="updTurn">
-              <option value="My Turn">My Turn</option>
-              <option value="Their Turn">Their Turn</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label>Date Response Received</label>
+          <input type="date" id="updResponseDate">
         </div>
         <div class="form-group">
           <label>Response Summary</label>
@@ -4142,6 +4133,13 @@ a:focus-visible,
       <fieldset id="updFieldsetNextSteps" style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 16px 0;">
         <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Next Steps</legend>
         <div class="form-row">
+          <div class="form-group">
+            <label>Whose Turn</label>
+            <select id="updTurn">
+              <option value="My Turn">My Turn</option>
+              <option value="Their Turn">Their Turn</option>
+            </select>
+          </div>
           <div class="form-group">
             <label>Next Action</label>
             <select id="updNextStep">
@@ -5911,11 +5909,14 @@ function setUpdateType(type) {
   const fsFollowup  = document.getElementById('updFieldsetFollowup');
   const fsNextSteps = document.getElementById('updFieldsetNextSteps');
   const fsDetails   = document.getElementById('updFieldsetDetails');
+
   if (type === 'response') {
     fsResponse.style.display  = '';
     fsFollowup.style.display  = 'none';
     fsNextSteps.style.display = '';
     fsDetails.style.display   = '';
+    // Auto-set turn: they responded, ball is in my court
+    document.getElementById('updTurn').value = 'My Turn';
   } else if (type === 'followup') {
     fsResponse.style.display  = 'none';
     fsFollowup.style.display  = '';
@@ -5924,9 +5925,10 @@ function setUpdateType(type) {
     // Auto-default follow-up date to today
     const fupDate = document.getElementById('updFollowupDate');
     if (!fupDate.value) fupDate.value = new Date().toISOString().split('T')[0];
-    // Auto-set next action to "Await response"
-    document.getElementById('updNextStep').value = 'Await response';
     refreshDateInputs(document.getElementById('updFieldsetFollowup'));
+    // Auto-set: I sent something, ball is in their court
+    document.getElementById('updTurn').value = 'Their Turn';
+    document.getElementById('updNextStep').value = 'Await response';
   } else if (type === 'note') {
     fsResponse.style.display  = 'none';
     fsFollowup.style.display  = 'none';
@@ -5939,8 +5941,15 @@ async function openUpdateModal(id) {
   pendingUpdateId = id;
   const { data } = await api('GET', `/api/requests/${id}`);
   const r = data.request || data;
-  document.getElementById('updResponseDate').value    = r.response_received_date || '';
-  document.getElementById('updResponseSummary').value = r.response_summary || '';
+
+  // EVENT fields — always start blank (each update is a new log entry)
+  document.getElementById('updResponseDate').value    = '';
+  document.getElementById('updResponseSummary').value = '';
+  document.getElementById('updFollowupDate').value    = '';
+  document.getElementById('updFollowupMethod').value  = 'Email';
+  document.getElementById('updFollowupSummary').value = '';
+
+  // STATE fields — pre-fill with current values (persistent data)
   document.getElementById('updNextStep').value        = r.next_step || '';
   document.getElementById('updNextStepDate').value    = r.next_step_date || '';
   document.getElementById('updNotes').value            = r.notes || '';
@@ -5948,10 +5957,7 @@ async function openUpdateModal(id) {
   document.getElementById('updTurn').value             = r.turn || 'My Turn';
   document.getElementById('updSecName').value          = r.secondary_contact_name || '';
   document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
-  // Reset follow-up fields
-  document.getElementById('updFollowupDate').value    = '';
-  document.getElementById('updFollowupMethod').value  = 'Email';
-  document.getElementById('updFollowupSummary').value = '';
+
   // Default to "response" type and sync pickers
   setUpdateType('response');
   refreshDateInputs(document.getElementById('updateModal'));
@@ -5972,20 +5978,19 @@ async function saveUpdate() {
   const payload = { update_type: _currentUpdateType };
 
   if (_currentUpdateType === 'response') {
-    // Log a response received
+    // Log a response received — event fields
     payload.response_received_date = document.getElementById('updResponseDate').value || undefined;
     payload.response_summary       = document.getElementById('updResponseSummary').value || undefined;
-    payload.turn                   = document.getElementById('updTurn').value;
   } else if (_currentUpdateType === 'followup') {
-    // Log a follow-up sent — auto-flip turn to Their Turn
+    // Log a follow-up sent — event fields
     payload.followup_date    = document.getElementById('updFollowupDate').value || undefined;
     payload.followup_method  = document.getElementById('updFollowupMethod').value || 'Email';
     payload.followup_summary = document.getElementById('updFollowupSummary').value || undefined;
-    payload.turn             = 'Their Turn';
   }
 
-  // Next Steps (visible for response + followup)
+  // Turn + Next Steps (visible for response + followup)
   if (_currentUpdateType !== 'note') {
+    payload.turn           = document.getElementById('updTurn').value;
     payload.next_step      = document.getElementById('updNextStep').value || undefined;
     payload.next_step_date = document.getElementById('updNextStepDate').value || undefined;
   }
