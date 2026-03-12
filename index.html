@@ -5846,6 +5846,11 @@ async function openDetail(idOrObj) {
           <button class="btn btn-primary btn-sm" onclick="openUpdateModal(${r.id})">Update Request</button>
           <button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View Appeal</button>
           <button class="btn btn-danger btn-sm" onclick="closeReq(${r.id})">Close Request</button>` : ''}
+        ${isClosed ? `
+          <button class="btn btn-ghost btn-sm" onclick="openLetter(${r.id})">📄 View Letter</button>
+          <button class="btn btn-primary btn-sm" onclick="openUpdateModal(${r.id})">Edit Request</button>
+          ${r.appeal_text ? `<button class="btn btn-ghost btn-sm" onclick="openAppealModal(${r.id})" style="border-color:var(--amber);color:var(--amber);">View Appeal</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="reopenReq(${r.id})">Reopen Request</button>` : ''}
         ${!isClosed ? `<button class="btn btn-danger btn-sm" onclick="deleteReq(${r.id})">Delete</button>` : ''}
       </div>
     </div>
@@ -6342,6 +6347,15 @@ async function closeReq(id) {
   toast('✓ Request closed', 'success');
   await refreshAllData();
   nav('closed-requests');
+}
+
+async function reopenReq(id) {
+  if (!confirm('Reopen this request? It will be moved back to Active Requests.')) return;
+  const { status, data } = await api('POST', `/api/requests/${id}/reopen`, {});
+  if (status !== 200) { toast(data.error || 'Failed', 'error'); return; }
+  toast('✓ Request reopened', 'success');
+  await refreshAllData();
+  await openDetail(id);
 }
 
 async function deleteReq(id) {

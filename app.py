@@ -2185,6 +2185,27 @@ def close_request(req_id):
     return jsonify({"ok": True})
 
 
+@app.route("/api/requests/<int:req_id>/reopen", methods=["POST"])
+@subscription_required
+def reopen_request(req_id):
+    db = get_db()
+    row = _can_access_request(db, req_id, session["user_id"])
+    if not row:
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+    now = datetime.now().isoformat(sep=" ", timespec="seconds")
+    # Restore to 'active' (or 'appealed' if appeal was filed)
+    new_status = "appealed" if row["appeal_text"] else "active"
+    db.execute(
+        "UPDATE requests SET status=?, updated_at=? WHERE id=?",
+        (new_status, now, req_id)
+    )
+    db.commit()
+    db.close()
+    log_action(req_id, session["user_id"], f"Request reopened — status set to {new_status}")
+    return jsonify({"ok": True})
+
+
 # ─────────────────────────────────────────────
 # Routes: Generate letter text
 # ─────────────────────────────────────────────
