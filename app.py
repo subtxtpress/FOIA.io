@@ -2590,6 +2590,60 @@ def save_appeal(req_id):
     return jsonify({"ok": True, "appeal_deadline": appeal_deadline})
 
 
+@app.route("/api/requests/<int:req_id>/appeal-activity", methods=["GET"])
+@subscription_required
+def get_appeal_activity(req_id):
+    """Return action_log entries related to the appeal."""
+    db = get_db()
+    if not _can_access_request(db, req_id, session["user_id"]):
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+    rows = db.execute(
+        "SELECT id, action, note, logged_at FROM action_log "
+        "WHERE request_id=? AND action LIKE 'Appeal:%' ORDER BY logged_at DESC",
+        (req_id,)
+    ).fetchall()
+    db.close()
+    return jsonify([dict(r) for r in rows])
+
+
+@app.route("/api/requests/<int:req_id>/appeal-activity", methods=["POST"])
+@subscription_required
+def log_appeal_activity(req_id):
+    """Log a follow-up or response for an appeal."""
+    data = request.get_json() or {}
+    db = get_db()
+    if not _can_access_request(db, req_id, session["user_id"]):
+        db.close()
+        return jsonify({"error": "Not found"}), 404
+    db.close()
+
+    act_type = data.get("type", "followup")  # followup | response
+    act_date = data.get("date", "")
+    method   = data.get("method", "")
+    summary  = data.get("summary", "")
+
+    if act_type == "response":
+        action = "Appeal: Response received"
+        note_parts = []
+        if act_date:
+            note_parts.append(act_date)
+        if summary:
+            note_parts.append(summary)
+        note = " — ".join(note_parts) if note_parts else None
+    else:
+        action = f"Appeal: Sent follow-up via {method or 'Email'}"
+        note_parts = []
+        if act_date:
+            note_parts.append(act_date)
+        if summary:
+            note_parts.append(summary)
+        note = " — ".join(note_parts) if note_parts else None
+
+    log_action(req_id, session["user_id"], action, note)
+    return jsonify({"ok": True})
+
+
 # ─────────────────────────────────────────────
 # Routes: Attachments
 # ─────────────────────────────────────────────

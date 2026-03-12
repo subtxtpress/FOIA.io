@@ -218,6 +218,9 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.logo-tld {
+  text-transform: lowercase;
+}
 .sidebar-logo p {
   font-family: var(--font-mono);
   font-size: .65rem;
@@ -3073,7 +3076,7 @@ a:focus-visible,
 <div id="authWrap">
   <div class="auth-box">
     <div class="auth-logo">
-      <h1>FOIA.io</h1>
+      <h1>FOIA<span class="logo-tld">.io</span></h1>
       <p>FOIA Request Management</p>
     </div>
     <div class="auth-tabs">
@@ -3156,7 +3159,7 @@ a:focus-visible,
 <div id="joinWrap" style="display:none;">
   <div class="auth-box">
     <div class="auth-logo">
-      <h1>FOIA.io</h1>
+      <h1>FOIA<span class="logo-tld">.io</span></h1>
       <p>Team Invitation</p>
     </div>
     <div id="joinContent">
@@ -3174,7 +3177,7 @@ a:focus-visible,
   <!-- Sidebar -->
   <nav id="sidebar">
     <div class="sidebar-logo">
-      <h1>FOIA.io</h1>
+      <h1>FOIA<span class="logo-tld">.io</span></h1>
       <p>Request Manager</p>
     </div>
 
@@ -4393,6 +4396,44 @@ a:focus-visible,
       <div class="form-actions discard-save">
         <button class="btn btn-danger" onclick="closeAppealModal()">Discard</button>
         <button class="btn btn-primary" id="appealSaveBtn" onclick="saveAppeal()">Save Appeal → Mark as Appealed</button>
+      </div>
+
+      <!-- Appeal Correspondence Tracker (shown after appeal is saved) -->
+      <div id="appealCorrespondence" style="display:none;margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);margin-bottom:12px;">Appeal Correspondence</div>
+        <div style="display:flex;gap:6px;margin-bottom:12px;">
+          <button type="button" class="upd-type-pill active" data-atype="followup" onclick="setAppealActType('followup')">
+            <span class="upd-pill-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></span> Sent Follow-up
+          </button>
+          <button type="button" class="upd-type-pill" data-atype="response" onclick="setAppealActType('response')">
+            <span class="upd-pill-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="18" x2="12" y2="6"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></span> Received Response
+          </button>
+        </div>
+        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:0 0 12px 0;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="appealActDate">
+            </div>
+            <div class="form-group" id="appealActMethodGroup">
+              <label>Method</label>
+              <select id="appealActMethod">
+                <option value="Email">Email</option>
+                <option value="Letter">Letter / Mail</option>
+                <option value="Phone">Phone</option>
+                <option value="Fax">Fax</option>
+                <option value="Online Portal">Online Portal</option>
+                <option value="In Person">In Person</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Summary</label>
+            <textarea id="appealActSummary" rows="2" placeholder="e.g., Sent status inquiry on appeal filed March 1…"></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="logAppealActivity()" style="margin-top:4px;">Log Entry</button>
+        </fieldset>
+        <ul class="action-log-list" id="appealActivityLog"></ul>
       </div>
     </div>
   </div>
@@ -6734,6 +6775,18 @@ async function openAppealModal(id) {
 
   document.getElementById('appealText').contentEditable = 'true';
 
+  // Correspondence section — only show for saved appeals
+  const corrSection = document.getElementById('appealCorrespondence');
+  if (corrSection) {
+    corrSection.style.display = hasSavedAppeal ? '' : 'none';
+    if (hasSavedAppeal) {
+      setAppealActType('followup');
+      document.getElementById('appealActDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('appealActSummary').value = '';
+      await loadAppealActivity();
+    }
+  }
+
   // Scroll modal to top
   const overlay = document.getElementById('appealModal');
   overlay.classList.add('open');
@@ -6774,6 +6827,47 @@ function downloadAppealPdf() {
   window.location.href = `/api/requests/${pendingAppealId}/download-appeal-pdf`;
 }
 
+let _appealActType = 'followup';
+function setAppealActType(type) {
+  _appealActType = type;
+  document.querySelectorAll('#appealCorrespondence .upd-type-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.atype === type);
+  });
+  document.getElementById('appealActMethodGroup').style.display = type === 'followup' ? '' : 'none';
+}
+async function logAppealActivity() {
+  if (!pendingAppealId) return;
+  const d = document.getElementById('appealActDate').value;
+  const m = document.getElementById('appealActMethod').value;
+  const s = document.getElementById('appealActSummary').value;
+  if (!s && !d) { toast('Please enter a date or summary', 'error'); return; }
+  const { status, data } = await api('POST', `/api/requests/${pendingAppealId}/appeal-activity`, {
+    type: _appealActType, date: d, method: m, summary: s
+  });
+  if (status !== 200) { toast(data.error || 'Failed to log', 'error'); return; }
+  toast('✓ Appeal activity logged', 'success');
+  document.getElementById('appealActDate').value = '';
+  document.getElementById('appealActSummary').value = '';
+  await loadAppealActivity();
+}
+async function loadAppealActivity() {
+  if (!pendingAppealId) return;
+  const { data } = await api('GET', `/api/requests/${pendingAppealId}/appeal-activity`);
+  const list = document.getElementById('appealActivityLog');
+  if (!Array.isArray(data) || !data.length) {
+    list.innerHTML = '<li style="color:var(--text-dim);font-size:.8rem;">No correspondence logged yet.</li>';
+    return;
+  }
+  list.innerHTML = data.map(l => `
+    <li>
+      <div class="al-date">${fmtDateTime(l.logged_at)}</div>
+      <div>
+        <div class="al-action">${esc(l.action.replace('Appeal: ', ''))}</div>
+        ${l.note ? `<div class="al-note">${esc(l.note)}</div>` : ''}
+      </div>
+    </li>`).join('');
+}
+
 async function saveAppeal() {
   if (!pendingAppealId) return;
   const appeal_type = document.getElementById('appealType').value;
@@ -6786,9 +6880,23 @@ async function saveAppeal() {
   if (status !== 200) { toast(data.error || 'Save failed', 'error'); return; }
 
   toast('✓ Appeal saved — request marked as Appealed', 'success');
-  const appealedId = pendingAppealId;
-  closeAppealModal();
-  await openDetail(appealedId);
+
+  // Update UI to reflect saved state without closing modal
+  const saveBtn = document.getElementById('appealSaveBtn');
+  if (saveBtn) saveBtn.textContent = 'Save Changes';
+  const pdfBtn = document.getElementById('btnDownloadAppealPdf');
+  if (pdfBtn) pdfBtn.style.display = '';
+
+  // Show correspondence section after first save
+  const corrSection = document.getElementById('appealCorrespondence');
+  if (corrSection && corrSection.style.display === 'none') {
+    corrSection.style.display = '';
+    setAppealActType('followup');
+    document.getElementById('appealActDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('appealActSummary').value = '';
+    await loadAppealActivity();
+  }
+
   await refreshAllData();
 }
 document.addEventListener('keydown', e => {
