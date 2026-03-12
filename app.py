@@ -2751,6 +2751,32 @@ def download_attachment(att_id):
     return send_file(path, as_attachment=True, download_name=row["original_name"])
 
 
+@app.route("/api/attachments/<int:att_id>/view")
+@subscription_required
+def view_attachment(att_id):
+    """Serve file inline so browsers can render PDFs/images in a new tab."""
+    db = get_db()
+    row = db.execute(
+        "SELECT * FROM request_attachments WHERE id=?", (att_id,)
+    ).fetchone()
+    if not row:
+        db.close()
+        abort(404)
+    # Verify access via parent request
+    req = _can_access_request(db, row["request_id"], session["user_id"])
+    db.close()
+    if not req:
+        abort(404)
+
+    path = os.path.join(UPLOAD_FOLDER, str(row["user_id"]),
+                        str(row["request_id"]), row["filename"])
+    if not os.path.exists(path):
+        abort(404)
+
+    return send_file(path, as_attachment=False, download_name=row["original_name"],
+                     mimetype=row["mime_type"] or None)
+
+
 @app.route("/api/attachments/<int:att_id>", methods=["DELETE"])
 @subscription_required
 def delete_attachment(att_id):
