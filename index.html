@@ -1384,7 +1384,37 @@ a:focus-visible,
   box-shadow: 0 2px 8px rgba(99,102,241,.25);
 }
 .upd-pill-icon {
-  font-size: .85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+.upd-pill-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.inline-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+}
+.inline-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 /* –– Administrative Appeals –––––––––––––––––––––––––––––––––– */
 #appealModalSub {
@@ -3357,7 +3387,7 @@ a:focus-visible,
               <div class="ai-field full" id="aipPortalRow" style="display:none;">
                 <div class="ai-label">Online Portal</div>
                 <div class="ai-val">
-                  <a id="aipPortalLink" href="#" target="_blank" rel="noopener">🌐 Open Agency FOIA Portal →</a>
+                  <a id="aipPortalLink" href="#" target="_blank" rel="noopener"><span class="inline-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> Open Agency FOIA Portal →</a>
                 </div>
               </div>
             </div>
@@ -4089,7 +4119,7 @@ a:focus-visible,
         <button class="btn btn-ghost btn-sm" onclick="downloadPdf()">Download PDF</button>
         <span class="copy-success" id="copySuccess">✓ Copied</span>
         <a id="foiaGovLink" href="https://www.foia.gov/create-a-request" target="_blank" rel="noopener"
-           class="btn btn-ghost btn-sm">🌐 Open FOIA.gov Portal</a>
+           class="btn btn-ghost btn-sm"><span class="inline-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> Open FOIA.gov Portal</a>
       </div>
       <div class="form-actions discard-save">
         <div style="display:flex;gap:10px;margin-left:auto;">
@@ -4112,13 +4142,13 @@ a:focus-visible,
       <!-- Update Type Selector -->
       <div class="upd-type-bar">
         <button type="button" class="upd-type-pill active" data-type="response" onclick="setUpdateType('response')">
-          <span class="upd-pill-icon">📥</span> Received Response
+          <span class="upd-pill-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="18" x2="12" y2="6"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></span> Received Response
         </button>
         <button type="button" class="upd-type-pill" data-type="followup" onclick="setUpdateType('followup')">
-          <span class="upd-pill-icon">📤</span> Sent Follow-up
+          <span class="upd-pill-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></span> Sent Follow-up
         </button>
         <button type="button" class="upd-type-pill" data-type="edit" onclick="setUpdateType('edit')">
-          <span class="upd-pill-icon">✏️</span> Edit Details
+          <span class="upd-pill-icon"><svg viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span> Edit Details
         </button>
       </div>
 
@@ -4370,7 +4400,7 @@ a:focus-visible,
 <!-- ── Subscribe Page (shown over app when needed) ─────────── -->
 <div id="subscribePage">
   <div class="subscribe-card">
-    <div style="font-size:2.5rem;margin-bottom:12px;">📁</div>
+    <div style="margin-bottom:12px;"><svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
     <h2>Unlock FOIA.io</h2>
     <p>Manage unlimited FOIA requests, auto-generate letters, and track every deadline.</p>
     <div class="price-tag">$19 <span>/ month</span></div>
@@ -4561,7 +4591,7 @@ async function handleInviteToken(token) {
     authWrap.style.display = 'none';
     joinContent.innerHTML = `
       <div style="text-align:center;padding:8px 0 24px;">
-        <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
+        <div style="margin-bottom:12px;"><svg viewBox="0 0 24 24" width="28" height="28" stroke="var(--amber)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <p style="font-size:.95rem;font-weight:600;margin-bottom:8px;">This invite link is invalid or has expired.</p>
         <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">Ask your team admin to generate a new one.</p>
         <button class="btn btn-ghost" onclick="window.location.href='/'">Go to FOIA.io</button>
@@ -5330,7 +5360,7 @@ async function loadAgencies() {
   const sel = document.getElementById('nrAgency');
   if (!sel) return;
   sel.innerHTML = '<option value="">— Select agency —</option>' +
-    '<option value="__manual__">✏️ Not listed — enter manually</option>' +
+    '<option value="__manual__">⊕ Not listed — enter manually</option>' +
     agenciesData.map(a =>
       `<option value="${a.id}">${esc(a.name)}${a.abbreviation ? ' ('+esc(a.abbreviation)+')' : ''}</option>`
     ).join('');
@@ -5737,7 +5767,7 @@ async function openDetail(idOrObj) {
 
     ${(r.next_step || r.response_received_date || r.outcome || r.agency_status) ? `
     <div class="card" style="margin-bottom:16px;border-color:var(--amber);">
-      <div class="card-title">📋 Status &amp; Next Steps</div>
+      <div class="card-title"><span class="inline-icon"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></span> Status &amp; Next Steps</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         ${r.response_received_date ? `<div class="meta-chip"><strong>Response Received:</strong> ${fmtDate(r.response_received_date)}</div>` : ''}
         ${r.outcome ? `<div class="meta-chip"><strong>Outcome:</strong> ${esc(r.outcome)}</div>` : ''}
@@ -5785,7 +5815,7 @@ async function openDetail(idOrObj) {
 
     ${isAppealed && r.appeal_text ? `
     <div class="card" style="margin-bottom:16px;border-color:var(--amber);">
-      <div class="card-title" style="color:var(--red);">⚖️ Appeal on File</div>
+      <div class="card-title" style="color:var(--red);"><span class="inline-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="15"/><path d="M5 12l7 3 7-3"/><path d="M5 12l7-3 7 3"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="5" y1="21" x2="19" y2="21"/></svg></span> Appeal on File</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="meta-chip"><strong>Type:</strong> ${esc(appealTypeLabel(r.appeal_type))}</div>
         <div class="meta-chip">
@@ -5807,7 +5837,7 @@ async function openDetail(idOrObj) {
 
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:.75rem;width:120px;">📁 Attachments</span>
+        <span style="font-size:.75rem;width:120px;display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> Attachments</span>
         <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0;padding:6px 14px;font-size:.7rem;">
           ↑ Upload
           <input type="file" style="display:none;" onchange="uploadAttachment(${r.id}, this)">
