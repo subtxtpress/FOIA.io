@@ -334,6 +334,8 @@ def init_db():
         ("agency_status", "TEXT"),
         ("phone", "TEXT"),
         ("tracking_number", "TEXT"),
+        ("contact_name", "TEXT"),
+        ("contact_email", "TEXT"),
     ]:
         try:
             db.execute(f"ALTER TABLE requests ADD COLUMN {col} {col_type}")
@@ -2258,7 +2260,8 @@ def update_request(req_id):
         "appeal_saved_at", "appeal_deadline",
         "outcome", "exemptions_cited", "fees", "fee_dispute",
         "method_filed", "priority", "agency_status", "phone",
-        "agency_name", "agency_type", "state_code", "tracking_number"
+        "agency_name", "agency_type", "state_code", "tracking_number",
+        "contact_name", "contact_email"
     ]
     for field in allowed:
         if field in data:
@@ -2583,6 +2586,18 @@ def save_appeal(req_id):
             status='appealed', updated_at=?
         WHERE id=?
     """, (appeal_type, appeal_text, exemption, now, appeal_deadline, now, req_id))
+
+    # Also update contact fields if provided from appeal modal
+    contact_fields = {}
+    for f in ("contact_name", "contact_email", "secondary_contact_name",
+              "secondary_contact_email", "phone"):
+        if f in data:
+            contact_fields[f] = data[f]
+    if contact_fields:
+        sets = ", ".join(f"{k}=?" for k in contact_fields)
+        vals = list(contact_fields.values()) + [req_id]
+        db.execute(f"UPDATE requests SET {sets} WHERE id=?", vals)
+
     db.commit()
     db.close()
     log_action(req_id, session["user_id"], "Appeal saved — marked as Appealed",

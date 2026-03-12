@@ -4305,6 +4305,16 @@ a:focus-visible,
         </div>
         <div class="form-row">
           <div class="form-group">
+            <label>Primary Contact Name</label>
+            <input type="text" id="updContactName" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label>Primary Contact Email</label>
+            <input type="email" id="updContactEmail" placeholder="email@agency.gov">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
             <label>Secondary Contact Name</label>
             <input type="text" id="updSecName" placeholder="Name">
           </div>
@@ -4397,6 +4407,37 @@ a:focus-visible,
         <button class="btn btn-danger" onclick="closeAppealModal()">Discard</button>
         <button class="btn btn-primary" id="appealSaveBtn" onclick="saveAppeal()">Save Appeal → Mark as Appealed</button>
       </div>
+
+      <!-- Appeal Contact Details -->
+      <fieldset id="appealContactFieldset" style="border:1px solid var(--border);border-radius:8px;padding:16px;margin:20px 0 0 0;">
+        <legend style="font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 6px;color:var(--text-dim);">Contact Details</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Primary Contact Name</label>
+            <input type="text" id="appealContactName" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label>Primary Contact Email</label>
+            <input type="email" id="appealContactEmail" placeholder="email@agency.gov">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Secondary Contact Name</label>
+            <input type="text" id="appealSecName" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label>Secondary Contact Email</label>
+            <input type="email" id="appealSecEmail" placeholder="email@agency.gov">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Contact Phone</label>
+            <input type="tel" id="appealPhone" placeholder="e.g. 573-555-1234">
+          </div>
+        </div>
+      </fieldset>
 
       <!-- Appeal Correspondence Tracker (shown after appeal is saved) -->
       <div id="appealCorrespondence" style="display:none;margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
@@ -5786,6 +5827,7 @@ async function openDetail(idOrObj) {
           ${r.priority && r.priority !== 'Standard' ? `<div class="meta-chip" style="${r.priority==='Critical'?'border-color:var(--red);color:var(--red);':''}"><strong>Priority:</strong> ${esc(r.priority)}</div>` : ''}
           ${r.method_filed ? `<div class="meta-chip"><strong>Filed via:</strong> ${esc(r.method_filed)}</div>` : ''}
           ${r.phone ? `<div class="meta-chip"><strong>Phone:</strong> <a href="tel:${esc(r.phone)}" style="color:var(--text);">${esc(r.phone)}</a></div>` : ''}
+          ${r.contact_name ? `<div class="meta-chip"><strong>Contact:</strong> ${esc(r.contact_name)}${r.contact_email ? ` <a href="mailto:${esc(r.contact_email)}" style="color:var(--text);margin-left:4px;">${esc(r.contact_email)}</a>` : ''}</div>` : ''}
           ${r.secondary_contact_name ? `<div class="meta-chip"><strong>2nd Contact:</strong> ${esc(r.secondary_contact_name)}</div>` : ''}
           ${r.last_action_date ? `<div class="meta-chip"><strong>Last Action:</strong> ${fmtDateTime(r.last_action_date)}</div>` : ''}
           ${r.org_id ? `<div class="meta-chip"><strong>Filed by:</strong> ${esc(r.filed_by||'—')}</div>` : ''}
@@ -5852,6 +5894,9 @@ async function openDetail(idOrObj) {
           </div>
           <div class="info-label" style="margin-top:10px;">Deadline Date</div>
           <div class="info-val"><span class="dp-wrap"><button type="button" class="dp-trigger" id="deadlineTrigger">${fmtDate(r.deadline_date)||'—'}</button></span></div>
+          ${r.contact_email ? `
+          <div class="info-label" style="margin-top:10px;">Contact Email</div>
+          <div class="info-val"><a href="mailto:${esc(r.contact_email)}" style="color:var(--text);">${esc(r.contact_email)}</a></div>` : ''}
           ${r.secondary_contact_email ? `
           <div class="info-label" style="margin-top:10px;">2nd Contact Email</div>
           <div class="info-val"><a href="mailto:${esc(r.secondary_contact_email)}" style="color:var(--text);">${esc(r.secondary_contact_email)}</a></div>` : ''}
@@ -6177,6 +6222,8 @@ function setUpdateType(type) {
     refreshDateInputs(document.getElementById('updFieldsetNextSteps'));
     document.getElementById('updNotes').value            = r.notes || '';
     document.getElementById('updDeadline').value         = r.deadline_date || '';
+    document.getElementById('updContactName').value      = r.contact_name || '';
+    document.getElementById('updContactEmail').value     = r.contact_email || '';
     document.getElementById('updSecName').value          = r.secondary_contact_name || '';
     document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
     document.getElementById('updPhone').value            = r.phone || '';
@@ -6200,6 +6247,8 @@ async function openUpdateModal(id) {
   document.getElementById('updNotes').value            = r.notes || '';
   document.getElementById('updDeadline').value         = r.deadline_date || '';
   document.getElementById('updTurn').value             = r.turn || 'My Turn';
+  document.getElementById('updContactName').value      = r.contact_name || '';
+  document.getElementById('updContactEmail').value     = r.contact_email || '';
   document.getElementById('updSecName').value          = r.secondary_contact_name || '';
   document.getElementById('updSecEmail').value         = r.secondary_contact_email || '';
   document.getElementById('updPhone').value            = r.phone || '';
@@ -6267,6 +6316,8 @@ async function saveUpdate() {
   // Details (always visible)
   payload.notes                   = document.getElementById('updNotes').value;
   payload.deadline_date           = document.getElementById('updDeadline').value || undefined;
+  payload.contact_name            = document.getElementById('updContactName').value;
+  payload.contact_email           = document.getElementById('updContactEmail').value;
   payload.secondary_contact_name  = document.getElementById('updSecName').value;
   payload.secondary_contact_email = document.getElementById('updSecEmail').value;
 
@@ -6775,6 +6826,13 @@ async function openAppealModal(id) {
 
   document.getElementById('appealText').contentEditable = 'true';
 
+  // Pre-fill contact fields from request data
+  document.getElementById('appealContactName').value  = r.contact_name || '';
+  document.getElementById('appealContactEmail').value = r.contact_email || '';
+  document.getElementById('appealSecName').value      = r.secondary_contact_name || '';
+  document.getElementById('appealSecEmail').value     = r.secondary_contact_email || '';
+  document.getElementById('appealPhone').value        = r.phone || '';
+
   // Correspondence section — only show for saved appeals
   const corrSection = document.getElementById('appealCorrespondence');
   if (corrSection) {
@@ -6875,7 +6933,12 @@ async function saveAppeal() {
   const exemption   = document.getElementById('appealExemption').value;
 
   const { status, data } = await api('POST', `/api/requests/${pendingAppealId}/save-appeal`, {
-    appeal_type, appeal_text, exemption
+    appeal_type, appeal_text, exemption,
+    contact_name:            document.getElementById('appealContactName').value || undefined,
+    contact_email:           document.getElementById('appealContactEmail').value || undefined,
+    secondary_contact_name:  document.getElementById('appealSecName').value || undefined,
+    secondary_contact_email: document.getElementById('appealSecEmail').value || undefined,
+    phone:                   document.getElementById('appealPhone').value || undefined,
   });
   if (status !== 200) { toast(data.error || 'Save failed', 'error'); return; }
 
