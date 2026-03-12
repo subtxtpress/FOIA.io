@@ -333,6 +333,7 @@ def init_db():
         ("priority", "TEXT"),
         ("agency_status", "TEXT"),
         ("phone", "TEXT"),
+        ("tracking_number", "TEXT"),
     ]:
         try:
             db.execute(f"ALTER TABLE requests ADD COLUMN {col} {col_type}")
@@ -2257,7 +2258,7 @@ def update_request(req_id):
         "appeal_saved_at", "appeal_deadline",
         "outcome", "exemptions_cited", "fees", "fee_dispute",
         "method_filed", "priority", "agency_status", "phone",
-        "agency_name", "agency_type", "state_code"
+        "agency_name", "agency_type", "state_code", "tracking_number"
     ]
     for field in allowed:
         if field in data:

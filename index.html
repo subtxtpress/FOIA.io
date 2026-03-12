@@ -4191,6 +4191,10 @@ a:focus-visible,
           </div>
         </div>
         <div class="form-group">
+          <label>Assigned Tracking Number</label>
+          <input type="text" id="updTrackingNumber" placeholder="e.g. 2026-FOIA-00857">
+        </div>
+        <div class="form-group">
           <label>Exemptions Cited</label>
           <input type="text" id="updExemptions" placeholder="e.g., RSMo 610.021(13), 5 U.S.C. § 552(b)(7)(C)…">
         </div>
@@ -5765,13 +5769,14 @@ async function openDetail(idOrObj) {
 
     ${deadlineBanner}
 
-    ${(r.next_step || r.response_received_date || r.outcome || r.agency_status) ? `
+    ${(r.next_step || r.response_received_date || r.outcome || r.agency_status || r.tracking_number) ? `
     <div class="card" style="margin-bottom:16px;border-color:var(--amber);">
       <div class="card-title"><span class="inline-icon"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></span> Status &amp; Next Steps</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         ${r.response_received_date ? `<div class="meta-chip"><strong>Response Received:</strong> ${fmtDate(r.response_received_date)}</div>` : ''}
         ${r.outcome ? `<div class="meta-chip"><strong>Outcome:</strong> ${esc(r.outcome)}</div>` : ''}
         ${r.agency_status ? `<div class="meta-chip"><strong>Agency Status:</strong> ${esc(r.agency_status)}</div>` : ''}
+        ${r.tracking_number ? `<div class="meta-chip"><strong>Tracking #:</strong> <span style="font-family:var(--font-mono);">${esc(r.tracking_number)}</span></div>` : ''}
         ${r.next_step ? `<div class="meta-chip"><strong>Next Step:</strong> ${esc(r.next_step)}</div>` : ''}
         ${r.next_step_date ? `<div class="meta-chip"><strong>Follow-up By:</strong> ${fmtDate(r.next_step_date)}</div>` : ''}
         ${r.exemptions_cited ? `<div class="meta-chip"><strong>Exemptions:</strong> ${esc(r.exemptions_cited)}</div>` : ''}
@@ -6092,6 +6097,7 @@ function setUpdateType(type) {
     document.getElementById('updResponseSummary').value = '';
     document.getElementById('updOutcome').value         = '';
     document.getElementById('updAgencyStatus').value    = '';
+    document.getElementById('updTrackingNumber').value  = '';
     document.getElementById('updExemptions').value      = '';
     document.getElementById('updFees').value            = '';
     document.getElementById('updFeeDispute').value      = '0';
@@ -6119,6 +6125,7 @@ function setUpdateType(type) {
     document.getElementById('updResponseSummary').value = r.response_summary || '';
     document.getElementById('updOutcome').value         = r.outcome || '';
     document.getElementById('updAgencyStatus').value    = r.agency_status || '';
+    document.getElementById('updTrackingNumber').value  = r.tracking_number || '';
     document.getElementById('updExemptions').value      = r.exemptions_cited || '';
     document.getElementById('updFees').value            = r.fees || '';
     document.getElementById('updFeeDispute').value      = r.fee_dispute ? '1' : '0';
@@ -6185,6 +6192,7 @@ async function saveUpdate() {
     payload.response_summary       = document.getElementById('updResponseSummary').value || undefined;
     payload.outcome                = document.getElementById('updOutcome').value || undefined;
     payload.agency_status          = document.getElementById('updAgencyStatus').value || undefined;
+    payload.tracking_number        = document.getElementById('updTrackingNumber').value || undefined;
     payload.exemptions_cited       = document.getElementById('updExemptions').value || undefined;
     payload.fees                   = document.getElementById('updFees').value || undefined;
     payload.fee_dispute            = parseInt(document.getElementById('updFeeDispute').value) || 0;
@@ -6199,6 +6207,7 @@ async function saveUpdate() {
     payload.response_summary       = document.getElementById('updResponseSummary').value || undefined;
     payload.outcome                = document.getElementById('updOutcome').value || undefined;
     payload.agency_status          = document.getElementById('updAgencyStatus').value || undefined;
+    payload.tracking_number        = document.getElementById('updTrackingNumber').value || undefined;
     payload.exemptions_cited       = document.getElementById('updExemptions').value || undefined;
     payload.fees                   = document.getElementById('updFees').value || undefined;
     payload.fee_dispute            = parseInt(document.getElementById('updFeeDispute').value) || 0;
