@@ -31,7 +31,7 @@ SMTP_PORT  = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER  = os.environ.get("SMTP_USER", "")
 SMTP_PASS  = os.environ.get("SMTP_PASS", "")
 SMTP_FROM  = os.environ.get("SMTP_FROM", "noreply@foia.io")
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
+UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", os.path.join(os.path.dirname(__file__), "uploads"))
 MAX_UPLOAD_MB = 20
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
