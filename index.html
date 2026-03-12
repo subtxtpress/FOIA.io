@@ -5330,10 +5330,10 @@ async function loadAgencies() {
   const sel = document.getElementById('nrAgency');
   if (!sel) return;
   sel.innerHTML = '<option value="">— Select agency —</option>' +
+    '<option value="__manual__">✏️ Not listed — enter manually</option>' +
     agenciesData.map(a =>
       `<option value="${a.id}">${esc(a.name)}${a.abbreviation ? ' ('+esc(a.abbreviation)+')' : ''}</option>`
-    ).join('') +
-    '<option value="__manual__">✏️ Not listed — enter manually</option>';
+    ).join('');
 }
 
 async function loadAgencyDir() {
