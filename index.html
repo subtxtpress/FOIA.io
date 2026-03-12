@@ -403,12 +403,13 @@ body {
   border-radius: 6px;
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: .65rem;
+  font-size: .6rem;
   letter-spacing: 0.08em;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
+  white-space: nowrap;
   transition: background .2s;
 }
 /* Main content */
@@ -1617,9 +1618,12 @@ a:focus-visible,
   padding: 0;
 }
 .sidebar-link.beta {
-  color: var(--text-dim);
   font-weight: 600;
   letter-spacing: .3px;
+  background: var(--logo-grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 .sidebar-sep {
   color: var(--border);
@@ -2587,7 +2591,10 @@ a:focus-visible,
   color: var(--text-dim);
 }
 [data-theme="light"] .sidebar-link.beta {
-  color: var(--text-dim);
+  background: var(--logo-grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 [data-theme="light"] .org-switcher-label {
   color: var(--text-dim);
