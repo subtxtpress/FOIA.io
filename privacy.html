@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOIA.io — Privacy Policy</title>
+  <meta name="description" content="FOIA.io privacy policy. Your data stays yours.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="FOIA.io — Privacy Policy">
+  <meta property="og:description" content="FOIA.io privacy policy. Your data stays yours.">
+  <meta property="og:url" content="https://subtxtpress.github.io/FOIA.io/privacy.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FOIA.io">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+  <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Mobile / PWA -->
+  <meta name="theme-color" content="#C07840" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#8B4513" media="(prefers-color-scheme: light)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FOIA.io">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── Design Tokens ─────────────────────────────────────────── */
+    :root {
+      --bg:        #1a1a1a;
+      --bg2:       #242424;
+      --bg3:       #2e2e2e;
+      --border:    rgba(197,185,154,0.16);
+      --primary:   #a75740;
+      --primary-dim:  rgba(167, 87, 64, 0.12);
+      --primary-glow: rgba(167, 87, 64, 0.22);
+      --accent:    #b85c3f;
+      --accent-dim:  rgba(184, 92, 63, 0.10);
+      --accent-glow: rgba(184, 92, 63, 0.22);
+      --text:      #F0EAE0;
+      --text-dim:  #8a8078;
+      --red:       #c4654a;
+      --green:     #8a9e7a;
+      --amber:     #c49a45;
+      --radius:    6px;
+      --shadow:    0 2px 8px rgba(0,0,0,0.4);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+      --font-heading: 'Barlow Condensed', sans-serif;
+      --font-mono:    'IBM Plex Mono', monospace;
+      --font-body:    'Inter', sans-serif;
+      --palette-lightest: #F7F5F2;
+      --palette-light:    #E8E2D9;
+      --palette-mid:      #C5B99A;
+      --palette-accent:   #b85c3f;
+      --palette-dark:     #1C1917;
+      --surface-page:     #1a1a1a;
+      --surface-card:     #242424;
+      --surface-elevated: #2e2e2e;
+      --grad-header: linear-gradient(160deg, #242424 0%, #1a1a1a 100%);
+      --grad-neutral: linear-gradient(to right, #C5B99A, #b85c3f);
+      --logo-grad: linear-gradient(90deg, #C5B99A, #b85c3f);
+      --accent-subtle: rgba(196,122,58,0.12);
+      --border-light:  rgba(197,185,154,0.16);
+      --border-strong: rgba(197,185,154,0.28);
+    }
+
+    /* ─── Reset ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--font-body), var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── Scrollbar ──────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; opacity: 0.7; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--palette-mid); }
+
+    /* ─── Selection ──────────────────────────────────────────────── */
+    ::selection { background: var(--accent-dim); color: var(--text); }
+
+    /* ─── Utility ─────────────────────────────────────────────────── */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 4px 22px;
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.17s ease, border-color 0.17s ease, box-shadow 0.17s ease, transform 0.17s ease, color 0.17s ease;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 28px var(--primary-glow);
+      transform: translateY(-1px);
+    }
+
+    /* ─── Nav ─────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(26,26,26,0.90);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    nav::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--grad-neutral);
+      pointer-events: none;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 62px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .nav-wordmark {
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--grad-neutral);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-signin {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+    .nav-signin:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* ─── Page Content ────────────────────────────────────────────── */
+    .page-wrap {
+      padding: 80px 24px 100px;
+    }
+    .content-card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) + 6px);
+      padding: 56px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .content-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--grad-neutral);
+      pointer-events: none;
+    }
+    .page-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .page-title {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .page-effective {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      font-style: italic;
+      margin-bottom: 40px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .policy-section {
+      margin-bottom: 36px;
+    }
+    .policy-section:last-child {
+      margin-bottom: 0;
+    }
+    .policy-h3 {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .policy-p {
+      font-size: 0.9375rem;
+      color: var(--text-dim);
+      line-height: 1.75;
+    }
+    .policy-ul {
+      list-style: none;
+      margin-top: 10px;
+    }
+    .policy-ul li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9375rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 10px;
+    }
+    .policy-ul li .bullet {
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .policy-link {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .policy-link:hover {
+      opacity: 0.8;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 60px 0 0;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 48px;
+      padding-bottom: 48px;
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      text-decoration: none;
+    }
+    .footer-logo-text {
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--grad-neutral);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .footer-tagline {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .footer-col-title {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+    .footer-links a {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      transition: color 0.15s ease;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .footer-bottom-left { font-size: 0.8rem; color: #555; }
+    .footer-bottom-right { display: flex; gap: 20px; }
+    .footer-bottom-right a {
+      font-size: 0.8rem;
+      color: #555;
+      transition: color 0.15s ease;
+    }
+    .footer-bottom-right a:hover { color: var(--text-dim); }
+
+    /* ─── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .content-card { padding: 36px 28px; }
+      .footer-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+      }
+      .footer-brand { grid-column: 1 / -1; }
+    }
+    @media (max-width: 480px) {
+      .page-wrap { padding: 48px 16px 72px; }
+      .content-card { padding: 28px 20px; }
+      .footer-top { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+
+    /* ─── Light Mode ────────────────────────────────────────────── */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:          #F7F5F2;
+        --bg2:         #FFFFFF;
+        --bg3:         #F0EBE2;
+        --border:      rgba(139,100,60,0.20);
+        --primary:        #8B4513;
+        --primary-dim:    rgba(139,69,19,0.08);
+        --primary-glow:   rgba(139,69,19,0.15);
+        --accent:         #8B4513;
+        --accent-dim:     rgba(139,69,19,0.08);
+        --accent-glow:    rgba(139,69,19,0.15);
+        --text:        #1C1917;
+        --text-dim:    #78716C;
+        --shadow:      0 2px 16px rgba(0,0,0,0.06);
+        --shadow-lg:   0 8px 28px rgba(0,0,0,0.10);
+        --accent-subtle: rgba(139,69,19,0.08);
+        --border-light:  rgba(197,185,154,0.35);
+        --border-strong: rgba(139,100,60,0.45);
+      }
+      body { color: #44403C; }
+      nav { background: rgba(247,245,242,0.92); border-bottom-color: rgba(139,100,60,0.15); }
+      .nav-wordmark {
+        background: linear-gradient(90deg, #8B4513 0%, #1C1917 50%, #8B4513 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .nav-signin:hover { background: rgba(139,69,19,0.04); }
+      .btn-primary { background: #8B4513; color: #FFFFFF; border-color: #8B4513; }
+      ::-webkit-scrollbar-track { background: var(--bg); }
+      ::-webkit-scrollbar-thumb { background: var(--palette-mid); }
+      ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+      ::selection { background: rgba(139,69,19,0.15); color: var(--text); }
+      .footer-bottom-left { color: var(--text-dim); }
+      .footer-bottom-right a { color: var(--text-dim); }
+      .footer-bottom-right a:hover { color: #8B4513; }
+      .footer-links a:hover { color: #8B4513; }
+      .footer-logo-text {
+        background: linear-gradient(90deg, #C5B99A, #8B4513);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── NAV ─────────────────────────────────────────────────────── -->
+  <nav>
+    <div class="container nav-inner">
+      <a href="landing.html" class="nav-logo">
+        <span class="nav-wordmark">FOIA.io</span>
+      </a>
+      <div class="nav-actions">
+        <a href="https://subtxtpress.github.io/FOIA.io/" class="nav-signin">Sign In</a>
+        <a href="https://subtxtpress.github.io/FOIA.io/" class="btn btn-primary">Get Started →</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── CONTENT ──────────────────────────────────────────────────── -->
+  <main class="page-wrap">
+    <div class="content-card">
+      <p class="page-label">Legal</p>
+      <h1 class="page-title">Privacy Policy</h1>
+      <p class="page-effective">Effective upon use of the service.</p>
+
+      <div class="policy-section">
+        <h3 class="policy-h3">What FOIA.io Does</h3>
+        <p class="policy-p">FOIA.io helps you track FOIA requests, deadlines, notes, and agency communications. It is a workspace—not a publishing platform, analytics broker, or data-collection service.</p>
+      </div>
+
+      <div class="policy-section">
+        <h3 class="policy-h3">Your Data</h3>
+        <ul class="policy-ul">
+          <li><span class="bullet">✓</span> You own all data you enter.</li>
+          <li><span class="bullet">✓</span> FOIA.io does not sell, rent, or share your information.</li>
+          <li><span class="bullet">✓</span> FOIA.io only stores the minimum data required to operate the service.</li>
+          <li><span class="bullet">✓</span> You can export your data at any time.</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3 class="policy-h3">How Your Data Is Used</h3>
+        <p class="policy-p">Your data is used only to: display your FOIA portfolio, calculate deadlines and timelines, maintain your account, and improve platform stability. No advertising, tracking, or third-party marketing tools are used.</p>
+      </div>
+
+      <div class="policy-section">
+        <h3 class="policy-h3">Security</h3>
+        <ul class="policy-ul">
+          <li><span class="bullet">✓</span> Data is encrypted in transit.</li>
+          <li><span class="bullet">✓</span> Access to systems is restricted to authorized personnel.</li>
+          <li><span class="bullet">✓</span> No unnecessary personal information is collected.</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3 class="policy-h3">Contact</h3>
+        <p class="policy-p">Questions or data concerns: <a href="mailto:jturner@subtxtpress.com" class="policy-link">jturner@subtxtpress.com</a></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="landing.html" class="footer-logo">
+            <span class="footer-logo-text">FOIA.io</span>
+          </a>
+          <p class="footer-tagline">Public records, professionally managed.</p>
+        </div>
+
+        <div>
+          <p class="footer-col-title">Product</p>
+          <ul class="footer-links">
+            <li><a href="landing.html#features">Features</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="landing.html#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="footer-col-title">Account</p>
+          <ul class="footer-links">
+            <li><a href="https://subtxtpress.github.io/FOIA.io/">Sign In</a></li>
+            <li><a href="https://subtxtpress.github.io/FOIA.io/">Get Started</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-bottom-left">© 2026 FOIA.io &nbsp;·&nbsp;</p>
+        <div class="footer-bottom-right">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
