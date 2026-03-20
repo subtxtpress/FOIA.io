@@ -57,6 +57,7 @@ def init_db():
             stripe_customer_id  TEXT,
             stripe_sub_id       TEXT,
             subscription_status TEXT DEFAULT 'inactive',
+            plan                TEXT DEFAULT 'free',
             lifetime_free       INTEGER DEFAULT 0,
             created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -246,6 +247,13 @@ def init_db():
     # ── Migrations (safe to run on existing DBs) ───────────────────────────
     try:
         db.execute("ALTER TABLE users ADD COLUMN lifetime_free INTEGER DEFAULT 0")
+        db.commit()
+    except Exception:
+        pass  # column already exists
+
+    # Plan tier column (free / pro / newsroom)
+    try:
+        db.execute("ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free'")
         db.commit()
     except Exception:
         pass  # column already exists
@@ -1124,25 +1132,54 @@ def login_required(f):
 
 
 def subscription_required(f):
+    """Gate routes behind an active subscription (any paid plan or lifetime_free)."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if "user_id" not in session:
             return jsonify({"error": "Unauthorized"}), 401
-        # ── Lifetime-free users always have access ─────────────────
         db = get_db()
         user = db.execute(
-            "SELECT subscription_status, lifetime_free FROM users WHERE id=?",
+            "SELECT subscription_status, plan, lifetime_free FROM users WHERE id=?",
             (session["user_id"],)
         ).fetchone()
         db.close()
         if user and user["lifetime_free"]:
             return f(*args, **kwargs)
-        # ── TEST MODE: subscription gate disabled ──────────────────
-        # All registered users have full access.
-        # Re-enable Stripe check before going live.
-        # ──────────────────────────────────────────────────────────
-        return f(*args, **kwargs)
+        if user and user["subscription_status"] == "active" and user["plan"] in ("pro", "newsroom"):
+            return f(*args, **kwargs)
+        return jsonify({"error": "This feature requires a Pro or Newsroom subscription.", "upgrade": True}), 403
     return decorated
+
+
+def plan_required(min_plan):
+    """Gate routes behind a minimum plan tier: 'pro' or 'newsroom'.
+    Usage: @plan_required('newsroom')
+    """
+    tier_levels = {"free": 0, "pro": 1, "newsroom": 2}
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            if "user_id" not in session:
+                return jsonify({"error": "Unauthorized"}), 401
+            db = get_db()
+            user = db.execute(
+                "SELECT subscription_status, plan, lifetime_free FROM users WHERE id=?",
+                (session["user_id"],)
+            ).fetchone()
+            db.close()
+            if not user:
+                return jsonify({"error": "Unauthorized"}), 401
+            # Lifetime-free users get Pro-level access
+            effective_plan = user["plan"] or "free"
+            if user["lifetime_free"]:
+                effective_plan = max(effective_plan, "pro", key=lambda p: tier_levels.get(p, 0))
+            if user["subscription_status"] != "active" and not user["lifetime_free"]:
+                return jsonify({"error": f"This feature requires a {min_plan.title()} subscription.", "upgrade": True}), 403
+            if tier_levels.get(effective_plan, 0) < tier_levels.get(min_plan, 0):
+                return jsonify({"error": f"This feature requires a {min_plan.title()} subscription.", "upgrade": True}), 403
+            return f(*args, **kwargs)
+        return decorated
+    return decorator
 
 
 # ─────────────────────────────────────────────
@@ -1365,9 +1402,13 @@ def register():
             return jsonify({"error": "Invalid or already used invite code"}), 400
         lifetime_free = 1
 
+    # Lifetime-free users get active status; everyone else starts inactive/free
+    sub_status = "active" if lifetime_free else "inactive"
+    plan = "pro" if lifetime_free else "free"
+
     db.execute(
-        "INSERT INTO users (username, email, password, subscription_status, lifetime_free) VALUES (?,?,?,?,?)",
-        (username, email, hash_password(password), "active", lifetime_free)
+        "INSERT INTO users (username, email, password, subscription_status, plan, lifetime_free) VALUES (?,?,?,?,?,?)",
+        (username, email, hash_password(password), sub_status, plan, lifetime_free)
     )
     db.commit()
     user = db.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
@@ -1383,7 +1424,7 @@ def register():
     db.close()
     session["user_id"] = user["id"]
     session["username"] = username
-    return jsonify({"ok": True, "username": username, "subscription_status": "active", "lifetime_free": lifetime_free})
+    return jsonify({"ok": True, "username": username, "subscription_status": sub_status, "plan": plan, "lifetime_free": lifetime_free})
 
 
 @app.route("/api/auth/login", methods=["POST"])
@@ -1407,7 +1448,9 @@ def login():
     return jsonify({
         "ok": True,
         "username": user["username"],
-        "subscription_status": user["subscription_status"]
+        "subscription_status": user["subscription_status"],
+        "plan": user["plan"] or "free",
+        "lifetime_free": user["lifetime_free"]
     })
 
 
@@ -1496,7 +1539,7 @@ def me():
         return jsonify({"authenticated": False})
     db = get_db()
     user = db.execute(
-        "SELECT id, username, email, subscription_status, active_org_id FROM users WHERE id=?",
+        "SELECT id, username, email, subscription_status, plan, lifetime_free, active_org_id FROM users WHERE id=?",
         (session["user_id"],)
     ).fetchone()
     # Load org memberships
@@ -1547,26 +1590,60 @@ def stripe_webhook():
     sig = request.headers.get("Stripe-Signature", "")
     webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 
-    # Verify signature in production:
-    # event = stripe.Webhook.construct_event(payload, sig, webhook_secret)
-
-    try:
-        event = json.loads(payload)
-    except Exception:
-        return "Bad payload", 400
+    # ── Signature verification (REQUIRED for production) ─────────
+    if webhook_secret:
+        try:
+            import stripe
+            event = stripe.Webhook.construct_event(payload, sig, webhook_secret)
+        except ImportError:
+            app.logger.warning("stripe package not installed — skipping sig verification")
+            try:
+                event = json.loads(payload)
+            except Exception:
+                return "Bad payload", 400
+        except Exception as e:
+            app.logger.error(f"Stripe webhook signature failed: {e}")
+            return "Invalid signature", 400
+    else:
+        app.logger.warning("STRIPE_WEBHOOK_SECRET not set — webhook signature NOT verified")
+        try:
+            event = json.loads(payload)
+        except Exception:
+            return "Bad payload", 400
 
     event_type = event.get("type", "")
     obj = event.get("data", {}).get("object", {})
+
+    # Map Stripe Price IDs to plan tiers
+    PRICE_TO_PLAN = {
+        os.environ.get("STRIPE_PRICE_ID_PRO", ""): "pro",
+        os.environ.get("STRIPE_PRICE_ID_NEWSROOM", ""): "newsroom",
+        # Fallback: if only one STRIPE_PRICE_ID is set, treat it as pro
+        os.environ.get("STRIPE_PRICE_ID", ""): "pro",
+    }
 
     db = get_db()
     if event_type == "checkout.session.completed":
         customer_id = obj.get("customer")
         sub_id = obj.get("subscription")
         email = obj.get("customer_details", {}).get("email", "")
+
+        # Determine plan from the price in the checkout session
+        plan = "pro"  # default
+        line_items = obj.get("line_items", {}).get("data", [])
+        if line_items:
+            price_id = line_items[0].get("price", {}).get("id", "")
+            plan = PRICE_TO_PLAN.get(price_id, "pro")
+
+        # Also check metadata if set during checkout creation
+        meta_plan = obj.get("metadata", {}).get("plan")
+        if meta_plan in ("pro", "newsroom"):
+            plan = meta_plan
+
         db.execute(
             """UPDATE users SET stripe_customer_id=?, stripe_sub_id=?,
-               subscription_status='active' WHERE email=?""",
-            (customer_id, sub_id, email.lower())
+               subscription_status='active', plan=? WHERE email=?""",
+            (customer_id, sub_id, plan, email.lower())
         )
     elif event_type == "customer.subscription.updated":
         sub_id = obj.get("id")
@@ -1578,7 +1655,7 @@ def stripe_webhook():
     elif event_type == "customer.subscription.deleted":
         sub_id = obj.get("id")
         db.execute(
-            "UPDATE users SET subscription_status='inactive' WHERE stripe_sub_id=?",
+            "UPDATE users SET subscription_status='inactive', plan='free' WHERE stripe_sub_id=?",
             (sub_id,)
         )
     db.commit()
@@ -1586,18 +1663,23 @@ def stripe_webhook():
     return "ok", 200
 
 
-# DEV ONLY — activate subscription without Stripe (remove in production)
+# DEV ONLY — activate subscription without Stripe (admin-gated for safety)
 @app.route("/api/dev/activate", methods=["POST"])
-@login_required
+@admin_required
 def dev_activate():
+    data = request.get_json() or {}
+    plan = data.get("plan", "pro")
+    if plan not in ("pro", "newsroom"):
+        return jsonify({"error": "Plan must be 'pro' or 'newsroom'"}), 400
+    target_user = data.get("user_id", session["user_id"])
     db = get_db()
     db.execute(
-        "UPDATE users SET subscription_status='active' WHERE id=?",
-        (session["user_id"],)
+        "UPDATE users SET subscription_status='active', plan=? WHERE id=?",
+        (plan, target_user)
     )
     db.commit()
     db.close()
-    return jsonify({"ok": True, "message": "Dev subscription activated"})
+    return jsonify({"ok": True, "message": f"Dev subscription activated ({plan})"})
 
 
 # ─────────────────────────────────────────────
@@ -1945,15 +2027,18 @@ def preview_number():
 
 
 @app.route("/api/requests", methods=["POST"])
-@subscription_required
+@login_required
 def create_request():
     # ── Free-plan limit: 5 active requests ─────────────────────
     db = get_db()
     user = db.execute(
-        "SELECT subscription_status, lifetime_free FROM users WHERE id=?",
+        "SELECT subscription_status, plan, lifetime_free FROM users WHERE id=?",
         (session["user_id"],)
     ).fetchone()
-    is_paid = user and (user["lifetime_free"] or user["subscription_status"] == "active")
+    is_paid = user and (
+        user["lifetime_free"]
+        or (user["subscription_status"] == "active" and user.get("plan", "free") in ("pro", "newsroom"))
+    )
     if not is_paid:
         active_count = db.execute(
             "SELECT COUNT(*) as cnt FROM requests WHERE user_id=? AND status != 'closed'",
@@ -2028,7 +2113,7 @@ def create_request():
 
 
 @app.route("/api/requests")
-@subscription_required
+@login_required
 def list_requests():
     status_filter = request.args.get("status")
     db = get_db()
@@ -2062,7 +2147,7 @@ def list_requests():
 
 
 @app.route("/api/requests/<int:req_id>")
-@subscription_required
+@login_required
 def get_request(req_id):
     db = get_db()
     row = _can_access_request(db, req_id, session["user_id"])
@@ -2076,7 +2161,7 @@ def get_request(req_id):
 
 
 @app.route("/api/requests/<int:req_id>", methods=["DELETE"])
-@subscription_required
+@login_required
 def delete_request(req_id):
     db = get_db()
     row = _can_access_request(db, req_id, session["user_id"])
@@ -2117,7 +2202,7 @@ def delete_request(req_id):
 # Routes: Save letter → move to Active
 # ─────────────────────────────────────────────
 @app.route("/api/requests/<int:req_id>/save-letter", methods=["POST"])
-@subscription_required
+@login_required
 def save_letter(req_id):
     data = request.get_json()
     letter_text = data.get("letter_text", "")
@@ -2167,7 +2252,7 @@ def save_letter(req_id):
 
 
 @app.route("/api/requests/<int:req_id>/close", methods=["POST"])
-@subscription_required
+@login_required
 def close_request(req_id):
     db = get_db()
     row = _can_access_request(db, req_id, session["user_id"])
@@ -2186,7 +2271,7 @@ def close_request(req_id):
 
 
 @app.route("/api/requests/<int:req_id>/reopen", methods=["POST"])
-@subscription_required
+@login_required
 def reopen_request(req_id):
     db = get_db()
     row = _can_access_request(db, req_id, session["user_id"])
@@ -2210,7 +2295,7 @@ def reopen_request(req_id):
 # Routes: Generate letter text
 # ─────────────────────────────────────────────
 @app.route("/api/requests/<int:req_id>/generate-letter")
-@subscription_required
+@login_required
 def generate_letter(req_id):
     db = get_db()
     access = _can_access_request(db, req_id, session["user_id"])
@@ -2259,7 +2344,7 @@ def generate_letter(req_id):
 # Routes: Update active request
 # ─────────────────────────────────────────────
 @app.route("/api/requests/<int:req_id>/update", methods=["POST"])
-@subscription_required
+@login_required
 def update_request(req_id):
     data = request.get_json()
     db = get_db()
@@ -2684,7 +2769,7 @@ def log_appeal_activity(req_id):
 # Routes: Attachments
 # ─────────────────────────────────────────────
 @app.route("/api/requests/<int:req_id>/attachments")
-@subscription_required
+@login_required
 def list_attachments(req_id):
     db = get_db()
     row = _can_access_request(db, req_id, session["user_id"])
@@ -2700,7 +2785,7 @@ def list_attachments(req_id):
 
 
 @app.route("/api/requests/<int:req_id>/attachments", methods=["POST"])
-@subscription_required
+@login_required
 def upload_attachment(req_id):
     db = get_db()
     row = _can_access_request(db, req_id, session["user_id"])
@@ -2753,7 +2838,7 @@ def upload_attachment(req_id):
 
 
 @app.route("/api/attachments/<int:att_id>/download")
-@subscription_required
+@login_required
 def download_attachment(att_id):
     db = get_db()
     row = db.execute(
@@ -2773,7 +2858,7 @@ def download_attachment(att_id):
 
 
 @app.route("/api/attachments/<int:att_id>/view")
-@subscription_required
+@login_required
 def view_attachment(att_id):
     """Serve file inline so browsers can render PDFs/images in a new tab."""
     db = get_db()
@@ -2799,7 +2884,7 @@ def view_attachment(att_id):
 
 
 @app.route("/api/attachments/<int:att_id>", methods=["DELETE"])
-@subscription_required
+@login_required
 def delete_attachment(att_id):
     db = get_db()
     row = db.execute(
@@ -2830,7 +2915,7 @@ def delete_attachment(att_id):
 # Routes: Action log
 # ─────────────────────────────────────────────
 @app.route("/api/requests/<int:req_id>/log")
-@subscription_required
+@login_required
 def get_action_log(req_id):
     db = get_db()
     row = _can_access_request(db, req_id, session["user_id"])
@@ -2849,7 +2934,7 @@ def get_action_log(req_id):
 # Routes: Word doc download
 # ─────────────────────────────────────────────
 @app.route("/api/requests/<int:req_id>/download-docx")
-@subscription_required
+@login_required
 def download_docx(req_id):
     """Generate and stream a .docx letter for a request."""
     import subprocess, tempfile, json as _json
@@ -2906,7 +2991,7 @@ def download_docx(req_id):
 
 
 @app.route("/api/requests/<int:req_id>/download-pdf")
-@subscription_required
+@login_required
 def download_pdf(req_id):
     """Generate and stream a PDF letter for a request."""
     import tempfile
@@ -3028,7 +3113,7 @@ def _assert_org_member(db, user_id, org_id, min_role=None):
 
 
 @app.route("/api/org/create", methods=["POST"])
-@login_required
+@plan_required("newsroom")
 def org_create():
     data = request.get_json() or {}
     name = (data.get("name") or "").strip()
@@ -3119,7 +3204,7 @@ def org_switch(org_id):
 
 
 @app.route("/api/org/<int:org_id>/invite", methods=["POST"])
-@login_required
+@plan_required("newsroom")
 def org_invite(org_id):
     data = request.get_json() or {}
     email = (data.get("email") or "").strip().lower()
@@ -3245,7 +3330,7 @@ def org_requests(org_id):
 
 
 @app.route("/api/requests/<int:req_id>/assign", methods=["PATCH"])
-@login_required
+@plan_required("newsroom")
 def request_assign(req_id):
     """Assign a request to a team member (org context required)."""
     data = request.get_json() or {}

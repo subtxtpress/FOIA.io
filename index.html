@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta property="og:title" content="FOIA.io — Request Management">
 <meta property="og:description" content="Track, generate, and appeal public records requests">
-<meta property="og:image" content="https://foiaio-production.up.railway.app/img/og-image.png">
+<meta property="og:image" content="/img/og-image.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://foiaio-production.up.railway.app/img/og-image.png">
+<meta name="twitter:image" content="/img/og-image.png">
 <title>FOIA.io — Request Management</title>
 <!-- Prevents phone number auto-detection formatting -->
 <meta name="format-detection" content="telephone=no">
@@ -34,10 +34,10 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json">
 <!-- Security Headers -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://raqonwahukpejuftbqav.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <!-- Performance -->
-<link rel="preconnect" href="https://your-api-domain.com">
+<link rel="preconnect" href="https://raqonwahukpejuftbqav.supabase.co">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -3076,6 +3076,7 @@ a:focus-visible,
 }
 .dp-footer button:hover { background: var(--bg3); }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -3095,8 +3096,8 @@ a:focus-visible,
     <!-- Login -->
     <div id="loginForm">
       <div class="form-group">
-        <label>Username or Email</label>
-        <input type="text" id="loginUser" placeholder="your@email.com" autocomplete="username">
+        <label>Email</label>
+        <input type="email" id="loginUser" placeholder="your@email.com" autocomplete="email">
       </div>
       <div class="form-group">
         <label>Password</label>
@@ -3162,19 +3163,6 @@ a:focus-visible,
   </div>
 </div>
 
-<!-- ── Join Org Screen ──────────────────────────────────────── -->
-<div id="joinWrap" style="display:none;">
-  <div class="auth-box">
-    <div class="auth-logo">
-      <h1>FOIA<span class="logo-tld">.io</span></h1>
-      <p>Team Invitation</p>
-    </div>
-    <div id="joinContent">
-      <!-- Filled dynamically -->
-    </div>
-  </div>
-</div>
-
 <!-- ── Main App ────────────────────────────────────────────── -->
 <div id="app" style="display:none;">
 
@@ -3186,13 +3174,6 @@ a:focus-visible,
     <div class="sidebar-logo">
       <h1>FOIA<span class="logo-tld">.io</span></h1>
       <p>Request Manager</p>
-    </div>
-
-    <!-- Org switcher -->
-    <div id="orgSwitcher" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border);">
-      <div class="org-switcher-label">Workspace</div>
-      <select id="orgSelect" onchange="switchOrg(this.value)" class="org-switcher-select" aria-label="Switch workspace">
-      </select>
     </div>
 
     <div class="sidebar-nav-wrap">
@@ -3217,21 +3198,6 @@ a:focus-visible,
       <button class="nav-item" data-page="closed-requests" onclick="nav('closed-requests')">
         <span class="icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span> Closed Requests
         <span class="nav-badge" id="badgeClosed">0</span>
-      </button>
-
-      <!-- Newsroom section (shown when user belongs to an org) -->
-      <div class="nav-label" id="newsroomNavSection" style="display:none;">Newsroom</div>
-      <button class="nav-item" id="sharedDashNavBtn" data-page="shared-dashboard" onclick="nav('shared-dashboard')" style="display:none;">
-        <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Shared Dashboard
-      </button>
-      <button class="nav-item" id="activityNavBtn" data-page="activity" onclick="nav('activity')" style="display:none;">
-        <span class="icon"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Activity
-      </button>
-      <button class="nav-item" id="teamNavBtn" data-page="team" onclick="nav('team')" style="display:none;">
-        <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span> Team
-      </button>
-      <button class="nav-item" id="orgSettingsNavBtn" data-page="org-settings" onclick="nav('org-settings')" style="display:none;">
-        <span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings
       </button>
 
       <div class="nav-label" id="adminNavSection" style="display:none;">Admin</div>
@@ -3613,113 +3579,6 @@ a:focus-visible,
         </div>
       </div>
 
-      <!-- ── Shared Dashboard (Newsroom) ──────────────────────── -->
-      <div id="page-shared-dashboard" class="page">
-        <div style="max-width:1100px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-            <div>
-              <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:2px;" id="sharedDashTitle">Shared Dashboard</h2>
-              <p style="font-size:.82rem;color:var(--text-dim);">All requests filed under this organization.</p>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <select id="sharedStatusFilter" onchange="loadSharedDashboard()"
-                style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:.8rem;padding:5px 8px;border-radius:6px;">
-                <option value="">All statuses</option>
-                <option value="new">New</option>
-                <option value="active">Active</option>
-                <option value="appealed">Appealed</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-          </div>
-          <div id="sharedDashStats"></div>
-          <div id="sharedDashContent">
-            <div style="color:var(--text-dim);font-size:.9rem;padding:40px;text-align:center;">Loading…</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Team Settings (Newsroom) ──────────────────────────── -->
-      <div id="page-team" class="page">
-        <div style="max-width:700px;">
-          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Team</h2>
-          <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">Manage your organization's members and invitations.</p>
-
-          <!-- Create org prompt (shown when user has no orgs) -->
-          <div id="teamNoOrg" class="card" style="display:none;">
-            <h3 style="font-size:.95rem;font-weight:700;margin-bottom:8px;">Create a Newsroom</h3>
-            <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:16px;">Set up a shared workspace so your team can collaborate on FOIA requests.</p>
-            <div class="form-group" style="margin-bottom:12px;">
-              <label>Organization Name</label>
-              <input type="text" id="newOrgName" placeholder="e.g. The Daily Sentinel Investigations" maxlength="80">
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="createOrg()">Create Organization</button>
-          </div>
-
-          <!-- Members panel (shown when user belongs to an org) -->
-          <div id="teamOrgPanel" style="display:none;">
-            <div class="card" style="margin-bottom:16px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-                <div class="card-title" style="margin:0;">Members</div>
-                <button class="btn btn-primary btn-sm" id="inviteBtn" onclick="openInviteModal()" style="display:none;">+ Invite</button>
-              </div>
-              <div id="teamMemberList">
-                <div style="color:var(--text-dim);font-size:.85rem;">Loading…</div>
-              </div>
-            </div>
-
-            <div class="card" style="margin-bottom:16px;">
-              <div class="card-title">Pending Invitations</div>
-              <div id="teamInviteList">
-                <div style="font-size:.82rem;color:var(--text-dim);">Loading…</div>
-              </div>
-            </div>
-
-            <div class="card" id="teamLeaveCard" style="display:none;">
-              <div class="card-title" style="color:var(--red);">Leave Organization</div>
-              <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:12px;">Remove yourself from this organization. You will lose access to all shared requests.</p>
-              <button class="btn btn-danger btn-sm" onclick="leaveOrg()">Leave Organization</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Activity Feed (Newsroom) ─────────────────────────── -->
-      <div id="page-activity" class="page">
-        <div style="max-width:800px;">
-          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Activity</h2>
-          <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:20px;">Recent actions across all organization requests.</p>
-          <div id="activityFeed">
-            <div style="color:var(--text-dim);font-size:.9rem;padding:40px;text-align:center;">Loading…</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Org Settings (Newsroom) ──────────────────────────── -->
-      <div id="page-org-settings" class="page">
-        <div style="max-width:600px;">
-          <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:4px;">Organization Settings</h2>
-          <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">Manage your organization details.</p>
-
-          <div class="card" style="margin-bottom:16px;">
-            <div class="card-title">General</div>
-            <div class="form-group" style="margin-bottom:12px;">
-              <label>Organization Name</label>
-              <input type="text" id="orgSettingsName" maxlength="80">
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="saveOrgSettings()">Save Changes</button>
-          </div>
-
-          <div class="card">
-            <div class="card-title">Organization Info</div>
-            <div style="font-size:.82rem;color:var(--text-dim);">
-              <p style="margin-bottom:6px;"><strong>Slug:</strong> <span id="orgSettingsSlug">—</span></p>
-              <p><strong>Members:</strong> <span id="orgSettingsMemberCount">—</span></p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- ── Plans & Pricing ───────────────────────────────────── -->
       <div id="page-pricing" class="page">
 
@@ -3735,7 +3594,7 @@ a:focus-visible,
               <div class="pricing-price">$0<span>/mo</span></div>
               <div class="pricing-subtitle">No credit card required</div>
               <ul class="pricing-features">
-                <li><span class="pricing-check">✓</span> Unlimited FOIA requests</li>
+                <li><span class="pricing-check">✓</span> Up to 5 active requests</li>
                 <li><span class="pricing-check">✓</span> Automatic deadline tracking</li>
                 <li><span class="pricing-check">✓</span> Notes and file attachments</li>
                 <li><span class="pricing-check">✓</span> Full action history on every request</li>
@@ -3750,25 +3609,12 @@ a:focus-visible,
               <div class="pricing-price">$5<span>/mo</span></div>
               <div class="pricing-subtitle" style="font-style:italic;">Everything in Core, plus:</div>
               <ul class="pricing-features">
+                <li><span class="pricing-check">✓</span> Unlimited active requests</li>
                 <li><span class="pricing-check">✓</span> Professional appeal letters</li>
                 <li><span class="pricing-check">✓</span> Priority email support</li>
                 <li><span class="pricing-check">✓</span> Early access to new features</li>
               </ul>
               <div class="pricing-footer">For when an agency ignores, delays, or denies your request.</div>
-            </div>
-
-            <!-- Newsroom -->
-            <div class="card pricing-card pricing-coming-soon">
-              <div class="pricing-badge soon">Coming soon</div>
-              <div class="pricing-tier-label">Newsroom</div>
-              <div class="pricing-price">$15<span>/mo</span></div>
-              <div class="pricing-subtitle" style="font-style:italic;">Everything in Pro, plus:</div>
-              <ul class="pricing-features">
-                <li><span class="pricing-check">✓</span> Multi-user accounts</li>
-                <li><span class="pricing-check">✓</span> Shared request dashboard</li>
-                <li><span class="pricing-check">✓</span> Team notes and handoff tools</li>
-              </ul>
-              <div class="pricing-footer">Built for newsrooms managing requests across beats.</div>
             </div>
 
           </div>
@@ -3783,22 +3629,17 @@ a:focus-visible,
                     <th style="text-align:left;width:55%;">Feature</th>
                     <th style="text-align:center;">Core</th>
                     <th style="text-align:center;color:var(--text);">Pro</th>
-                    <th style="text-align:center;">Newsroom</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><td>Unlimited FOIA Requests</td><td class="td-check">✓</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
-                  <tr><td>Automatic Deadline Tracking</td><td class="td-check">✓</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
-                  <tr><td>Notes and File Attachments</td><td class="td-check">✓</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
-                  <tr><td>Full Action History</td><td class="td-check">✓</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
-                  <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="4">Pro &amp; Above</td></tr>
-                  <tr><td>Professional Appeal Letters</td><td class="td-none">—</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
-                  <tr><td>Priority Email Support</td><td class="td-none">—</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
-                  <tr><td>Early Feature Access</td><td class="td-none">—</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
-                  <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="4">Newsroom Only</td></tr>
-                  <tr><td>Multi-User Accounts</td><td class="td-none">—</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
-                  <tr><td>Shared Request Dashboard</td><td class="td-none">—</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
-                  <tr><td>Team Notes and Handoff Tools</td><td class="td-none">—</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
+                  <tr><td>FOIA Requests</td><td style="text-align:center;font-size:.78rem;">5 active</td><td class="td-check">Unlimited</td></tr>
+                  <tr><td>Automatic Deadline Tracking</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
+                  <tr><td>Notes and File Attachments</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
+                  <tr><td>Full Action History</td><td class="td-check">✓</td><td class="td-check">✓</td></tr>
+                  <tr><td style="color:var(--text-dim);font-size:.75rem;padding-top:14px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px;" colspan="3">Pro Only</td></tr>
+                  <tr><td>Professional Appeal Letters</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
+                  <tr><td>Priority Email Support</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
+                  <tr><td>Early Feature Access</td><td class="td-none">—</td><td class="td-check">✓</td></tr>
                 </tbody>
               </table>
             </div>
@@ -4027,61 +3868,6 @@ a:focus-visible,
     </div><!-- /content -->
   </main><!-- /main -->
 </div><!-- /app -->
-
-<!-- ── Invite Member Modal ───────────────────────────────────── -->
-<div class="modal-overlay" role="dialog" aria-modal="true" id="inviteModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" style="max-width:440px;">
-    <div class="modal-header">
-      <div class="modal-title">Invite Team Member</div>
-      <button class="modal-close" aria-label="Close dialog" onclick="document.getElementById('inviteModal').classList.remove('open')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Email address</label>
-        <input type="email" id="inviteEmail" placeholder="colleague@newsroom.com" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label>Role</label>
-        <select id="inviteRole" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;width:100%;">
-          <option value="editor">Editor — can file and edit requests</option>
-          <option value="viewer">Viewer — read-only access</option>
-          <option value="owner">Owner — full admin access</option>
-        </select>
-      </div>
-      <div id="inviteResult" style="display:none;" class="card" style="background:var(--bg3);padding:10px;border-radius:6px;margin-top:4px;">
-        <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:4px;">Invite link (send this to your colleague):</div>
-        <div id="inviteLinkText" style="font-size:.78rem;word-break:break-all;color:var(--text);"></div>
-        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="copyInviteLink()">Copy Link</button>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('inviteModal').classList.remove('open')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="sendInvite()">Generate Invite Link</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Assign Request Modal ──────────────────────────────────── -->
-<div class="modal-overlay" role="dialog" aria-modal="true" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" style="max-width:400px;">
-    <div class="modal-header">
-      <div class="modal-title">Assign Request</div>
-      <button class="modal-close" aria-label="Close dialog" onclick="document.getElementById('assignModal').classList.remove('open')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Assign to</label>
-        <select id="assignSelect" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;width:100%;">
-          <option value="">— Unassigned —</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('assignModal').classList.remove('open')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="confirmAssign()">Save</button>
-    </div>
-  </div>
-</div>
 
 <!-- ── Beta Notice Modal ─────────────────────────────────────── -->
 <div class="modal-overlay" role="dialog" aria-modal="true" id="betaModal" onclick="if(event.target===this)this.classList.remove('open')">
@@ -4530,25 +4316,114 @@ let agenciesData = [];
 let pendingLetterId = null;
 let pendingUpdateId = null;
 
-// Newsroom state
-let currentOrgs = [];       // [{id, name, slug, role}]
-let activeOrgId = null;     // null = personal workspace
-let orgMembers = [];        // members of the active org (for assign modal)
-let pendingAssignReqId = null;
-let pendingInviteLink = '';
+// ─────────────────────────────────────────────────────────────
+// Supabase client
+// ─────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://raqonwahukpejuftbqav.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhcW9ud2FodWtwZWp1ZnRicWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MDM1MjcsImV4cCI6MjA4NjE3OTUyN30.p7ZEoIXrR6H95H6phQBp3XU-pzOptDSVZe6ZSv7lelM';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ─────────────────────────────────────────────────────────────
-// API helper
-// ─────────────────────────────────────────────────────────────
-async function api(method, path, body) {
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include'
-  };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(path, opts);
-  return { status: res.status, data: await res.json().catch(() => ({})) };
+// Current user profile cache
+let currentProfile = null;
+
+async function getUser() {
+  const { data: { user } } = await sb.auth.getUser();
+  return user;
+}
+
+async function getProfile() {
+  if (currentProfile) return currentProfile;
+  const user = await getUser();
+  if (!user) return null;
+  const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  currentProfile = data;
+  return data;
+}
+
+// ── Letter & Appeal Templates ─────────────────────────────────
+const SEGREGABILITY = `I request that all reasonably segregable portions of exempt material be released and that redactions be limited to those authorized by law, with specific exemptions cited. If any portion of this request is denied, please provide a detailed justification and inform me of my appeal rights. If my request is denied in whole or in part, please provide the exemptions withholdings by reference to specific exemptions of the applicable law and provide the name of the official responsible for the denial.`;
+
+const FEE_WAIVER_FEDERAL = `I request a waiver of fees associated with this request. I am an independent journalist and researcher working in the public interest. Disclosure of these records will contribute significantly to public understanding of government operations and policy. This request is not being made for commercial purposes. Therefore, I request a waiver of all fees under 5 U.S.C. § 552(a)(4)(A)(iii). If fees are expected to exceed $25, please notify me in advance.`;
+
+const FEE_WAIVER_STATE = `I request a waiver of fees associated with this request. I am an independent journalist and researcher working in the public interest. Disclosure of these records will contribute significantly to public understanding of government operations and policy. This request is not being made for commercial purposes. Therefore, I request a waiver of all fees under the applicable state public records law. If fees are expected to exceed $25, please notify me in advance.`;
+
+const APPEAL_CLOSING = `Please issue a determination on this appeal within twenty (20) business days as required by 5 U.S.C. § 552(a)(6)(A)(ii). If you uphold the denial, please provide a detailed written explanation citing the specific statutory basis for each withholding so that I may seek judicial review.\n\nThank you for your attention to this request. I look forward to your response within the statutory timeframe.\n\nRespectfully submitted,`;
+
+const STATE_APPEAL_CLOSING = `Please issue a timely determination on this appeal as required by state law. If you uphold the denial, please provide a detailed written explanation citing the specific statutory basis for each withholding so that I may seek further review.\n\nThank you for your attention to this request. I look forward to your response.\n\nRespectfully submitted,`;
+
+function buildLetterText(agencyName, foiaOfficerTitle, subject, statute = '5 U.S.C. § 552', agencyType = 'Federal', lawName = null, responseDays = 20) {
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const isState = agencyType === 'State';
+  const feeWaiver = isState ? FEE_WAIVER_STATE : FEE_WAIVER_FEDERAL;
+  let viaLine, reLine, opening, closing;
+
+  if (isState) {
+    viaLine = 'Via Written Request';
+    reLine = `Re: Public Records Request — ${subject}`;
+    opening = `Pursuant to the ${lawName || 'state public records law'}, ${statute}, I hereby request access to and copies of the following records:`;
+    closing = responseDays
+      ? `Thank you for your attention to this request. I look forward to your response within ${responseDays} business days as required by ${statute}.\n\nRespectfully submitted,`
+      : `Thank you for your attention to this request. I look forward to your response within a reasonable time as required by ${statute}.\n\nRespectfully submitted,`;
+  } else {
+    viaLine = 'Via Electronic Submission';
+    reLine = `Re: Freedom of Information Act Request — ${subject}`;
+    opening = `Pursuant to the Freedom of Information Act, ${statute}, and the regulations promulgated thereunder, I hereby request the following records:`;
+    closing = `Thank you for your attention to this request. I look forward to your response within the statutory timeframe as required by ${statute}.\n\nRespectfully submitted,`;
+  }
+
+  return `${today}\n\n${foiaOfficerTitle}\n${agencyName}\n\n${viaLine}\n\n${reLine}\n\nDear ${foiaOfficerTitle}:\n\n${opening}\n\n${subject}\n\n[Please describe the records you are seeking in detail here. Include relevant dates, names, document types, programs, or other identifying information that will help locate the responsive records.]\n\n${SEGREGABILITY}\n\n${feeWaiver}\n\n${closing}\n\n[Your Name]\n[Your Address]\n[Your Email]\n[Your Phone]`;
+}
+
+function buildAppealText(appealType, agencyName, foiaOfficerTitle, subject, foiaNumber, createdDate, exemption, agencyType = 'Federal', stateInfo = null) {
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const filed = foiaNumber;
+  const isState = ['State', 'Local', 'University'].includes(agencyType);
+  let body;
+
+  const lawName = stateInfo?.law_name || 'state public records law';
+
+  if (appealType === 'improper_exemption') {
+    const exemptionRef = exemption ? `Exemption ${exemption}` : 'the cited exemption';
+    if (isState) {
+      body = `I am writing to appeal the denial of my public records request, ${filed}, submitted on ${createdDate}, seeking: ${subject}\n\nThe agency denied my request in whole or in part based on ${exemptionRef}. I respectfully challenge this withholding under ${lawName}.\n\nExemptions to public records laws must be construed narrowly. The agency bears the burden of demonstrating that withheld material falls squarely within the claimed exemption.\n\nFurthermore, even if some portions of the responsive records fall within a claimed exemption, the agency is required to segregate and release all non-exempt portions.`;
+    } else {
+      body = `I am writing to appeal the denial of my Freedom of Information Act request, ${filed}, submitted on ${createdDate}, seeking: ${subject}\n\nThe agency denied my request in whole or in part based on ${exemptionRef}. I respectfully challenge this withholding on the following grounds:\n\nFOIA exemptions must be construed narrowly. See FBI v. Abramson, 456 U.S. 615, 621 (1982). The agency bears the burden of demonstrating that withheld material falls squarely within the claimed exemption.\n\nFurthermore, even if some portions of the responsive records fall within a claimed exemption, the agency is required to segregate and release all non-exempt portions. 5 U.S.C. § 552(b).`;
+    }
+  } else if (appealType === 'constructive_denial') {
+    if (isState) {
+      body = `I am writing to appeal the constructive denial of my public records request, ${filed}, submitted on ${createdDate}, seeking: ${subject}\n\nAs of the date of this appeal, the agency has failed to issue a determination within the timeframe required by state law. This constitutes a constructive denial.`;
+    } else {
+      body = `I am writing to appeal the constructive denial of my Freedom of Information Act request, ${filed}, submitted on ${createdDate}, seeking: ${subject}\n\nAs of the date of this appeal, the agency has failed to issue a determination within the twenty (20) business day period mandated by 5 U.S.C. § 552(a)(6)(A)(i).`;
+    }
+  } else if (appealType === 'inadequate_search') {
+    if (isState) {
+      body = `I am writing to appeal the adequacy of the search conducted in response to my public records request, ${filed}, submitted on ${createdDate}, seeking: ${subject}\n\nThe agency's response does not demonstrate that it conducted a search reasonably calculated to uncover all responsive documents under ${lawName}.`;
+    } else {
+      body = `I am writing to appeal the adequacy of the search conducted in response to my Freedom of Information Act request, ${filed}, submitted on ${createdDate}, seeking: ${subject}\n\nThe agency's response does not demonstrate that it conducted a search reasonably calculated to uncover all responsive documents.`;
+    }
+  } else if (appealType === 'fee_dispute') {
+    if (isState) {
+      body = `I am writing to appeal the fee assessment associated with my public records request, ${filed}, submitted on ${createdDate}, seeking: ${subject}\n\nThe agency has assessed fees that I challenge under ${lawName}.`;
+    } else {
+      body = `I am writing to appeal the fee assessment associated with my Freedom of Information Act request, ${filed}, submitted on ${createdDate}, seeking: ${subject}\n\nThe agency has assessed fees that I challenge on multiple grounds.`;
+    }
+  } else {
+    body = '[Appeal type not recognized]';
+  }
+
+  let header;
+  if (isState) {
+    const stateName = stateInfo?.state_name || '';
+    const appealAuth = stateInfo?.appeal_authority || 'Attorney General';
+    const appealAddr = stateInfo?.appeal_address || '';
+    const sLawName = stateInfo?.law_name || 'Public Records';
+    header = `${today}\n\n${appealAuth}\n${stateName}\n${appealAddr}\n\nVia Electronic Submission\n\nRe: Administrative Appeal of ${sLawName} Request ${foiaNumber} — ${subject}\n\nDear ${appealAuth.split(' ').pop()}:`;
+  } else {
+    header = `${today}\n\nDirector, Office of Information Policy\nU.S. Department of Justice\n441 G Street NW, Suite 11050\nWashington, DC 20530\n\nVia Electronic Submission\n\nRe: Administrative Appeal of FOIA Request ${foiaNumber} — ${subject}\n\nDear Director:`;
+  }
+
+  const closing = isState ? STATE_APPEAL_CLOSING : APPEAL_CLOSING;
+  return `${header}\n\n${body}\n\n${closing}\n\n[Your Name]\n[Your Address]\n[Your Email]\n[Your Phone]\n\nEnclosure: Copy of original FOIA request ${foiaNumber} and agency response (if any)`;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -4578,37 +4453,58 @@ function authTab(tab) {
 }
 
 async function doLogin() {
-  const username = document.getElementById('loginUser').value.trim();
+  const email = document.getElementById('loginUser').value.trim();
   const password = document.getElementById('loginPass').value;
-  const { status, data } = await api('POST', '/api/auth/login', { username, password });
-  if (status !== 200) {
-    showAuthError(data.error || 'Login failed');
-    return;
-  }
+  if (!email || !password) { showAuthError('Email and password required'); return; }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { showAuthError(error.message); return; }
+  currentProfile = null;
   await bootAfterAuth();
 }
 
 async function doRegister() {
-  const username    = document.getElementById('regUser').value.trim();
-  const email       = document.getElementById('regEmail').value.trim();
-  const password    = document.getElementById('regPass').value;
+  const username = document.getElementById('regUser').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPass').value;
   const invite_code = document.getElementById('regInvite').value.trim().toUpperCase();
-  const { status, data } = await api('POST', '/api/auth/register', { username, email, password, invite_code });
-  if (status !== 200) {
-    showAuthError(data.error || 'Registration failed');
-    return;
+  if (!username || !email || !password) { showAuthError('All fields required'); return; }
+  if (password.length < 8) { showAuthError('Password must be at least 8 characters'); return; }
+
+  // Validate invite code if provided
+  let isLifetimeFree = false;
+  if (invite_code) {
+    const { data: codeRow, error: codeErr } = await sb.from('invite_codes')
+      .select('id').eq('code', invite_code).eq('used', 0).single();
+    if (codeErr || !codeRow) { showAuthError('Invalid or already used invite code'); return; }
+    isLifetimeFree = true;
   }
+
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { username } }
+  });
+  if (error) { showAuthError(error.message); return; }
+
+  // Update profile with invite code benefits
+  if (isLifetimeFree && data.user) {
+    await sb.from('profiles').update({
+      plan: 'pro', subscription_status: 'active', lifetime_free: true
+    }).eq('id', data.user.id);
+    // Mark invite code as used
+    await sb.from('invite_codes').update({ used: 1 }).eq('code', invite_code);
+  }
+
+  currentProfile = null;
   await bootAfterAuth();
 }
 
 async function doForgot() {
   const email = document.getElementById('forgotEmail').value.trim();
   if (!email) { showAuthError('Please enter your email'); return; }
-  const { status, data } = await api('POST', '/api/auth/forgot-password', { email });
-  if (status !== 200) {
-    showAuthError(data.error || 'Request failed');
-    return;
-  }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+  if (error) { showAuthError(error.message); return; }
   showAuthError('');
   document.getElementById('forgotForm').innerHTML =
     '<p style="color:var(--green);text-align:center;padding:24px 0;">If that email is registered, a reset link has been sent. Check your inbox.</p>' +
@@ -4618,15 +4514,11 @@ async function doForgot() {
 async function doReset() {
   const password = document.getElementById('resetPass').value;
   const confirm  = document.getElementById('resetPassConfirm').value;
+  if (!password) { showAuthError('Enter a new password'); return; }
   if (password.length < 8) { showAuthError('Password must be at least 8 characters'); return; }
   if (password !== confirm) { showAuthError('Passwords do not match'); return; }
-  const token = new URLSearchParams(window.location.search).get('reset');
-  if (!token) { showAuthError('Invalid reset link'); return; }
-  const { status, data } = await api('POST', '/api/auth/reset-password', { token, password });
-  if (status !== 200) {
-    showAuthError(data.error || 'Reset failed');
-    return;
-  }
+  const { error } = await sb.auth.updateUser({ password });
+  if (error) { showAuthError(error.message); return; }
   showAuthError('');
   document.getElementById('resetForm').innerHTML =
     '<p style="color:var(--green);text-align:center;padding:24px 0;">Password updated! You can now sign in.</p>' +
@@ -4634,115 +4526,33 @@ async function doReset() {
 }
 
 async function bootAfterAuth() {
-  // If there's a pending org invite, handle it now
-  if (window._pendingInviteToken) {
-    const token = window._pendingInviteToken;
-    window._pendingInviteToken = null;
-    await handleInviteToken(token);
-    return;
-  }
   await bootFromSession();
 }
 
 async function bootFromSession() {
   const urlParams = new URLSearchParams(window.location.search);
-
-  // Check for password reset token in URL
   const resetToken = urlParams.get('reset');
-  if (resetToken) {
+  if (resetToken) { authTab('reset'); return; }
+
+  // Handle Supabase auth callback (password reset, email confirm)
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  if (hashParams.get('type') === 'recovery') {
     authTab('reset');
     return;
   }
 
-  // Check for org invite token in URL
-  const inviteToken = urlParams.get('token');
-  if (inviteToken) {
-    await handleInviteToken(inviteToken);
-    return;
-  }
-
-  const { data } = await api('GET', '/api/auth/me');
-  if (data.authenticated) {
-    bootApp(data.username, data.subscription_status, data.orgs || [], data.active_org_id || null);
-  }
-}
-
-async function handleInviteToken(token) {
-  // Fetch invite info (public endpoint — no login required)
-  const { status, data } = await api('GET', `/api/org/invite-info?token=${encodeURIComponent(token)}`);
-  const joinWrap    = document.getElementById('joinWrap');
-  const authWrap    = document.getElementById('authWrap');
-  const joinContent = document.getElementById('joinContent');
-
-  // Check if already logged in
-  const meRes = await api('GET', '/api/auth/me');
-  const isAuthed = meRes.data?.authenticated;
-
-  if (status !== 200) {
-    // Invalid or expired token — show error then fall through to normal app
-    joinWrap.style.display = '';
-    authWrap.style.display = 'none';
-    joinContent.innerHTML = `
-      <div style="text-align:center;padding:8px 0 24px;">
-        <div style="margin-bottom:12px;"><svg viewBox="0 0 24 24" width="28" height="28" stroke="var(--amber)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <p style="font-size:.95rem;font-weight:600;margin-bottom:8px;">This invite link is invalid or has expired.</p>
-        <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">Ask your team admin to generate a new one.</p>
-        <button class="btn btn-ghost" onclick="window.location.href='/'">Go to FOIA.io</button>
-      </div>`;
-    return;
-  }
-
-  const { org_name, email, role } = data;
-
-  if (!isAuthed) {
-    // Not logged in — show login/register with context, then join after auth
-    authWrap.style.display = '';
-    // Prepend a banner to the auth box
-    const banner = document.createElement('div');
-    banner.style.cssText = 'background:rgba(128,128,128,.06);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.84rem;line-height:1.55;';
-    banner.innerHTML = `<strong style="color:var(--text);">Team invitation</strong><br>You've been invited to join <strong>${esc(org_name)}</strong> as <strong>${esc(role)}</strong>.<br><span style="color:var(--text-dim);">Sign in or create an account to accept.</span>`;
-    const authBox = authWrap.querySelector('.auth-box');
-    authBox.insertBefore(banner, authBox.querySelector('.auth-tabs'));
-
-    // After login/register, intercept bootFromSession to complete join
-    window._pendingInviteToken = token;
-    return;
-  }
-
-  // Logged in — show accept screen
-  joinWrap.style.display = '';
-  authWrap.style.display = 'none';
-  joinContent.innerHTML = `
-    <div style="text-align:center;padding:8px 0;">
-      <div style="font-size:2rem;margin-bottom:12px;">🤝</div>
-      <p style="font-size:1rem;font-weight:700;margin-bottom:6px;">You're invited to join</p>
-      <p style="font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:6px;">${esc(org_name)}</p>
-      <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:24px;">as <strong>${esc(role)}</strong></p>
-      <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="joinOrg('${esc(token)}')">Accept Invitation</button>
-      <button class="btn btn-ghost" style="width:100%;" onclick="window.location.href='/'">Decline</button>
-      <div id="joinError" style="display:none;color:var(--red);font-size:.82rem;margin-top:12px;"></div>
-    </div>`;
-}
-
-async function joinOrg(token) {
-  const { status, data } = await api('POST', '/api/org/join', { token });
-  if (status !== 200) {
-    const el = document.getElementById('joinError');
-    if (el) { el.textContent = data.error || 'Could not join organization.'; el.style.display = ''; }
-    return;
-  }
-  // Success — clear URL params and boot into the app
-  toast(`Welcome to ${data.org_name}!`, 'success');
-  window.history.replaceState({}, '', '/');
-  document.getElementById('joinWrap').style.display = 'none';
-  const meRes = await api('GET', '/api/auth/me');
-  if (meRes.data?.authenticated) {
-    bootApp(meRes.data.username, meRes.data.subscription_status, meRes.data.orgs || [], meRes.data.active_org_id || null);
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) {
+    const profile = await getProfile();
+    if (profile) {
+      bootApp(profile.username, profile.subscription_status, profile.plan, profile.lifetime_free);
+    }
   }
 }
 
 async function doLogout() {
-  await api('POST', '/api/auth/logout');
+  await sb.auth.signOut();
+  currentProfile = null;
   location.reload();
 }
 
@@ -4778,7 +4588,7 @@ function toggleTheme() {
   applyTheme(current === 'dark' ? 'light' : 'dark');
 }
 
-async function bootApp(username, subStatus, orgs, activeOrgIdFromServer) {
+async function bootApp(username, subStatus, plan, lifetimeFree) {
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   window.scrollTo(0, 0);
@@ -4786,22 +4596,19 @@ async function bootApp(username, subStatus, orgs, activeOrgIdFromServer) {
   document.getElementById('userAvatar').textContent = username[0].toUpperCase();
   initTheme();
 
-  // Upgrade all static date inputs (in modals and new-request form) to calendar pickers
+  window._userPlan = plan || 'free';
+  window._userSubStatus = subStatus || 'inactive';
+  window._userLifetimeFree = !!lifetimeFree;
+
   upgradeDateInputs(document.getElementById('updateModal'));
   upgradeDateInputs(document.getElementById('page-new-request'));
 
-  // Newsroom: load orgs into sidebar
-  currentOrgs = orgs || [];
-  activeOrgId = activeOrgIdFromServer || null;
-  renderOrgSwitcher();
-
-  // ── TEST MODE: subscription gate disabled ──────────────────
   await loadAgencies();
   await refreshAllData();
 
-  // Show admin nav if the logged-in user is an admin
-  const { status: adminStatus } = await api('GET', '/api/admin/invite-codes');
-  if (adminStatus === 200) {
+  // Admin check: compare profile email
+  const profile = await getProfile();
+  if (profile && profile.email === 'jturner@subtxtpress.com') {
     document.getElementById('adminNavSection').style.display = '';
     document.getElementById('adminNavBtn').style.display = '';
   }
@@ -4813,389 +4620,16 @@ async function bootApp(username, subStatus, orgs, activeOrgIdFromServer) {
 // Subscription
 // ─────────────────────────────────────────────────────────────
 async function goToCheckout() {
-  const { status, data } = await api('POST', '/api/stripe/create-checkout', {});
-  toast(data.message || 'Redirecting to Stripe…', '');
+  toast('Stripe checkout coming soon — contact support for Pro access.', '');
 }
 
 async function devActivate() {
-  const { status, data } = await api('POST', '/api/dev/activate', {});
-  if (status === 200) {
-    document.getElementById('subscribePage').style.display = 'none';
-    await loadAgencies();
-    await refreshAllData();
-    nav('dashboard');
-    toast('Dev access activated ✓', 'success');
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Newsroom
-// ─────────────────────────────────────────────────────────────
-
-function renderOrgSwitcher() {
-  const switcher = document.getElementById('orgSwitcher');
-  const select   = document.getElementById('orgSelect');
-  const newsroomSection = document.getElementById('newsroomNavSection');
-  const sharedBtn = document.getElementById('sharedDashNavBtn');
-  const activityBtn = document.getElementById('activityNavBtn');
-  const teamBtn   = document.getElementById('teamNavBtn');
-  const settingsBtn = document.getElementById('orgSettingsNavBtn');
-
-  if (!currentOrgs.length) {
-    switcher.style.display = 'none';
-    newsroomSection.style.display = 'none';
-    sharedBtn.style.display = 'none';
-    activityBtn.style.display = 'none';
-    teamBtn.style.display = 'none';
-    settingsBtn.style.display = 'none';
-    return;
-  }
-
-  // Build select options
-  select.innerHTML = '<option value="0">Personal workspace</option>' +
-    currentOrgs.map(o => `<option value="${o.id}" ${o.id === activeOrgId ? 'selected' : ''}>${esc(o.name)}</option>`).join('');
-
-  const hasActive = !!activeOrgId;
-  const userOrg = currentOrgs.find(o => o.id === activeOrgId);
-  const isOwner = userOrg?.role === 'owner';
-
-  switcher.style.display = '';
-  newsroomSection.style.display = '';
-  sharedBtn.style.display = hasActive ? '' : 'none';
-  activityBtn.style.display = hasActive ? '' : 'none';
-  teamBtn.style.display = '';
-  settingsBtn.style.display = hasActive && isOwner ? '' : 'none';
-}
-
-async function switchOrg(orgIdStr) {
-  const orgId = parseInt(orgIdStr) || 0;
-  const { status } = await api('POST', `/api/org/${orgId}/switch`, {});
-  if (status !== 200) { toast('Could not switch workspace', 'error'); return; }
-  activeOrgId = orgId || null;
-  renderOrgSwitcher();
+  const user = await getUser();
+  await sb.from('profiles').update({ subscription_status: 'active', plan: 'pro' }).eq('id', user.id);
+  currentProfile = null;
   await refreshAllData();
-  if (activeOrgId && currentPage === 'dashboard') await loadSharedDashboard().then(() => nav('shared-dashboard'));
-  else nav('dashboard');
-}
-
-async function loadSharedDashboard() {
-  if (!activeOrgId) return;
-  const org = currentOrgs.find(o => o.id === activeOrgId);
-  if (org) document.getElementById('sharedDashTitle').textContent = org.name + ' — Requests';
-
-  // Load stats + requests in parallel
-  const [statsRes, reqRes] = await Promise.all([
-    api('GET', `/api/org/${activeOrgId}/stats`),
-    api('GET', `/api/org/${activeOrgId}/requests${document.getElementById('sharedStatusFilter')?.value ? '?status=' + document.getElementById('sharedStatusFilter').value : ''}`)
-  ]);
-
-  const el = document.getElementById('sharedDashContent');
-
-  // Render stats bar
-  const statsEl = document.getElementById('sharedDashStats');
-  if (statsRes.status === 200 && statsEl) {
-    const s = statsRes.data.stats;
-    statsEl.innerHTML = `
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
-        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--text);">${s.total}</div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Total</div>
-        </div>
-        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--text);">${s.new}</div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">New</div>
-        </div>
-        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--green);">${s.active}</div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Active</div>
-        </div>
-        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--yellow);">${s.appealed}</div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Appealed</div>
-        </div>
-        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--text-dim);">${s.closed}</div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Closed</div>
-        </div>
-        <div style="flex:1;min-width:90px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:1.4rem;font-weight:800;color:var(--text);">${s.members}</div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);font-weight:600;">Members</div>
-        </div>
-      </div>`;
-  }
-
-  if (reqRes.status !== 200) { el.innerHTML = `<p style="color:var(--red)">Could not load requests.</p>`; return; }
-  const reqs = reqRes.data.requests || [];
-  if (!reqs.length) {
-    el.innerHTML = `<div class="card" style="text-align:center;padding:40px;color:var(--text-dim);">No requests yet in this workspace.</div>`;
-    return;
-  }
-  el.innerHTML = `<div class="table-wrap"><table style="width:100%;font-size:.82rem;">
-    <thead><tr>
-      <th style="text-align:left;">Request #</th>
-      <th style="text-align:left;">Subject</th>
-      <th style="text-align:left;">Agency</th>
-      <th style="text-align:left;">Status</th>
-      <th style="text-align:left;">Filed by</th>
-      <th style="text-align:left;">Assigned to</th>
-    </tr></thead>
-    <tbody>${reqs.map(r => `
-      <tr style="cursor:pointer;" onclick="openDetailById(${r.id})">
-        <td style="color:var(--text);font-weight:600;">${priorityDot(r)}${esc(r.foia_number)}</td>
-        <td>${esc(r.subject||'—')}</td>
-        <td>${esc(r.agency_name||'—')}</td>
-        <td>${statusBadge(r)}</td>
-        <td>${esc(r.filed_by||'—')}</td>
-        <td>${r.assigned_to_username ? esc(r.assigned_to_username) : '<span style="color:var(--text-dim)">—</span>'}</td>
-      </tr>`).join('')}
-    </tbody>
-  </table></div>`;
-}
-
-async function openDetailById(reqId) {
-  const r = allRequestsData.find(x => x.id === reqId);
-  if (r) { openDetail(r); return; }
-  // If not in personal data, fetch it
-  const { status, data } = await api('GET', `/api/requests/${reqId}`);
-  if (status === 200 && data.request) openDetail(data.request);
-}
-
-async function loadTeamPage() {
-  const noOrg   = document.getElementById('teamNoOrg');
-  const orgPanel = document.getElementById('teamOrgPanel');
-  const memberList = document.getElementById('teamMemberList');
-  const inviteBtn  = document.getElementById('inviteBtn');
-  const leaveCard  = document.getElementById('teamLeaveCard');
-
-  if (!currentOrgs.length) {
-    noOrg.style.display = '';
-    orgPanel.style.display = 'none';
-    return;
-  }
-
-  noOrg.style.display = 'none';
-  orgPanel.style.display = '';
-
-  // Use activeOrgId or first org
-  const orgId = activeOrgId || currentOrgs[0].id;
-  const { status, data } = await api('GET', `/api/org/${orgId}`);
-  if (status !== 200) { memberList.innerHTML = '<p style="color:var(--red)">Could not load team.</p>'; return; }
-
-  orgMembers = data.members || [];
-  const userOrg = currentOrgs.find(o => o.id === orgId);
-  const isOwner = userOrg?.role === 'owner';
-  if (isOwner) inviteBtn.style.display = '';
-  else inviteBtn.style.display = 'none';
-
-  // Show leave button for non-sole-owners
-  const ownerCount = orgMembers.filter(m => m.role === 'owner').length;
-  leaveCard.style.display = (!isOwner || ownerCount > 1) ? '' : 'none';
-
-  memberList.innerHTML = orgMembers.map(m => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;">${esc(m.username[0].toUpperCase())}</div>
-        <div>
-          <div style="font-size:.88rem;font-weight:600;">${esc(m.username)}</div>
-          <div style="font-size:.75rem;color:var(--text-dim);">${esc(m.email)}</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:4px;
-          background:var(--bg3);
-          color:${m.role==='owner'?'var(--text)':'var(--text-dim)'};">${m.role}</span>
-        ${isOwner && m.role !== 'owner' ? `
-          <select onchange="changeMemberRole(${orgId}, ${m.id}, this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:.75rem;padding:3px 6px;border-radius:4px;">
-            <option value="editor" ${m.role==='editor'?'selected':''}>Editor</option>
-            <option value="viewer" ${m.role==='viewer'?'selected':''}>Viewer</option>
-            <option value="owner">Owner</option>
-          </select>
-          <button class="btn btn-danger btn-sm" style="font-size:.7rem;padding:3px 8px;" onclick="removeMember(${orgId}, ${m.id}, '${esc(m.username)}')">Remove</button>` : ''}
-      </div>
-    </div>`).join('');
-
-  // Load pending invitations (owners only)
-  await loadPendingInvitations(orgId, isOwner);
-}
-
-async function createOrg() {
-  const name = document.getElementById('newOrgName').value.trim();
-  if (!name) { toast('Enter an organization name', 'error'); return; }
-  const { status, data } = await api('POST', '/api/org/create', { name });
-  if (status !== 200) { toast(data.error || 'Could not create organization', 'error'); return; }
-  currentOrgs = [...currentOrgs, data.org];
-  activeOrgId = data.org.id;
-  renderOrgSwitcher();
-  toast(`${name} created!`, 'success');
-  await loadTeamPage();
-  nav('team');
-}
-
-function openInviteModal() {
-  document.getElementById('inviteEmail').value = '';
-  document.getElementById('inviteRole').value = 'editor';
-  document.getElementById('inviteResult').style.display = 'none';
-  document.getElementById('inviteModal').classList.add('open');
-}
-
-async function sendInvite() {
-  const email = document.getElementById('inviteEmail').value.trim();
-  const role  = document.getElementById('inviteRole').value;
-  if (!email) { toast('Enter an email address', 'error'); return; }
-  const orgId = activeOrgId || currentOrgs[0]?.id;
-  if (!orgId) return;
-  const { status, data } = await api('POST', `/api/org/${orgId}/invite`, { email, role });
-  if (status !== 200) { toast(data.error || 'Could not send invite', 'error'); return; }
-  pendingInviteLink = data.invite_url;
-  document.getElementById('inviteLinkText').textContent = data.invite_url;
-  document.getElementById('inviteResult').style.display = '';
-  toast('Invite link generated', 'success');
-}
-
-function copyInviteLink() {
-  navigator.clipboard.writeText(pendingInviteLink).then(() => toast('Copied to clipboard', 'success'));
-}
-
-async function changeMemberRole(orgId, userId, role) {
-  const { status, data } = await api('PATCH', `/api/org/${orgId}/members/${userId}`, { role });
-  if (status !== 200) { toast(data.error || 'Could not update role', 'error'); return; }
-  toast('Role updated', 'success');
-}
-
-async function removeMember(orgId, userId, username) {
-  if (!confirm(`Remove ${username} from the organization?`)) return;
-  const { status, data } = await api('DELETE', `/api/org/${orgId}/members/${userId}`);
-  if (status !== 200) { toast(data.error || 'Could not remove member', 'error'); return; }
-  toast(`${username} removed`, 'success');
-  await loadTeamPage();
-}
-
-async function openAssignModal(reqId) {
-  pendingAssignReqId = reqId;
-  const req = allRequestsData.find(r => r.id === reqId);
-  const orgId = req?.org_id || activeOrgId;
-  if (!orgId) return;
-
-  // Fetch org members if needed
-  if (!orgMembers.length) {
-    const { data } = await api('GET', `/api/org/${orgId}`);
-    orgMembers = data.members || [];
-  }
-
-  const select = document.getElementById('assignSelect');
-  select.innerHTML = '<option value="">— Unassigned —</option>' +
-    orgMembers.map(m => `<option value="${m.id}" ${m.id === req?.assigned_to ? 'selected' : ''}>${esc(m.username)}</option>`).join('');
-  document.getElementById('assignModal').classList.add('open');
-}
-
-async function confirmAssign() {
-  const assignedTo = document.getElementById('assignSelect').value || null;
-  const { status, data } = await api('PATCH', `/api/requests/${pendingAssignReqId}/assign`, {
-    assigned_to: assignedTo ? parseInt(assignedTo) : null
-  });
-  document.getElementById('assignModal').classList.remove('open');
-  if (status !== 200) { toast(data.error || 'Could not assign request', 'error'); return; }
-  toast('Assignment updated', 'success');
-  // Refresh detail if open
-  const req = allRequestsData.find(r => r.id === pendingAssignReqId);
-  if (req) {
-    req.assigned_to = assignedTo ? parseInt(assignedTo) : null;
-    const member = orgMembers.find(m => m.id === req.assigned_to);
-    req.assigned_to_username = member?.username || null;
-    // Update assign chip in detail view
-    const chip = document.getElementById(`assignChip-${pendingAssignReqId}`);
-    if (chip) {
-      const name = member ? esc(member.username) : `<span style="color:var(--text-dim)">Unassigned</span>`;
-      chip.innerHTML = `<strong>Assigned to:</strong> ${name} <button class="btn btn-ghost btn-sm" style="padding:1px 6px;font-size:.7rem;margin-left:4px;" onclick="openAssignModal(${pendingAssignReqId})">Change</button>`;
-    }
-  }
-  if (currentPage === 'shared-dashboard') await loadSharedDashboard();
-}
-
-async function loadPendingInvitations(orgId, isOwner) {
-  const el = document.getElementById('teamInviteList');
-  if (!isOwner) {
-    el.innerHTML = '<div style="font-size:.82rem;color:var(--text-dim);">Only owners can view pending invitations.</div>';
-    return;
-  }
-  const { status, data } = await api('GET', `/api/org/${orgId}/invitations`);
-  if (status !== 200) { el.innerHTML = '<div style="font-size:.82rem;color:var(--red);">Could not load invitations.</div>'; return; }
-  const invites = data.invitations || [];
-  if (!invites.length) {
-    el.innerHTML = '<div style="font-size:.82rem;color:var(--text-dim);">No pending invitations.</div>';
-    return;
-  }
-  el.innerHTML = invites.map(inv => {
-    const expires = new Date(inv.expires_at);
-    const daysLeft = Math.max(0, Math.ceil((expires - Date.now()) / 86400000));
-    return `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:.85rem;font-weight:600;">${esc(inv.email)}</div>
-        <div style="font-size:.72rem;color:var(--text-dim);">
-          Role: <strong>${inv.role}</strong> · Expires in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}
-          ${inv.invited_by_name ? ` · Invited by ${esc(inv.invited_by_name)}` : ''}
-        </div>
-      </div>
-      <button class="btn btn-danger btn-sm" style="font-size:.7rem;padding:3px 8px;" onclick="revokeInvitation(${orgId}, ${inv.id}, '${esc(inv.email)}')">Revoke</button>
-    </div>`;
-  }).join('');
-}
-
-async function revokeInvitation(orgId, inviteId, email) {
-  if (!confirm(`Revoke invitation for ${email}?`)) return;
-  const { status, data } = await api('DELETE', `/api/org/${orgId}/invitations/${inviteId}`);
-  if (status !== 200) { toast(data.error || 'Could not revoke invitation', 'error'); return; }
-  toast('Invitation revoked', 'success');
-  await loadTeamPage();
-}
-
-async function leaveOrg() {
-  const org = currentOrgs.find(o => o.id === activeOrgId);
-  const orgName = org ? org.name : 'this organization';
-  if (!confirm(`Leave ${orgName}? You will lose access to all shared requests.`)) return;
-  const { status, data } = await api('POST', `/api/org/${activeOrgId}/leave`);
-  if (status !== 200) { toast(data.error || 'Could not leave organization', 'error'); return; }
-  toast(`Left ${orgName}`, 'success');
-  // Refresh org list
-  const meRes = await api('GET', '/api/auth/me');
-  if (meRes.data?.authenticated) {
-    currentOrgs = meRes.data.orgs || [];
-    activeOrgId = meRes.data.active_org_id || null;
-    renderOrgSwitcher();
-  }
   nav('dashboard');
-}
-
-async function loadActivityFeed() {
-  if (!activeOrgId) return;
-  const el = document.getElementById('activityFeed');
-  const { status, data } = await api('GET', `/api/org/${activeOrgId}/activity?limit=50`);
-  if (status !== 200) { el.innerHTML = '<p style="color:var(--red)">Could not load activity.</p>'; return; }
-  const items = data.activity || [];
-  if (!items.length) {
-    el.innerHTML = '<div class="card" style="text-align:center;padding:40px;color:var(--text-dim);">No activity yet.</div>';
-    return;
-  }
-  el.innerHTML = items.map(a => {
-    const when = timeAgo(a.logged_at);
-    return `
-    <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
-      <div style="width:28px;height:28px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;flex-shrink:0;margin-top:2px;">${esc((a.username||'?')[0].toUpperCase())}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:.84rem;">
-          <strong>${esc(a.username)}</strong>
-          <span style="color:var(--text-dim);"> ${esc(a.action)}</span>
-        </div>
-        <div style="font-size:.76rem;color:var(--text-dim);margin-top:2px;">
-          <span style="color:var(--text);cursor:pointer;" onclick="openDetailById(${a.request_id})">${esc(a.foia_number)}</span>
-          ${a.subject ? ' — ' + esc(a.subject) : ''}
-          <span style="margin-left:6px;">${when}</span>
-        </div>
-        ${a.note ? `<div style="font-size:.76rem;color:var(--text-dim);margin-top:2px;font-style:italic;">${esc(a.note)}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
+  toast('Dev access activated ✓', 'success');
 }
 
 function timeAgo(dateStr) {
@@ -5207,29 +4641,6 @@ function timeAgo(dateStr) {
   if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
   if (diff < 604800) return `${Math.floor(diff/86400)}d ago`;
   return d.toLocaleDateString();
-}
-
-async function loadOrgSettings() {
-  if (!activeOrgId) return;
-  const { status, data } = await api('GET', `/api/org/${activeOrgId}`);
-  if (status !== 200) return;
-  document.getElementById('orgSettingsName').value = data.org.name;
-  document.getElementById('orgSettingsSlug').textContent = data.org.slug;
-  document.getElementById('orgSettingsMemberCount').textContent = (data.members || []).length;
-}
-
-async function saveOrgSettings() {
-  if (!activeOrgId) return;
-  const name = document.getElementById('orgSettingsName').value.trim();
-  if (!name) { toast('Name is required', 'error'); return; }
-  const { status, data } = await api('PATCH', `/api/org/${activeOrgId}/settings`, { name });
-  if (status !== 200) { toast(data.error || 'Could not save settings', 'error'); return; }
-  // Update local org data
-  const org = currentOrgs.find(o => o.id === activeOrgId);
-  if (org) { org.name = data.name; org.slug = data.slug; }
-  renderOrgSwitcher();
-  document.getElementById('orgSettingsSlug').textContent = data.slug;
-  toast('Settings saved', 'success');
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -5246,10 +4657,6 @@ const PAGE_TITLES = {
   'detail':            'Request Detail',
   'terms':             'Terms of Service',
   'help':              'Help',
-  'shared-dashboard':  'Shared Dashboard',
-  'activity':          'Activity',
-  'team':              'Team',
-  'org-settings':      'Organization Settings',
   'pricing':         'Plans & Pricing',
   'admin':           'Admin',
 };
@@ -5280,10 +4687,6 @@ async function nav(page) {
   if (page === 'agency-dir')        await loadAgencyDir();
   if (page === 'state-laws')        await loadStateLaws();
   if (page === 'admin')             await adminLoadCodes();
-  if (page === 'shared-dashboard')  await loadSharedDashboard();
-  if (page === 'activity')          await loadActivityFeed();
-  if (page === 'team')              await loadTeamPage();
-  if (page === 'org-settings')      await loadOrgSettings();
 }
 
 function goBack() {
@@ -5324,8 +4727,14 @@ function closeSidebar() {
 // Data loaders
 // ─────────────────────────────────────────────────────────────
 async function refreshAllData() {
-  const { data } = await api('GET', '/api/requests');
-  allRequestsData = Array.isArray(data) ? data : [];
+  const user = await getUser();
+  if (!user) return;
+  const { data: requests, error } = await sb.from('requests')
+    .select('*')
+    .eq('auth_uid', user.id)
+    .order('updated_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  allRequestsData = requests || [];
   updateBadges();
 }
 
@@ -5448,8 +4857,8 @@ async function loadClosedRequests() {
 }
 
 async function loadAgencies() {
-  const { data } = await api('GET', '/api/agencies');
-  agenciesData = Array.isArray(data) ? data : [];
+  const { data } = await sb.from('federal_agencies').select('id, name, abbreviation').order('name');
+  agenciesData = data || [];
   const sel = document.getElementById('nrAgency');
   if (!sel) return;
   sel.innerHTML = '<option value="">— Select agency —</option>' +
@@ -5463,8 +4872,8 @@ async function loadAgencyDir() {
   const tbody = document.getElementById('agencyDirBody');
   const tableHead = document.querySelector('#agencyDirModal thead');
   tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-dim);">Loading…</td></tr>';
-  const { status, data: agencies } = await api('GET', '/api/agencies');
-  if (status !== 200 || !Array.isArray(agencies)) {
+  const { data: agencies, error: agencyErr } = await sb.from('federal_agencies').select('*').order('name');
+  if (agencyErr || !Array.isArray(agencies)) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--red);">Error loading agencies. Please try again.</td></tr>';
     return;
   }
@@ -5502,9 +4911,10 @@ async function loadAgencyDir() {
 // New Request Form
 // ─────────────────────────────────────────────────────────────
 async function initNewRequestForm() {
-  const { data } = await api('GET', '/api/requests/new-number');
-  document.getElementById('nrFoiaNum').value = data.foia_number || '';
-  document.getElementById('nrDate').value    = data.date || new Date().toISOString().split('T')[0];
+  const user = await getUser();
+  const { data: foiaNum } = await sb.rpc('next_foia_number', { p_auth_uid: user.id });
+  document.getElementById('nrFoiaNum').value = foiaNum || '';
+  document.getElementById('nrDate').value    = new Date().toISOString().split('T')[0];
   // Sync calendar picker trigger for the filed date
   refreshDateInputs(document.getElementById('page-new-request'));
   document.getElementById('nrType').value    = '';
@@ -5571,8 +4981,8 @@ async function populateLocalStateDropdown() {
   const sel = document.getElementById('nrLocalState');
   if (!sel || sel.options.length > 1) return; // already populated
   if (statesData.length === 0) {
-    const { data } = await api('GET', '/api/states');
-    statesData = Array.isArray(data) ? data : [];
+    const { data } = await sb.from('state_laws').select('*').order('state_name');
+    statesData = data || [];
   }
   sel.innerHTML = '<option value="">— Select state —</option>' +
     statesData.map(s =>
@@ -5584,11 +4994,11 @@ async function loadStatesDropdown() {
   const sel = document.getElementById('nrState');
   if (!sel) return;
   if (sel.options.length > 1) return; // already populated
-  
-  // Fetch states from API
+
+  // Fetch states from Supabase
   if (statesData.length === 0) {
-    const { data } = await api('GET', '/api/states');
-    statesData = Array.isArray(data) ? data : [];
+    const { data } = await sb.from('state_laws').select('*').order('state_name');
+    statesData = data || [];
   }
   
   // Populate dropdown
@@ -5605,7 +5015,7 @@ async function onStateChange() {
     document.getElementById('stateLawPanel').style.display = 'none';
     return;
   }
-  const { data } = await api('GET', `/api/states/${code}`);
+  const { data } = await sb.from('state_laws').select('*').eq('state_code', code).single();
   document.getElementById('slLawName').textContent  = data.law_name || '—';
   document.getElementById('slCitation').textContent = data.citation || '—';
   document.getElementById('slDays').textContent     =
@@ -5617,8 +5027,8 @@ async function onStateChange() {
 async function loadStateLaws() {
   const tbody = document.getElementById('stateLawsBody');
   tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-dim);">Loading…</td></tr>';
-  const { status, data } = await api('GET', '/api/states');
-  if (status !== 200 || !Array.isArray(data)) {
+  const { data, error: slErr } = await sb.from('state_laws').select('*').order('state_name');
+  if (slErr || !Array.isArray(data)) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--red);">Error loading state laws. Please try again.</td></tr>';
     stateLawsLoaded = false;
     return;
@@ -5656,7 +5066,7 @@ async function onAgencyChange() {
     document.getElementById('aipPortalRow').style.display = 'none';
     return;
   }
-  const { data } = await api('GET', `/api/agencies/${id}`);
+  const { data } = await sb.from('federal_agencies').select('*').eq('id', id).single();
   document.getElementById('aipTitle').textContent   = data.foia_officer_title || 'Call agency for contact name';
   document.getElementById('aipEmail').textContent   = data.foia_email || 'Call agency for email address';
   document.getElementById('aipPhone').textContent   = data.foia_phone || '—';
@@ -5737,14 +5147,62 @@ async function saveNewRequest() {
     priority: priority
   };
 
-  const { status, data } = await api('POST', '/api/requests', payload);
+  const user = await getUser();
+  const profile = await getProfile();
+  const isPaid = profile && (profile.lifetime_free || (profile.subscription_status === 'active' && profile.plan === 'pro'));
 
-  if (status !== 200) {
-    toast(data.error || 'Save failed', 'error');
-    return;
+  if (!isPaid) {
+    const { count } = await sb.from('requests').select('id', { count: 'exact', head: true })
+      .eq('auth_uid', user.id).neq('status', 'closed');
+    if (count >= 5) {
+      toast('Free plan limited to 5 active requests. Close existing requests or upgrade to Pro for unlimited.', 'error');
+      return;
+    }
   }
 
-  toast(`✓ Saved as ${data.foia_number}`, 'success');
+  const { data: foiaNum } = await sb.rpc('next_foia_number', { p_auth_uid: user.id });
+  const now = new Date().toISOString();
+  const createdDate = payload.filed_date || new Date().toISOString().split('T')[0];
+
+  // Resolve agency name from federal_agencies if agency_id is set
+  let resolvedAgencyName = payload.agency_name || '';
+  let resolvedOfficerTitle = payload.foia_officer_title || '';
+  if (payload.agency_id) {
+    const { data: agencyRow } = await sb.from('federal_agencies').select('name, foia_officer_title').eq('id', payload.agency_id).single();
+    if (agencyRow) {
+      resolvedAgencyName = agencyRow.name;
+      resolvedOfficerTitle = resolvedOfficerTitle || agencyRow.foia_officer_title || '';
+    }
+  }
+
+  const insertPayload = {
+    auth_uid: user.id,
+    user_id: 2,
+    foia_number: foiaNum,
+    created_date: createdDate,
+    agency_type: payload.agency_type || 'Federal',
+    agency_id: payload.agency_id || null,
+    agency_name: resolvedAgencyName,
+    state_code: payload.state_code || null,
+    foia_officer_title: resolvedOfficerTitle,
+    subject: payload.subject || '',
+    notes: payload.notes || '',
+    status: 'new',
+    method_filed: payload.method_filed || null,
+    priority: payload.priority || 'Standard',
+    updated_at: now
+  };
+
+  const { data: newReq, error } = await sb.from('requests').insert(insertPayload).select().single();
+  if (error) { toast(error.message, 'error'); return; }
+
+  // Log action
+  await sb.from('action_log').insert({
+    request_id: newReq.id, auth_uid: user.id, action: 'Request created', logged_at: now
+  });
+  await sb.from('requests').update({ last_action_date: now, last_action_note: 'Request created' }).eq('id', newReq.id);
+
+  toast(`✓ Saved as ${foiaNum}`, 'success');
   await refreshAllData();
   nav('all-requests');
 }
@@ -5769,10 +5227,11 @@ async function openDetail(idOrObj) {
     currentRequestId = r.id;
   } else {
     currentRequestId = idOrObj;
-    const { data } = await api('GET', `/api/requests/${idOrObj}`);
-    r = data.request || data;
+    const { data: fetchedReq } = await sb.from('requests').select('*').eq('id', idOrObj).single();
+    r = fetchedReq;
   }
-  const { data: logData } = await api('GET', `/api/requests/${currentRequestId}/log`);
+  const { data: logData } = await sb.from('action_log').select('*')
+    .eq('request_id', currentRequestId).order('logged_at', { ascending: false });
   log = logData;
 
   // Only update previousPage if we're NOT already on detail (prevents losing the real previous page)
@@ -5837,8 +5296,6 @@ async function openDetail(idOrObj) {
           ${r.contact_name ? `<div class="meta-chip"><strong>Contact:</strong> ${esc(r.contact_name)}${r.contact_email ? ` <a href="mailto:${esc(r.contact_email)}" style="color:var(--text);margin-left:4px;">${esc(r.contact_email)}</a>` : ''}</div>` : ''}
           ${r.secondary_contact_name ? `<div class="meta-chip"><strong>2nd Contact:</strong> ${esc(r.secondary_contact_name)}</div>` : ''}
           ${r.last_action_date ? `<div class="meta-chip"><strong>Last Action:</strong> ${fmtDateTime(r.last_action_date)}</div>` : ''}
-          ${r.org_id ? `<div class="meta-chip"><strong>Filed by:</strong> ${esc(r.filed_by||'—')}</div>` : ''}
-          ${r.org_id ? `<div class="meta-chip" id="assignChip-${r.id}"><strong>Assigned to:</strong> ${r.assigned_to_username ? esc(r.assigned_to_username) : '<span style="color:var(--text-dim)">Unassigned</span>'} <button class="btn btn-ghost btn-sm" style="padding:1px 6px;font-size:.7rem;margin-left:4px;" onclick="openAssignModal(${r.id})">Change</button></div>` : ''}
         </div>
       </div>
       <div class="detail-actions">
@@ -5975,21 +5432,24 @@ function fmtBytes(bytes) {
 async function loadAttachments(reqId) {
   const el = document.getElementById(`attachmentList-${reqId}`);
   if (!el) return;
-  const { status, data } = await api('GET', `/api/requests/${reqId}/attachments`);
-  if (status !== 200 || !Array.isArray(data)) {
+  const { data, error: attErr } = await sb.from('request_attachments').select('*')
+    .eq('request_id', reqId).order('uploaded_at', { ascending: false });
+  if (attErr || !Array.isArray(data) || !data.length) {
     el.innerHTML = `<div style="color:var(--text-dim);font-size:.85rem;">No attachments yet.</div>`;
     return;
   }
-  if (!data.length) {
-    el.innerHTML = `<div style="color:var(--text-dim);font-size:.85rem;">No attachments yet.</div>`;
-    return;
-  }
-  el.innerHTML = data.map(a => `
+  // Generate signed URLs for each attachment
+  const user = await getUser();
+  const rendered = await Promise.all(data.map(async a => {
+    const { data: urlData } = await sb.storage.from('attachments')
+      .createSignedUrl(`${user.id}/${a.request_id}/${a.filename}`, 3600);
+    const signedUrl = urlData?.signedUrl || '#';
+    return `
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
       <span style="font-size:1.2rem;">${fileIcon(a.original_name)}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          <a href="/api/attachments/${a.id}/view" target="_blank" rel="noopener"
+          <a href="${signedUrl}" target="_blank" rel="noopener"
              style="color:var(--text);text-decoration:none;">${esc(a.original_name)}</a>
         </div>
         <div style="font-size:.75rem;color:var(--text-dim);">
@@ -5997,12 +5457,13 @@ async function loadAttachments(reqId) {
           ${a.label ? ` · <em>${esc(a.label)}</em>` : ''}
         </div>
       </div>
-      <a href="/api/attachments/${a.id}/download"
-         class="btn btn-ghost btn-sm" style="flex-shrink:0;">↓ Download</a>
+      <a href="${signedUrl}"
+         class="btn btn-ghost btn-sm" style="flex-shrink:0;" download="${esc(a.original_name)}">↓ Download</a>
       <button class="btn btn-ghost btn-sm" style="flex-shrink:0;color:var(--red);"
               onclick="deleteAttachment(${a.id}, ${reqId})">×</button>
-    </div>
-  `).join('');
+    </div>`;
+  }));
+  el.innerHTML = rendered.join('');
 }
 
 function fileIcon(name) {
@@ -6020,41 +5481,65 @@ function fileIcon(name) {
 async function uploadAttachment(reqId, input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 20 * 1024 * 1024) {
-    toast('File exceeds 20MB limit', 'error'); return;
-  }
-  const formData = new FormData();
-  formData.append('file', file);
+  if (file.size > 20 * 1024 * 1024) { toast('File exceeds 20MB limit', 'error'); return; }
+  const user = await getUser();
+  const uuid = crypto.randomUUID();
+  const ext = file.name.split('.').pop().toLowerCase();
+  const safeName = `${uuid}.${ext}`;
+  const storagePath = `${user.id}/${reqId}/${safeName}`;
   toast(`Uploading ${file.name}…`, '');
-  try {
-    const res = await fetch(`/api/requests/${reqId}/attachments`, {
-      method: 'POST', body: formData
-    });
-    const data = await res.json();
-    if (!res.ok) { toast(data.error || 'Upload failed', 'error'); return; }
-    toast(`✓ ${file.name} uploaded`, 'success');
-    input.value = '';
-    await loadAttachments(reqId);
-  } catch(e) {
-    toast('Upload failed', 'error');
-  }
+
+  const { error: uploadErr } = await sb.storage.from('attachments').upload(storagePath, file);
+  if (uploadErr) { toast(uploadErr.message, 'error'); return; }
+
+  const now = new Date().toISOString();
+  await sb.from('request_attachments').insert({
+    request_id: reqId, auth_uid: user.id, user_id: 2,
+    filename: safeName, original_name: file.name,
+    file_size: file.size, mime_type: file.type,
+    label: '', uploaded_at: now
+  });
+  await sb.from('action_log').insert({
+    request_id: reqId, auth_uid: user.id,
+    action: 'Attachment uploaded', note: file.name, logged_at: now
+  });
+  toast(`✓ ${file.name} uploaded`, 'success');
+  input.value = '';
+  await loadAttachments(reqId);
 }
 
 async function deleteAttachment(attId, reqId) {
   if (!confirm('Delete this attachment? This cannot be undone.')) return;
-  const { status, data } = await api('DELETE', `/api/attachments/${attId}`);
-  if (status !== 200) { toast(data.error || 'Delete failed', 'error'); return; }
+  const { data: att } = await sb.from('request_attachments').select('*').eq('id', attId).single();
+  if (att) {
+    const user = await getUser();
+    await sb.storage.from('attachments').remove([`${user.id}/${att.request_id}/${att.filename}`]);
+  }
+  await sb.from('request_attachments').delete().eq('id', attId);
   toast('Attachment deleted', 'success');
   await loadAttachments(reqId);
 }
 async function openLetter(id) {
   pendingLetterId = id;
-  const { data: r } = await api('GET', `/api/requests/${id}`);
+  const { data: r } = await sb.from('requests').select('*').eq('id', id).single();
 
   let text = r.letter_text;
   if (!text) {
-    const { data: gen } = await api('GET', `/api/requests/${id}/generate-letter`);
-    text = gen.letter_text || '';
+    // Generate letter text client-side
+    let stateLaw = null;
+    if (r.agency_type === 'State' && r.state_code) {
+      const { data: sl } = await sb.from('state_laws').select('*').eq('state_code', r.state_code).single();
+      stateLaw = sl;
+    }
+    text = buildLetterText(
+      r.agency_name || 'Agency',
+      r.foia_officer_title || 'FOIA Officer',
+      r.subject || '[Subject]',
+      stateLaw?.citation || '5 U.S.C. § 552',
+      r.agency_type,
+      stateLaw?.law_name,
+      stateLaw?.response_days || r.response_days || 20
+    );
   }
 
   document.getElementById('letterText').textContent = text;
@@ -6070,7 +5555,7 @@ async function openLetter(id) {
   // Only show FOIA.gov portal link for federal requests
   const portalLink = document.getElementById('foiaGovLink');
   if (portalLink) {
-    portalLink.style.display = (r.jurisdiction === 'Federal') ? '' : 'none';
+    portalLink.style.display = (r.agency_type === 'Federal') ? '' : 'none';
   }
 
   // Show/hide date picker + action bar based on status
@@ -6110,20 +5595,21 @@ async function openLetter(id) {
 
 async function downloadDocx() {
   if (!pendingLetterId) return;
-  toast('Generating Word doc…', '');
-  window.location.href = `/api/requests/${pendingLetterId}/download-docx`;
+  console.warn('TODO: convert downloadDocx to Supabase Edge Function');
+  toast('Word doc export coming soon', '');
 }
 
 async function downloadPdf() {
   if (!pendingLetterId) return;
-  toast('Generating PDF…', '');
-  window.location.href = `/api/requests/${pendingLetterId}/download-pdf`;
+  console.warn('TODO: convert downloadPdf to Supabase Edge Function');
+  toast('PDF export coming soon', '');
 }
 
 async function quickSetTurn(id, value) {
-  const { status, data } = await api('POST', `/api/requests/${id}/update`, { turn: value });
-  if (status !== 200) {
-    toast(data.error || 'Update failed', 'error');
+  const now = new Date().toISOString();
+  const { error } = await sb.from('requests').update({ turn: value, updated_at: now }).eq('id', id);
+  if (error) {
+    toast(error.message || 'Update failed', 'error');
     return;
   }
   toast(`✓ Marked as "${value}"`, 'success');
@@ -6153,14 +5639,16 @@ function copyLetter() {
 
 async function saveLetter() {
   if (!pendingLetterId) return;
-  const text = document.getElementById('letterText').innerText;
+  const letterText = document.getElementById('letterText').innerText;
   const filedDate = document.getElementById('letterFiledDate').value || null;
-  const { status, data } = await api('POST', `/api/requests/${pendingLetterId}/save-letter`, {
-    letter_text: text,
-    filed_date: filedDate
-  });
-  if (status !== 200) { toast(data.error || 'Save failed', 'error'); return; }
-  toast(`✓ Letter saved — moved to Active. Deadline: ${fmtDate(data.deadline_date)}`, 'success');
+  const now = new Date().toISOString();
+  const updates = { letter_text: letterText, letter_saved_at: now, status: 'active', updated_at: now };
+  if (filedDate) updates.created_date = filedDate;
+  const { error } = await sb.from('requests').update(updates).eq('id', pendingLetterId);
+  if (error) { toast(error.message || 'Save failed', 'error'); return; }
+  const user = await getUser();
+  await sb.from('action_log').insert({ request_id: pendingLetterId, auth_uid: user.id, action: 'Letter saved', logged_at: now });
+  toast('✓ Letter saved — moved to Active', 'success');
   closeLetter();
   await refreshAllData();
   nav('active-requests');
@@ -6250,8 +5738,7 @@ function setUpdateType(type) {
 
 async function openUpdateModal(id) {
   pendingUpdateId = id;
-  const { data } = await api('GET', `/api/requests/${id}`);
-  const r = data.request || data;
+  const { data: r } = await sb.from('requests').select('*').eq('id', id).single();
   _pendingUpdateRequest = r;  // store for setUpdateType to access
 
   // STATE fields — pre-fill with current values
@@ -6334,8 +5821,69 @@ async function saveUpdate() {
   payload.secondary_contact_name  = document.getElementById('updSecName').value;
   payload.secondary_contact_email = document.getElementById('updSecEmail').value;
 
-  const { status, data } = await api('POST', `/api/requests/${pendingUpdateId}/update`, payload);
-  if (status !== 200) { toast(data.error || 'Update failed', 'error'); return; }
+  // Build the DB update and action log entry
+  const now = new Date().toISOString();
+  const user = await getUser();
+  const dbUpdate = { updated_at: now };
+  let actionNote = '';
+
+  if (_currentUpdateType === 'response') {
+    if (payload.response_received_date) dbUpdate.response_received_date = payload.response_received_date;
+    if (payload.response_summary) dbUpdate.response_summary = payload.response_summary;
+    if (payload.outcome) dbUpdate.outcome = payload.outcome;
+    if (payload.agency_status) dbUpdate.agency_status = payload.agency_status;
+    if (payload.tracking_number) dbUpdate.tracking_number = payload.tracking_number;
+    if (payload.exemptions_cited) dbUpdate.exemptions_cited = payload.exemptions_cited;
+    if (payload.fees) dbUpdate.fees = payload.fees;
+    dbUpdate.fee_dispute = payload.fee_dispute || 0;
+    actionNote = 'Response received';
+  } else if (_currentUpdateType === 'followup') {
+    actionNote = `Follow-up sent${payload.followup_method ? ' via ' + payload.followup_method : ''}`;
+    if (payload.followup_summary) actionNote += ': ' + payload.followup_summary;
+  } else if (_currentUpdateType === 'edit') {
+    if (payload.response_received_date) dbUpdate.response_received_date = payload.response_received_date;
+    if (payload.response_summary) dbUpdate.response_summary = payload.response_summary;
+    if (payload.outcome) dbUpdate.outcome = payload.outcome;
+    if (payload.agency_status) dbUpdate.agency_status = payload.agency_status;
+    if (payload.tracking_number) dbUpdate.tracking_number = payload.tracking_number;
+    if (payload.exemptions_cited) dbUpdate.exemptions_cited = payload.exemptions_cited;
+    if (payload.fees) dbUpdate.fees = payload.fees;
+    dbUpdate.fee_dispute = payload.fee_dispute || 0;
+    if (payload.phone) dbUpdate.phone = payload.phone;
+    if (payload.method_filed) dbUpdate.method_filed = payload.method_filed;
+    if (payload.priority) dbUpdate.priority = payload.priority;
+    if (payload.agency_name) dbUpdate.agency_name = payload.agency_name;
+    if (payload.agency_type) dbUpdate.agency_type = payload.agency_type;
+    actionNote = 'Request updated';
+  }
+
+  // Turn + Next Steps (always)
+  if (payload.turn) dbUpdate.turn = payload.turn;
+  if (payload.next_step !== undefined) dbUpdate.next_step = payload.next_step;
+  if (payload.next_step_date) dbUpdate.next_step_date = payload.next_step_date;
+
+  // Details (always)
+  if (payload.notes !== undefined) dbUpdate.notes = payload.notes;
+  if (payload.deadline_date) dbUpdate.deadline_date = payload.deadline_date;
+  if (payload.contact_name !== undefined) dbUpdate.contact_name = payload.contact_name;
+  if (payload.contact_email !== undefined) dbUpdate.contact_email = payload.contact_email;
+  if (payload.secondary_contact_name !== undefined) dbUpdate.secondary_contact_name = payload.secondary_contact_name;
+  if (payload.secondary_contact_email !== undefined) dbUpdate.secondary_contact_email = payload.secondary_contact_email;
+
+  dbUpdate.last_action_date = now;
+  dbUpdate.last_action_note = actionNote || 'Updated';
+
+  const { error } = await sb.from('requests').update(dbUpdate).eq('id', pendingUpdateId);
+  if (error) { toast(error.message || 'Update failed', 'error'); return; }
+
+  // Log action
+  await sb.from('action_log').insert({
+    request_id: pendingUpdateId, auth_uid: user.id,
+    action: actionNote || 'Updated',
+    note: _currentUpdateType === 'followup' ? (payload.followup_summary || '') : (payload.response_summary || ''),
+    logged_at: now
+  });
+
   const msgs = { response: '✓ Response logged', followup: '✓ Follow-up logged', edit: '✓ Request updated' };
   toast(msgs[_currentUpdateType] || '✓ Request updated', 'success');
   const updatedId = pendingUpdateId;
@@ -6349,8 +5897,11 @@ async function saveUpdate() {
 // ─────────────────────────────────────────────────────────────
 async function closeReq(id) {
   if (!confirm('Mark this request as closed?')) return;
-  const { status, data } = await api('POST', `/api/requests/${id}/close`, {});
-  if (status !== 200) { toast(data.error || 'Failed', 'error'); return; }
+  const now = new Date().toISOString();
+  const { error } = await sb.from('requests').update({ status: 'closed', closed_date: now.split('T')[0], updated_at: now }).eq('id', id);
+  if (error) { toast(error.message || 'Failed', 'error'); return; }
+  const user = await getUser();
+  await sb.from('action_log').insert({ request_id: id, auth_uid: user.id, action: 'Request closed', logged_at: now });
   toast('✓ Request closed', 'success');
   await refreshAllData();
   nav('closed-requests');
@@ -6358,8 +5909,13 @@ async function closeReq(id) {
 
 async function reopenReq(id) {
   if (!confirm('Reopen this request? It will be moved back to Active Requests.')) return;
-  const { status, data } = await api('POST', `/api/requests/${id}/reopen`, {});
-  if (status !== 200) { toast(data.error || 'Failed', 'error'); return; }
+  const { data: req } = await sb.from('requests').select('appeal_text').eq('id', id).single();
+  const newStatus = req?.appeal_text ? 'appealed' : 'active';
+  const now = new Date().toISOString();
+  const { error } = await sb.from('requests').update({ status: newStatus, updated_at: now }).eq('id', id);
+  if (error) { toast(error.message || 'Failed', 'error'); return; }
+  const user = await getUser();
+  await sb.from('action_log').insert({ request_id: id, auth_uid: user.id, action: 'Request reopened', logged_at: now });
   toast('✓ Request reopened', 'success');
   await refreshAllData();
   await openDetail(id);
@@ -6367,8 +5923,10 @@ async function reopenReq(id) {
 
 async function deleteReq(id) {
   if (!confirm('Permanently delete this request? This cannot be undone.')) return;
-  const { status, data } = await api('DELETE', `/api/requests/${id}`);
-  if (status !== 200) { toast(data.error || 'Failed', 'error'); return; }
+  await sb.from('action_log').delete().eq('request_id', id);
+  await sb.from('request_attachments').delete().eq('request_id', id);
+  const { error } = await sb.from('requests').delete().eq('id', id);
+  if (error) { toast(error.message || 'Failed', 'error'); return; }
   toast('Request deleted', '');
   await refreshAllData();
   nav('all-requests');
@@ -6391,8 +5949,9 @@ async function saveFoiaNum(id) {
   if (!val || val === disp.textContent.trim()) {
     inp.style.display = 'none'; disp.style.display = ''; return;
   }
-  const { status, data } = await api('POST', `/api/requests/${id}/update`, { foia_number: val });
-  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); inp.style.display = 'none'; disp.style.display = ''; return; }
+  const now = new Date().toISOString();
+  const { error } = await sb.from('requests').update({ foia_number: val, updated_at: now }).eq('id', id);
+  if (error) { toast(error.message || 'Failed to update', 'error'); inp.style.display = 'none'; disp.style.display = ''; return; }
   disp.textContent = val;
   document.getElementById('topbarTitle').textContent = val;
   inp.style.display = 'none'; disp.style.display = '';
@@ -6412,8 +5971,9 @@ function initDetailDatePickers(r) {
       value: r.created_date || '',
       async onChange(val) {
         if (!val) return;
-        const { status, data } = await api('POST', `/api/requests/${r.id}/update`, { created_date: val });
-        if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+        const now = new Date().toISOString();
+        const { error } = await sb.from('requests').update({ created_date: val, updated_at: now }).eq('id', r.id);
+        if (error) { toast(error.message || 'Failed to update', 'error'); return; }
         toast('Filed date updated', 'success');
         await openDetail(currentRequestId);
         refreshAllData();
@@ -6428,8 +5988,9 @@ function initDetailDatePickers(r) {
       value: r.deadline_date ? r.deadline_date.split('T')[0] : '',
       async onChange(val) {
         if (!val) return;
-        const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { deadline_date: val });
-        if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+        const now = new Date().toISOString();
+        const { error } = await sb.from('requests').update({ deadline_date: val, updated_at: now }).eq('id', currentRequestId);
+        if (error) { toast(error.message || 'Failed to update', 'error'); return; }
         toast('Deadline date updated', 'success');
         await openDetail(currentRequestId);
         refreshAllData();
@@ -6444,8 +6005,9 @@ function initDetailDatePickers(r) {
       value: r.appeal_saved_at ? r.appeal_saved_at.split('T')[0].split(' ')[0] : '',
       async onChange(val) {
         if (!val) return;
-        const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { appeal_saved_at: val });
-        if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+        const now = new Date().toISOString();
+        const { error } = await sb.from('requests').update({ appeal_saved_at: val, updated_at: now }).eq('id', currentRequestId);
+        if (error) { toast(error.message || 'Failed to update', 'error'); return; }
         toast('Appeal filed date updated', 'success');
         await openDetail(currentRequestId);
         refreshAllData();
@@ -6460,8 +6022,9 @@ function initDetailDatePickers(r) {
       value: r.appeal_deadline ? r.appeal_deadline.split('T')[0].split(' ')[0] : '',
       async onChange(val) {
         if (!val) return;
-        const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { appeal_deadline: val });
-        if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+        const now = new Date().toISOString();
+        const { error } = await sb.from('requests').update({ appeal_deadline: val, updated_at: now }).eq('id', currentRequestId);
+        if (error) { toast(error.message || 'Failed to update', 'error'); return; }
         toast('Appeal deadline updated', 'success');
         await openDetail(currentRequestId);
         refreshAllData();
@@ -6483,8 +6046,9 @@ function cancelEditNotes() {
 }
 async function saveNotes() {
   const val = document.getElementById('notesInput').value;
-  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { notes: val });
-  if (status !== 200) { toast(data.error || 'Failed to save notes', 'error'); return; }
+  const now = new Date().toISOString();
+  const { error } = await sb.from('requests').update({ notes: val, updated_at: now }).eq('id', currentRequestId);
+  if (error) { toast(error.message || 'Failed to save notes', 'error'); return; }
   document.getElementById('notesDisplay').textContent = val || 'Click to add notes…';
   cancelEditNotes();
   toast('Notes updated', 'success');
@@ -6504,8 +6068,9 @@ function cancelEditRespDays() {
 async function saveRespDays() {
   const val = parseInt(document.getElementById('respDaysInput').value, 10);
   if (!val || val < 1) { toast('Enter a valid number of days', 'error'); return; }
-  const { status, data } = await api('POST', `/api/requests/${currentRequestId}/update`, { response_days: val });
-  if (status !== 200) { toast(data.error || 'Failed to update', 'error'); return; }
+  const now = new Date().toISOString();
+  const { error } = await sb.from('requests').update({ response_days: val, updated_at: now }).eq('id', currentRequestId);
+  if (error) { toast(error.message || 'Failed to update', 'error'); return; }
   cancelEditRespDays();
   toast('Response days updated', 'success');
   await openDetail(currentRequestId);
@@ -6775,8 +6340,7 @@ function onAppealTypeChange() {
 
 async function openAppealModal(id) {
   pendingAppealId = id;
-  const { data } = await api('GET', `/api/requests/${id}`);
-  const r = data.request || data;
+  const { data: r } = await sb.from('requests').select('*').eq('id', id).single();
 
   // Pre-select type and exemption if appeal already saved
   if (r.appeal_type) {
@@ -6876,11 +6440,16 @@ async function openAppealModal(id) {
 
 async function regenerateAppeal() {
   if (!pendingAppealId) return;
-  const type      = document.getElementById('appealType').value;
+  const appealType = document.getElementById('appealType').value;
   const exemption = document.getElementById('appealExemption').value;
-  const params    = new URLSearchParams({ type, exemption });
-  const { data }  = await api('GET', `/api/requests/${pendingAppealId}/generate-appeal?${params}`);
-  document.getElementById('appealText').textContent = data.appeal_text || '';
+  const { data: req } = await sb.from('requests').select('*').eq('id', pendingAppealId).single();
+  let stateInfo = null;
+  if (['State','Local','University'].includes(req.agency_type) && req.state_code) {
+    const { data: sl } = await sb.from('state_laws').select('*').eq('state_code', req.state_code).single();
+    stateInfo = sl;
+  }
+  const appealText = buildAppealText(appealType, req.agency_name || 'Agency', req.foia_officer_title || 'Records Custodian', req.subject || '[Subject]', req.foia_number, req.created_date || '', exemption || req.appeal_exemption, req.agency_type, stateInfo);
+  document.getElementById('appealText').textContent = appealText;
 }
 
 function closeAppealModal() {
@@ -6903,8 +6472,8 @@ function copyAppealText(text) {
 
 function downloadAppealPdf() {
   if (!pendingAppealId) return;
-  toast('Generating PDF…', '');
-  window.location.href = `/api/requests/${pendingAppealId}/download-appeal-pdf`;
+  console.warn('TODO: convert downloadAppealPdf to Supabase Edge Function');
+  toast('PDF export coming soon', '');
 }
 
 let _appealActType = 'followup';
@@ -6921,10 +6490,14 @@ async function logAppealActivity() {
   const m = document.getElementById('appealActMethod').value;
   const s = document.getElementById('appealActSummary').value;
   if (!s && !d) { toast('Please enter a date or summary', 'error'); return; }
-  const { status, data } = await api('POST', `/api/requests/${pendingAppealId}/appeal-activity`, {
-    type: _appealActType, date: d, method: m, summary: s
+  const now = new Date().toISOString();
+  const user = await getUser();
+  await sb.from('action_log').insert({
+    request_id: pendingAppealId, auth_uid: user.id,
+    action: _appealActType === 'response' ? 'Appeal: Response received' : 'Appeal: Follow-up sent',
+    note: [d, m, s].filter(Boolean).join(' — '),
+    logged_at: now
   });
-  if (status !== 200) { toast(data.error || 'Failed to log', 'error'); return; }
   toast('✓ Appeal activity logged', 'success');
   document.getElementById('appealActDate').value = '';
   document.getElementById('appealActSummary').value = '';
@@ -6932,7 +6505,8 @@ async function logAppealActivity() {
 }
 async function loadAppealActivity() {
   if (!pendingAppealId) return;
-  const { data } = await api('GET', `/api/requests/${pendingAppealId}/appeal-activity`);
+  const { data } = await sb.from('action_log').select('id, action, note, logged_at')
+    .eq('request_id', pendingAppealId).like('action', 'Appeal:%').order('logged_at', { ascending: false });
   const list = document.getElementById('appealActivityLog');
   if (!Array.isArray(data) || !data.length) {
     list.innerHTML = '<li style="color:var(--text-dim);font-size:.8rem;">No correspondence logged yet.</li>';
@@ -6954,15 +6528,19 @@ async function saveAppeal() {
   const appeal_text = document.getElementById('appealText').innerText;
   const exemption   = document.getElementById('appealExemption').value;
 
-  const { status, data } = await api('POST', `/api/requests/${pendingAppealId}/save-appeal`, {
-    appeal_type, appeal_text, exemption,
-    contact_name:            document.getElementById('appealContactName').value || undefined,
-    contact_email:           document.getElementById('appealContactEmail').value || undefined,
-    secondary_contact_name:  document.getElementById('appealSecName').value || undefined,
-    secondary_contact_email: document.getElementById('appealSecEmail').value || undefined,
-    phone:                   document.getElementById('appealPhone').value || undefined,
-  });
-  if (status !== 200) { toast(data.error || 'Save failed', 'error'); return; }
+  const now = new Date().toISOString();
+  const { error } = await sb.from('requests').update({
+    appeal_type, appeal_text, appeal_exemption: exemption,
+    appeal_saved_at: now, status: 'appealed', updated_at: now,
+    contact_name:            document.getElementById('appealContactName').value || null,
+    contact_email:           document.getElementById('appealContactEmail').value || null,
+    secondary_contact_name:  document.getElementById('appealSecName').value || null,
+    secondary_contact_email: document.getElementById('appealSecEmail').value || null,
+    phone:                   document.getElementById('appealPhone').value || null,
+  }).eq('id', pendingAppealId);
+  if (error) { toast(error.message || 'Save failed', 'error'); return; }
+  const user = await getUser();
+  await sb.from('action_log').insert({ request_id: pendingAppealId, auth_uid: user.id, action: 'Appeal saved', logged_at: now });
 
   toast('✓ Appeal saved — request marked as Appealed', 'success');
 
@@ -7032,22 +6610,22 @@ async function openLawEnforcementModal() {
   
   // Load states and types for filters
   const [statesRes, typesRes] = await Promise.all([
-    api('GET', '/api/law-enforcement/states'),
-    api('GET', '/api/law-enforcement/types')
+    sb.rpc('le_states'),
+    sb.rpc('le_types')
   ]);
-  
-  if (statesRes.data?.states) {
+
+  if (statesRes.data) {
     const sel = document.getElementById('leStateFilter');
     sel.innerHTML = '<option value="">All States</option>';
-    statesRes.data.states.forEach(s => {
+    statesRes.data.forEach(s => {
       sel.innerHTML += `<option value="${s.state_abbr}">${s.state_abbr} (${s.count.toLocaleString()})</option>`;
     });
   }
-  
-  if (typesRes.data?.types) {
+
+  if (typesRes.data) {
     const sel = document.getElementById('leTypeFilter');
     sel.innerHTML = '<option value="">All Types</option>';
-    typesRes.data.types.forEach(t => {
+    typesRes.data.forEach(t => {
       const name = t.agency_type || 'Other';
       sel.innerHTML += `<option value="${name}">${name} (${t.count.toLocaleString()})</option>`;
     });
@@ -7061,13 +6639,13 @@ async function openLawEnforcementModal() {
 // Admin: Invite Codes
 // ─────────────────────────────────────────────────────────────
 async function adminLoadCodes() {
-  const { status, data } = await api('GET', '/api/admin/invite-codes');
+  const { data, error: codeErr } = await sb.from('invite_codes').select('*').order('created_at', { ascending: false });
   const el = document.getElementById('adminCodesList');
-  if (status === 403) {
+  if (codeErr) {
     el.innerHTML = '<div style="color:var(--red);font-size:.85rem;">Access denied.</div>';
     return;
   }
-  if (!data.length) {
+  if (!data || !data.length) {
     el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:.85rem;">No codes yet.</div>';
     return;
   }
@@ -7081,9 +6659,13 @@ async function adminLoadCodes() {
 
 async function adminGenerateCodes() {
   const count = parseInt(document.getElementById('adminCodeCount').value) || 1;
-  const { status, data } = await api('POST', '/api/admin/invite-codes', { count });
-  if (status === 403) { showToast('Access denied'); return; }
-  document.getElementById('adminNewCodesList').innerHTML = data.created.join('<br>');
+  const codes = Array.from({ length: count }, () => {
+    const hex = Array.from(crypto.getRandomValues(new Uint8Array(4)), b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    return { code: `AEOD-${hex}` };
+  });
+  const { data, error } = await sb.from('invite_codes').insert(codes).select();
+  if (error) { toast('Failed to generate codes', 'error'); return; }
+  document.getElementById('adminNewCodesList').innerHTML = data.map(c => c.code).join('<br>');
   document.getElementById('adminNewCodes').style.display = '';
   adminLoadCodes();
 }
@@ -7142,23 +6724,22 @@ async function loadLawEnforcementResults() {
   const state = document.getElementById('leStateFilter').value;
   const type = document.getElementById('leTypeFilter').value;
   
-  const params = new URLSearchParams({
-    limit: lePageSize,
-    offset: leCurrentOffset
-  });
-  if (search) params.set('q', search);
-  if (state) params.set('state', state);
-  if (type) params.set('type', type);
-  
-  const { data } = await api('GET', `/api/law-enforcement/agencies?${params}`);
-  
-  if (!data || !data.results) {
-    document.getElementById('leResults').innerHTML = 
+  let query = sb.from('state_local_agencies').select('*', { count: 'exact' });
+  if (state) query = query.eq('state_abbr', state);
+  if (type) query = query.eq('agency_type', type);
+  if (search) query = query.ilike('agency_name', `%${search}%`);
+  query = query.order('agency_name').range(leCurrentOffset, leCurrentOffset + lePageSize - 1);
+  const { data: results, count, error: leErr } = await query;
+
+  if (leErr || !results) {
+    document.getElementById('leResults').innerHTML =
       '<div style="text-align:center;padding:40px;color:var(--text-dim);">Error loading results</div>';
     return;
   }
-  
-  leCurrentTotal = data.total || 0;
+
+  // Wrap in data.results / data.total shape for the rest of the function
+  const data = { results, total: count || 0 };
+  leCurrentTotal = data.total;
 
   // Update subtitle with real total when unfiltered
   if (!search && !state && !type) {

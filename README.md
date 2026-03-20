@@ -1,211 +1,95 @@
 # FOIA.io
 
-FOIA Request Management SaaS — built for investigative journalists.
+FOIA Request Management — built for investigative journalists.
+
+A fully client-side web app powered by [Supabase](https://supabase.com) and hosted on [GitHub Pages](https://pages.github.com). No server required.
 
 ---
 
-## Quick Start (Local Development)
+## Architecture
 
-### Prerequisites
-- Python 3.9+
-- Node.js 18+ (for Word doc generation)
-- pip
+```
+index.html          → Single-file frontend (HTML + CSS + JS)
+Supabase Postgres   → Database (agencies, requests, state laws, etc.)
+Supabase Auth       → Email/password authentication
+Supabase Storage    → File attachments (20MB limit)
+Supabase Edge Fn    → Stripe webhook for subscription processing
+GitHub Pages        → Static file hosting (free)
+```
 
-### Install & Run
+## Tiers
 
+| Plan | Price | Features |
+|------|-------|----------|
+| **Free** | $0/mo | Up to 5 active requests, deadline tracking, notes, attachments, action history |
+| **Pro** | $5/mo | Unlimited requests, professional appeal letters, priority support |
+
+---
+
+## Local Development
+
+Just open `index.html` in a browser. It connects directly to Supabase — no local server needed.
+
+For a local dev server (to avoid CORS issues with file://):
 ```bash
-# 1. Clone / navigate to project folder
-cd foia_io
-
-# 2. Install Python dependencies
-pip3 install --break-system-packages -r requirements.txt
-
-# 3. Install Node.js dependencies (for Word doc export)
-npm install docx
-
-# 4. Copy env template
-cp .env.example .env
-# Edit .env with your SECRET_KEY and Stripe keys
-
-# 5. Run
-python3 app.py
-
-# 6. Open
+python3 -m http.server 5000
 open http://localhost:5000
 ```
 
 ---
 
-## File Structure
+## Supabase Setup
 
-```
-foia_io/
-├── app.py                 # Flask backend — all API routes
-├── index.html             # Single-file frontend
-├── generate_letter.js     # Word doc generator (Node.js / docx)
-├── requirements.txt       # Python dependencies
-├── package.json           # Node dependencies (after npm install)
-├── .env.example           # Environment variable template
-├── foia_io.db             # SQLite database (auto-created on first run)
-└── README.md
-```
+The app connects to Supabase project `raqonwahukpejuftbqav`. Configuration is in `index.html`:
+- `SUPABASE_URL` — Project API URL
+- `SUPABASE_ANON_KEY` — Publishable anon key
 
----
+### Database Tables
+| Table | Rows | Description |
+|-------|------|-------------|
+| `profiles` | — | User profiles (linked to auth.users) |
+| `requests` | — | FOIA request tracking |
+| `action_log` | — | Request activity history |
+| `request_attachments` | — | File attachment metadata |
+| `federal_agencies` | 611 | Federal agency FOIA contacts |
+| `state_local_agencies` | 17,979 | State/local law enforcement agencies |
+| `state_laws` | 50 | State public records laws |
+| `holidays` | 22 | Federal holidays (for deadline calculation) |
+| `invite_codes` | — | Beta access invite codes |
 
-## API Reference
+### Edge Functions
+| Function | Purpose |
+|----------|---------|
+| `stripe-webhook` | Processes Stripe subscription events |
 
-### Auth
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/auth/register` | Create account |
-| POST | `/api/auth/login` | Sign in |
-| POST | `/api/auth/logout` | Sign out |
-| GET  | `/api/auth/me` | Current session |
-
-### Requests
-| Method | Path | Description |
-|--------|------|-------------|
-| GET  | `/api/requests/new-number` | Preview next FOIA number |
-| POST | `/api/requests` | Create new request |
-| GET  | `/api/requests` | List all (filter: `?status=active`) |
-| GET  | `/api/requests/:id` | Get single request |
-| DELETE | `/api/requests/:id` | Delete request |
-| GET  | `/api/requests/:id/generate-letter` | Auto-generate letter text |
-| POST | `/api/requests/:id/save-letter` | Save letter → move to Active |
-| POST | `/api/requests/:id/update` | Update active request |
-| POST | `/api/requests/:id/close` | Close request |
-| GET  | `/api/requests/:id/log` | Get action log |
-| GET  | `/api/requests/:id/download-docx` | Download Word doc |
-
-### Agencies
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/agencies` | List all agencies |
-| GET | `/api/agencies/:id` | Get agency with full contact info |
-
-### Stripe
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/stripe/create-checkout` | Create Stripe checkout session |
-| POST | `/api/stripe/webhook` | Stripe webhook handler |
-| POST | `/api/dev/activate` | DEV ONLY — activate without Stripe |
+### RLS (Row Level Security)
+All tables have RLS enabled. Users can only read/write their own data. Reference tables (agencies, state laws, holidays) are read-only for all authenticated users.
 
 ---
 
-## Stripe Setup (Production)
+## Stripe Setup
 
-1. Create a product in your Stripe dashboard (e.g., "FOIA.io Monthly")
-2. Get the Price ID (`price_xxx`) from the product
-3. Add to `.env`:
-   ```
-   STRIPE_SECRET_KEY=sk_live_...
-   STRIPE_PRICE_ID=price_...
-   STRIPE_WEBHOOK_SECRET=whsec_...
-   ```
-4. In `app.py`, uncomment the Stripe SDK code in `create_checkout()`
-5. Set your Stripe webhook endpoint to `https://yourdomain.com/api/stripe/webhook`
-6. Listen for: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
-
-### Stripe checkout code (uncomment in app.py):
-```python
-import stripe
-stripe.api_key = STRIPE_SECRET
-
-session_obj = stripe.checkout.Session.create(
-    mode="subscription",
-    payment_method_types=["card"],
-    line_items=[{"price": STRIPE_PRICE_ID, "quantity": 1}],
-    customer_email=<user_email>,
-    success_url="https://yourdomain.com/?subscribed=1",
-    cancel_url="https://yourdomain.com/subscribe",
-)
-return jsonify({"url": session_obj.url})
-# Then redirect frontend to session_obj.url
-```
+1. Create a product + price in your Stripe dashboard
+2. Set the webhook URL to: `https://raqonwahukpejuftbqav.supabase.co/functions/v1/stripe-webhook`
+3. Add `STRIPE_WEBHOOK_SECRET` to Supabase Edge Function secrets
+4. Listen for: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
 
 ---
 
-## Deploying to Railway
+## Deploying to GitHub Pages
 
-```bash
-# Install Railway CLI
-npm i -g @railway/cli
-
-# Login & deploy
-railway login
-railway init
-railway up
-
-# Set environment variables in Railway dashboard
-# Add: SECRET_KEY, STRIPE_SECRET_KEY, STRIPE_PRICE_ID, STRIPE_WEBHOOK_SECRET
-```
-
-Add a `Procfile`:
-```
-web: gunicorn app:app --bind 0.0.0.0:$PORT
-```
+1. Push to `main` branch
+2. Go to repo Settings → Pages → Source: Deploy from branch → `main` / `/ (root)`
+3. (Optional) Add custom domain in the Pages settings and create a `CNAME` file
 
 ---
 
-## FOIA Numbering
+## Archive
 
-- Format: `FOIA-YYYY-NNN` (e.g., `FOIA-2026-001`)
-- Sequence resets to 001 each calendar year
-- Numbers are consumed atomically — no duplicates possible
-- Year tracked in `foia_sequence` table
-
----
-
-## Deadline Calculation
-
-- Federal standard: **20 business days** from creation date
-- Excludes weekends and federal holidays (2026–2027 pre-loaded)
-- Users can manually override the deadline date after the fact
-- Dashboard shows: days remaining / overdue count
-
----
-
-## Adding More Federal Agencies
-
-Edit the `AGENCIES` list in `app.py`. Each agency needs:
-```python
-{
-    "name": "Full Agency Name",
-    "abbreviation": "ABBR",
-    "foia_officer_title": "FOIA Officer",
-    "foia_email": "foia@agency.gov",
-    "foia_address": "Street\nCity, State ZIP",
-    "foia_phone": "(xxx) xxx-xxxx",
-    "foia_fax": "(xxx) xxx-xxxx",
-    "response_days": 20,
-    "portal_url": "https://..."
-}
-```
-Then delete `foia_io.db` and restart to re-seed, or INSERT directly into the `federal_agencies` table.
-
----
-
-## State / Local / University (Roadmap)
-
-Currently disabled in the jurisdiction dropdown. To enable:
-1. Create a `state_agencies` table with same schema as `federal_agencies`
-2. Add state-specific statute language to `build_letter_text()`
-3. Update the frontend dropdown options
-4. Seed with state agency contact data from state FOIA directories
-
----
-
-## Accessibility
-
-- High contrast dark mode (WCAG AAA compliant)
-- System font stack (dyslexia-friendly)
-- Full keyboard navigation (Esc closes modals, Ctrl+Enter saves)
-- Mobile responsive from 320px up
+The `archive/` folder contains the original Flask/Python backend (`app.py`, `db.py`, etc.) from before the Supabase migration. These files are kept for reference but are not used.
 
 ---
 
 ## License
 
 MIT
-# FOIA.io
-# FOIA.io

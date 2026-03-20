@@ -1,15 +1,13 @@
-foia_io.db
-uploads/
-__pycache__/
-*.pyc
 .env
 .DS_Store
+__pycache__/
+*.pyc
 *.egg-info/
-dist/
-build/
-node_modules/
 *.db
 *.db-shm
 *.db-wal
-SQLite format 3*
+node_modules/
+uploads/
+dist/
+build/
 .claude/worktrees/
